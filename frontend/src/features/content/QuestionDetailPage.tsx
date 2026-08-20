@@ -1,6 +1,6 @@
 import { ArrowLeftOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Col, Descriptions, Row, Segmented, Space, Tag, Typography, message } from 'antd';
+import { Alert, App, Button, Col, Descriptions, Row, Segmented, Space, Tag, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EnglishTermSpeaker } from '../../components/EnglishTermSpeaker';
@@ -39,6 +39,7 @@ function LearningContent({ learning }: { learning: QuestionLearning }) {
 }
 
 export function QuestionDetailPage() {
+  const { message } = App.useApp();
   const { id } = useParams();
   const questionId = Number(id);
   const validQuestionId = Number.isInteger(questionId) && questionId > 0;

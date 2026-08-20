@@ -531,6 +531,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/system/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取应用、数据库、Flyway 和生产内容状态 */
+        get: operations["getStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/study/wrong-questions": {
         parameters: {
             query?: never;
@@ -1576,6 +1593,31 @@ export interface components {
             wrongCount?: number;
             /** Format: date-time */
             lastStudiedAt?: string;
+        };
+        ApiResponseSystemStatusResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["SystemStatusResponse"];
+            traceId?: string;
+        };
+        SystemStatusResponse: {
+            status?: string;
+            application?: string;
+            databaseVersion?: string;
+            flywayVersion?: string;
+            /** Format: int64 */
+            questionCount?: number;
+            /** Format: int64 */
+            enabledQuestionCount?: number;
+            /** Format: int64 */
+            scenarioCount?: number;
+            /** Format: int64 */
+            sourceSnippetCount?: number;
+            /** Format: int64 */
+            labCount?: number;
+            /** Format: date-time */
+            checkedAt?: string;
         };
         ApiResponseListWrongQuestionResponse: {
             success?: boolean;
@@ -2919,6 +2961,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseWorkbenchResponse"];
+                };
+            };
+        };
+    };
+    getStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseSystemStatusResponse"];
                 };
             };
         };

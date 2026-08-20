@@ -1,5 +1,21 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P07 真实端到端联调
+
+- 新增 `/api/v1/system/status`，一次 PostgreSQL 快照返回服务状态、数据库/Flyway 版本及题目、场景、Source、Lab 计数；管理页接入真实状态卡片。
+- 新增 fresh PostgreSQL 验收：随机隔离数据库执行 V1–V16、导入正式 336 题和 12/60 场景，完成后精确删除临时库。
+- 修正三条学习路线的旧 targetKey，全部映射到正式 V0.3 Topic/Question externalKey；fresh DB 中 34 个计划项全部激活。
+- 新增真实主链路集成测试，覆盖 Workbench、Knowledge、搜索、答案披露、attempt/progress/review/wrong/favorite/note/scenario_attempt、Source、system status 及 SQL 后置断言。
+- 新增无 Mock Playwright 联调，覆盖收藏、练习披露、同 UUID 重试、笔记乐观锁 409、无效 Seed 422 和题目 404；backend-down 实际停服时显示明确错误页。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp test` 通过，49 个测试；`mvn -B -ntp package -DskipTests` 通过。
+- fresh DB：Flyway V16、正式题目 336、场景 12、Case 60、学习路线项 34，全部断言通过并完成临时库清理。
+- Node 22.13.0：`npm run typecheck`、`npm run test`、`npm run build` 通过；Vitest 5/5。
+- Playwright 14/14 通过；真实联调用例 2/2，happy path console/page error 0、非预期 4xx/5xx 0。
+- 后端实际停止后，Chrome 显示“学习工作台加载失败”，无白屏；证据见 `docs/v03/validation/p07/backend-down.png`。
+
 ## 2026-08-21 — V0.3 P06 场景、源码、实验与面试工作区
 
 - 重建 Scenario 工作区：CaseSwitcher、约束时间线、候选方案、API 矩阵和真实 attempt 提交均接入 PostgreSQL。

@@ -1369,6 +1369,27 @@
         }
       }
     },
+    "/api/v1/system/status": {
+      "get": {
+        "tags": [
+          "System Status"
+        ],
+        "summary": "读取应用、数据库、Flyway 和生产内容状态",
+        "operationId": "getStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSystemStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/study/wrong-questions": {
       "get": {
         "tags": [
@@ -3768,6 +3789,67 @@
             "format": "int32"
           },
           "lastStudiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseSystemStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SystemStatusResponse"
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "SystemStatusResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "application": {
+            "type": "string"
+          },
+          "databaseVersion": {
+            "type": "string"
+          },
+          "flywayVersion": {
+            "type": "string"
+          },
+          "questionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledQuestionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scenarioCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sourceSnippetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "labCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "checkedAt": {
             "type": "string",
             "format": "date-time"
           }

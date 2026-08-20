@@ -75,7 +75,7 @@
 | P04 | 前端 Design System 与 AppShell | DONE |
 | P05 | Workbench / Knowledge / Question 核心页面 | DONE |
 | P06 | Scenario / Source / Lab / Interview 页面 | DONE |
-| P07 | 真实端到端联调 | TODO |
+| P07 | 真实端到端联调 | DONE |
 | P08 | E2E / Visual / Performance | TODO |
 | P09 | Windows 部署与最终验收 | TODO |
 
@@ -124,3 +124,7 @@
 - Source 片段通过 V16 关联真实 Topic；代码查看器只展示项目自写教学伪代码，不复制第三方完整源码。
 - Lab 固定为五个纯 TypeScript 状态机，后端只提供版本化定义；前后步骤不会产生数据库写入。
 - Interview 基线采用本地可解释规则评分，四维权重固定为准确性 40、深度 25、结构 20、示例 15；外部 provider 仅保留关闭的 feature flag，不伪造 AI 能力。
+- P07 增加 `/api/v1/system/status`，由同一 PostgreSQL 只读快照返回 Flyway、题目、场景、Source 和 Lab 状态；管理页不再显示静态系统数字。
+- fresh DB 验收只创建并删除正则校验后的 `jil_p07_*` 随机数据库；不清理或改写 `devdb`。
+- 三条学习路线的 34 个目标全部改为正式 V0.3 Seed externalKey；导入 336 题后必须全部解析写入 `study_plan_item`。
+- P07 happy path 禁止 Mock；404、笔记 409、Seed 422、同 UUID 重试均调用真实后端。backend-down 通过真实停止 8080 后端验证错误页。

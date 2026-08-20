@@ -1,4 +1,5 @@
 import { request } from '../../api/client';
+import type { components } from '../../api/generated/schema';
 
 export type ContentStatus = 'ENABLED' | 'DISABLED';
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
@@ -10,6 +11,7 @@ export interface QuestionSummary { id: number; topicId: number; topicName: strin
 export interface QuestionDetail extends QuestionSummary { questionType: string; originType: string; plainExplanation?: string; designReason?: string; commonMistakes?: string; scorePoints?: string; tags: Tag[]; answers: { answerType: string; content: string; sortOrder: number }[]; followUps: { id: number; title: string; referenceAnswer?: string; sortOrder: number }[]; }
 export interface Page<T> { items: T[]; total: number; page: number; pageSize: number; }
 export interface QuestionPayload { topicId: number; title: string; questionType?: string; starLevel: number; difficulty: Difficulty; frequencyLevel: FrequencyLevel; originType?: string; status?: ContentStatus; oneLiner?: string; plainExplanation?: string; designReason?: string; commonMistakes?: string; scorePoints?: string; version?: number; tagIds: number[]; answers: { answerType: string; content: string; sortOrder: number }[]; followUps: { title: string; referenceAnswer?: string; sortOrder: number }[]; }
+export type SystemStatus = components['schemas']['SystemStatusResponse'];
 
 export const contentApi = {
   categories: () => request<Category[]>('/api/categories'),
@@ -25,5 +27,6 @@ export const contentApi = {
   question: (id: number) => request<QuestionDetail>(`/api/questions/${id}`),
   createQuestion: (body: Omit<QuestionPayload, 'version'>) => request<QuestionDetail>('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
   updateQuestion: (id: number, body: QuestionPayload & { version: number }) => request<QuestionDetail>(`/api/questions/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+  systemStatus: () => request<SystemStatus>('/api/v1/system/status'),
   importSeed: (file: File) => { const form = new FormData(); form.append('file', file); return request<{ seedPack: string; created: number; skipped: number }>('/api/system/seeds/import', { method: 'POST', body: form }); },
 };

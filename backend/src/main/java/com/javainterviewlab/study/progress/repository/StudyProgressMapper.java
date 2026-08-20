@@ -11,8 +11,8 @@ import java.util.List;
 /**
  * study_progress 的数据库访问接口。
  *
- * <p>同一档案的提交需要串行化。首次提交还没有 progress 行，单靠 {@code FOR UPDATE}
- * 无法锁住“尚不存在的行”，因此先锁定档案行，再读取和 UPSERT。</p>
+ * <p>同一档案同一题目的提交需要串行化。首次提交还没有 progress 行，单靠 {@code FOR UPDATE}
+ * 无法锁住“尚不存在的行”，因此使用事务级 advisory lock，再读取和 UPSERT。</p>
  */
 @Mapper
 public interface StudyProgressMapper {
@@ -21,14 +21,14 @@ public interface StudyProgressMapper {
     int countEnabledQuestionById(@Param("questionId") Long questionId);
 
     /**
-     * 锁定学习档案行。
+     * 锁定当前档案与题目的进度更新。
      *
-     * <p>当前每个本地档案只有一个活跃学习者，按档案串行化提交足以覆盖首次创建窗口；
-     * 锁随提交或回滚自动释放，不需要 Redis，也不会遗留应用层锁。</p>
+     * <p>锁键必须同时包含 profileId 和 questionId；否则同一用户练习不同题目也会排队。
+     * 锁随提交或回滚自动释放，不需要 Redis，也不会遗留 JVM 锁。</p>
      */
-    void lockProfileForProgress(@Param("profileId") Long profileId);
+    void lockProgress(@Param("profileId") Long profileId, @Param("questionId") Long questionId);
 
-    /** 读取当前快照；profile 行锁已串行化本提交链路，查询无需再叠加 progress 行锁。 */
+    /** 读取当前快照；事务锁已串行化同题提交，查询无需再叠加 progress 行锁。 */
     StudyProgressEntity findByProfileIdAndQuestionId(@Param("profileId") Long profileId, @Param("questionId") Long questionId);
 
     /** 用 UPSERT 创建或推进快照，并原子累加次数。 */

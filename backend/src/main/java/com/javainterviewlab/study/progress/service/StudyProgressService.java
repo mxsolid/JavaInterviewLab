@@ -11,7 +11,7 @@ import com.javainterviewlab.study.progress.dto.WrongQuestionResponse;
 import com.javainterviewlab.study.progress.repository.StudyProgressMapper;
 import com.javainterviewlab.study.progress.repository.model.StudyProgressEntity;
 import com.javainterviewlab.study.progress.repository.model.WrongQuestionRow;
-import com.javainterviewlab.study.profile.repository.StudyProfileMapper;
+import com.javainterviewlab.study.profile.service.CurrentProfileProvider;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -28,23 +28,27 @@ import java.util.List;
 public class StudyProgressService {
 
     private final StudyProgressMapper mapper;
-    private final StudyProfileMapper studyProfileMapper;
+    private final CurrentProfileProvider currentProfileProvider;
     private final Clock clock;
 
-    public StudyProgressService(StudyProgressMapper mapper, StudyProfileMapper studyProfileMapper, Clock clock) {
+    public StudyProgressService(
+            StudyProgressMapper mapper,
+            CurrentProfileProvider currentProfileProvider,
+            Clock clock
+    ) {
         this.mapper = mapper;
-        this.studyProfileMapper = studyProfileMapper;
+        this.currentProfileProvider = currentProfileProvider;
         this.clock = clock;
     }
 
     /**
      * 应用一条新写入的答题历史。
      *
-     * <p>先锁定学习档案行，弥补首次创建时没有进度行可加锁的问题。
-     * 因此掌握度计算总是基于上一条已提交快照，UPSERT 只负责原子落库和计数累加。</p>
+     * <p>首次创建时没有进度行可加锁，因此使用 profile + question 粒度的事务锁。
+     * 同题计算基于上一条已提交快照，不同题目不再被整个 profile 的行锁无谓串行化。</p>
      */
     public StudyProgressEntity applyAttempt(QuestionAttemptEntity attempt) {
-        mapper.lockProfileForProgress(attempt.getProfileId());
+        mapper.lockProgress(attempt.getProfileId(), attempt.getQuestionId());
         StudyProgressEntity current = mapper.findByProfileIdAndQuestionId(
                 attempt.getProfileId(), attempt.getQuestionId()
         );
@@ -67,7 +71,7 @@ public class StudyProgressService {
      */
     public StudyProgressResponse getQuestionProgress(Long questionId) {
         verifyEnabledQuestion(questionId);
-        return toResponse(questionId, findCurrentEntity(requireDefaultProfileId(), questionId));
+        return toResponse(questionId, findCurrentEntity(currentProfileProvider.requireProfileId(), questionId));
     }
 
     /** 读取指定档案和题目的当前快照，供提交幂等回填使用。 */
@@ -107,7 +111,7 @@ public class StudyProgressService {
 
     /** 查询当前仍需处理的启用错题；已停用题目不会在默认列表中出现。 */
     public List<WrongQuestionResponse> listActiveWrongQuestions() {
-        return mapper.findActiveWrongQuestions(requireDefaultProfileId()).stream()
+        return mapper.findActiveWrongQuestions(currentProfileProvider.requireProfileId()).stream()
                 .map(this::toWrongQuestionResponse)
                 .toList();
     }
@@ -118,15 +122,7 @@ public class StudyProgressService {
      * <p>重复调用保持幂等；它只清除当前错题标记，不会篡改历史错误次数，下一次 WRONG 会重新激活。</p>
      */
     public void resolveWrongBook(Long questionId) {
-        mapper.resolveWrongBook(requireDefaultProfileId(), questionId);
-    }
-
-    private Long requireDefaultProfileId() {
-        Long profileId = studyProfileMapper.findDefaultProfileId();
-        if (profileId == null) {
-            throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "默认学习档案不存在");
-        }
-        return profileId;
+        mapper.resolveWrongBook(currentProfileProvider.requireProfileId(), questionId);
     }
 
     private void verifyEnabledQuestion(Long questionId) {

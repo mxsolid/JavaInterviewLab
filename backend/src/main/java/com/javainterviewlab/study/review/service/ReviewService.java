@@ -1,7 +1,5 @@
 package com.javainterviewlab.study.review.service;
 
-import com.javainterviewlab.common.api.ApiErrorCode;
-import com.javainterviewlab.common.exception.BusinessException;
 import com.javainterviewlab.study.attempt.repository.model.QuestionAttemptEntity;
 import com.javainterviewlab.study.progress.domain.MasteryLevel;
 import com.javainterviewlab.study.progress.repository.model.StudyProgressEntity;
@@ -12,7 +10,7 @@ import com.javainterviewlab.study.review.dto.ScheduledReviewResponse;
 import com.javainterviewlab.study.review.repository.ReviewTaskMapper;
 import com.javainterviewlab.study.review.repository.model.ReviewTaskEntity;
 import com.javainterviewlab.study.review.repository.model.ReviewTaskRow;
-import com.javainterviewlab.study.profile.repository.StudyProfileMapper;
+import com.javainterviewlab.study.profile.service.CurrentProfileProvider;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -29,18 +27,18 @@ import java.util.List;
 public class ReviewService {
 
     private final ReviewTaskMapper reviewTaskMapper;
-    private final StudyProfileMapper studyProfileMapper;
+    private final CurrentProfileProvider currentProfileProvider;
     private final ReviewPolicy reviewPolicy;
     private final Clock clock;
 
     public ReviewService(
             ReviewTaskMapper reviewTaskMapper,
-            StudyProfileMapper studyProfileMapper,
+            CurrentProfileProvider currentProfileProvider,
             ReviewPolicy reviewPolicy,
             Clock clock
     ) {
         this.reviewTaskMapper = reviewTaskMapper;
-        this.studyProfileMapper = studyProfileMapper;
+        this.currentProfileProvider = currentProfileProvider;
         this.reviewPolicy = reviewPolicy;
         this.clock = clock;
     }
@@ -69,7 +67,7 @@ public class ReviewService {
         LocalDate today = LocalDate.now(clock);
         Instant start = today.atStartOfDay(clock.getZone()).toInstant();
         Instant end = today.plusDays(1).atStartOfDay(clock.getZone()).toInstant();
-        return reviewTaskMapper.findPendingDueBetween(requireDefaultProfileId(), start, end).stream()
+        return reviewTaskMapper.findPendingDueBetween(currentProfileProvider.requireProfileId(), start, end).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -83,14 +81,14 @@ public class ReviewService {
         LocalDate today = LocalDate.now(clock);
         Instant todayStart = today.atStartOfDay(clock.getZone()).toInstant();
         Instant tomorrowStart = today.plusDays(1).atStartOfDay(clock.getZone()).toInstant();
-        return reviewTaskMapper.findPendingDueBefore(requireDefaultProfileId(), tomorrowStart).stream()
+        return reviewTaskMapper.findPendingDueBefore(currentProfileProvider.requireProfileId(), tomorrowStart).stream()
                 .map(row -> toResponse(row, row.dueAt().isBefore(todayStart)))
                 .toList();
     }
 
     /** 返回指定状态的任务，默认 API 只用于 PENDING/COMPLETED/CANCELLED 的显式查询。 */
     public List<ReviewTaskResponse> listByStatus(ReviewTaskStatus status) {
-        return reviewTaskMapper.findByProfileAndStatus(requireDefaultProfileId(), status.name()).stream()
+        return reviewTaskMapper.findByProfileAndStatus(currentProfileProvider.requireProfileId(), status.name()).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -112,14 +110,6 @@ public class ReviewService {
                 entity.getStatus().name(),
                 entity.getStatus().getDescription()
         );
-    }
-
-    private Long requireDefaultProfileId() {
-        Long profileId = studyProfileMapper.findDefaultProfileId();
-        if (profileId == null) {
-            throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "默认学习档案不存在");
-        }
-        return profileId;
     }
 
     private ReviewTaskResponse toResponse(ReviewTaskRow row) {

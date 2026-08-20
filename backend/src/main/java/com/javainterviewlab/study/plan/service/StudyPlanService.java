@@ -13,6 +13,7 @@ import com.javainterviewlab.study.plan.repository.model.CurrentPlanRow;
 import com.javainterviewlab.study.plan.repository.model.StudyPlanDayRow;
 import com.javainterviewlab.study.plan.repository.model.StudyPlanItemRow;
 import com.javainterviewlab.study.plan.repository.model.StudyPlanRow;
+import com.javainterviewlab.study.profile.service.CurrentProfileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,10 +34,16 @@ public class StudyPlanService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StudyPlanService.class);
 
     private final StudyPlanMapper studyPlanMapper;
+    private final CurrentProfileProvider currentProfileProvider;
     private final Clock clock;
 
-    public StudyPlanService(StudyPlanMapper studyPlanMapper, Clock clock) {
+    public StudyPlanService(
+            StudyPlanMapper studyPlanMapper,
+            CurrentProfileProvider currentProfileProvider,
+            Clock clock
+    ) {
         this.studyPlanMapper = studyPlanMapper;
+        this.currentProfileProvider = currentProfileProvider;
         this.clock = clock;
     }
 
@@ -55,7 +62,7 @@ public class StudyPlanService {
 
     /** 未选择路线时返回 null，前端应展示路线选择而不是伪造学习状态。 */
     public CurrentPlanResponse getCurrentPlan() {
-        Long profileId = requireDefaultProfileId();
+        Long profileId = currentProfileProvider.requireProfileId();
         return toCurrentPlan(studyPlanMapper.findActivePlanByProfileId(profileId));
     }
 
@@ -100,14 +107,6 @@ public class StudyPlanService {
             throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "学习路线不存在或已停用");
         }
         return plan;
-    }
-
-    private Long requireDefaultProfileId() {
-        Long profileId = studyPlanMapper.findDefaultProfileId();
-        if (profileId == null) {
-            throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "默认学习档案不存在");
-        }
-        return profileId;
     }
 
     private List<StudyPlanDayResponse> findDays(Long planId) {

@@ -38,10 +38,6 @@
         ORDER BY i.sort_order, i.id
     </select>
 
-    <select id="findDefaultProfileId" resultType="long">
-        SELECT id FROM profile WHERE is_default = TRUE
-    </select>
-
     <select id="lockDefaultProfileId" resultType="long">
         SELECT id FROM profile WHERE is_default = TRUE FOR UPDATE
     </select>

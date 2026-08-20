@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.content.knowledge.repository.KnowledgeMapMapper">
+    <!-- 大文本不进入知识地图；按 topic 一次聚合题量和当前档案快照，避免 N+1。 -->
+    <select id="findKnowledgeTopics" resultType="com.javainterviewlab.content.knowledge.repository.model.KnowledgeTopicRow">
+        SELECT c.id AS "categoryId",
+               c.code AS "categoryCode",
+               c.name AS "categoryName",
+               c.description AS "categoryDescription",
+               c.sort_order AS "categorySortOrder",
+               t.id AS "topicId",
+               t.code AS "topicCode",
+               t.name AS "topicName",
+               t.description AS "topicDescription",
+               t.star_level AS "topicStarLevel",
+               t.sort_order AS "topicSortOrder",
+               COUNT(q.id) AS "totalQuestionCount",
+               COUNT(p.question_id) AS "touchedQuestionCount",
+               COUNT(p.question_id) FILTER (WHERE p.mastery_level IN ('SOLID', 'MASTERED')) AS "masteredQuestionCount"
+        FROM category c
+        JOIN topic t ON t.category_id = c.id AND t.status = 'ENABLED'
+        LEFT JOIN question q ON q.topic_id = t.id AND q.status = 'ENABLED'
+        LEFT JOIN study_progress p ON p.question_id = q.id AND p.profile_id = #{profileId}
+        WHERE c.status = 'ENABLED'
+        GROUP BY c.id, c.code, c.name, c.description, c.sort_order,
+                 t.id, t.code, t.name, t.description, t.star_level, t.sort_order
+        ORDER BY c.sort_order, c.id, t.sort_order, t.id
+    </select>
+</mapper>

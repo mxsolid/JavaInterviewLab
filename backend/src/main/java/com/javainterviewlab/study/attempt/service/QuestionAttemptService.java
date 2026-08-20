@@ -5,6 +5,7 @@ import com.javainterviewlab.common.exception.BusinessException;
 import com.javainterviewlab.study.attempt.dto.SubmitAttemptRequest;
 import com.javainterviewlab.study.attempt.repository.QuestionAttemptMapper;
 import com.javainterviewlab.study.attempt.repository.model.QuestionAttemptEntity;
+import com.javainterviewlab.study.profile.service.CurrentProfileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,14 @@ public class QuestionAttemptService {
     private static final Logger LOGGER = LoggerFactory.getLogger(QuestionAttemptService.class);
 
     private final QuestionAttemptMapper questionAttemptMapper;
+    private final CurrentProfileProvider currentProfileProvider;
 
-    public QuestionAttemptService(QuestionAttemptMapper questionAttemptMapper) {
+    public QuestionAttemptService(
+            QuestionAttemptMapper questionAttemptMapper,
+            CurrentProfileProvider currentProfileProvider
+    ) {
         this.questionAttemptMapper = questionAttemptMapper;
+        this.currentProfileProvider = currentProfileProvider;
     }
 
     /**
@@ -33,7 +39,7 @@ public class QuestionAttemptService {
      * <p>插入和冲突回读放在同一事务中：先依赖数据库唯一约束裁决并发，再返回同一 UUID 对应的原记录。</p>
      */
     public AppendAttemptResult appendIdempotently(SubmitAttemptRequest request) {
-        Long profileId = requireDefaultProfileId();
+        Long profileId = currentProfileProvider.requireProfileId();
         verifyEnabledQuestion(request.questionId());
         QuestionAttemptEntity entity = toEntity(profileId, request);
         Long attemptId = questionAttemptMapper.insertIgnore(entity);
@@ -51,14 +57,6 @@ public class QuestionAttemptService {
         LOGGER.info("答题历史创建成功, profileId={}, questionId={}, attemptId={}, resultType={}",
                 profileId, request.questionId(), attemptId, request.resultType());
         return new AppendAttemptResult(created, false);
-    }
-
-    private Long requireDefaultProfileId() {
-        Long profileId = questionAttemptMapper.findDefaultProfileId();
-        if (profileId == null) {
-            throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "默认学习档案不存在");
-        }
-        return profileId;
     }
 
     private void verifyEnabledQuestion(Long questionId) {

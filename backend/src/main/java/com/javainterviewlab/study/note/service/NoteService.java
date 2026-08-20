@@ -9,7 +9,7 @@ import com.javainterviewlab.study.note.dto.SaveNoteRequest;
 import com.javainterviewlab.study.note.repository.NoteMapper;
 import com.javainterviewlab.study.note.repository.model.NoteEntity;
 import com.javainterviewlab.study.profile.repository.StudyContentTargetMapper;
-import com.javainterviewlab.study.profile.repository.StudyProfileMapper;
+import com.javainterviewlab.study.profile.service.CurrentProfileProvider;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,23 +21,23 @@ import org.springframework.stereotype.Service;
 public class NoteService {
 
     private final NoteMapper noteMapper;
-    private final StudyProfileMapper studyProfileMapper;
+    private final CurrentProfileProvider currentProfileProvider;
     private final StudyContentTargetMapper contentTargetMapper;
 
     public NoteService(
             NoteMapper noteMapper,
-            StudyProfileMapper studyProfileMapper,
+            CurrentProfileProvider currentProfileProvider,
             StudyContentTargetMapper contentTargetMapper
     ) {
         this.noteMapper = noteMapper;
-        this.studyProfileMapper = studyProfileMapper;
+        this.currentProfileProvider = currentProfileProvider;
         this.contentTargetMapper = contentTargetMapper;
     }
 
     /** 查询一个已有笔记；不存在时返回 null，便于编辑器区分首次创建。 */
     public NoteResponse find(ContentTargetType targetType, Long targetId) {
         requireSupportedExistingTarget(targetType, targetId);
-        NoteEntity entity = noteMapper.findByProfileAndTarget(requireDefaultProfileId(), targetType, targetId);
+        NoteEntity entity = noteMapper.findByProfileAndTarget(currentProfileProvider.requireProfileId(), targetType, targetId);
         return entity == null ? null : toResponse(entity);
     }
 
@@ -49,7 +49,7 @@ public class NoteService {
      */
     public NoteResponse create(CreateNoteRequest request) {
         requireSupportedExistingTarget(request.targetType(), request.targetId());
-        Long profileId = requireDefaultProfileId();
+        Long profileId = currentProfileProvider.requireProfileId();
         NoteEntity entity = new NoteEntity();
         entity.setProfileId(profileId);
         entity.setTargetType(request.targetType());
@@ -79,14 +79,6 @@ public class NoteService {
             throw new BusinessException(ApiErrorCode.VERSION_CONFLICT, "笔记已被其他页面修改，请重新加载");
         }
         return toResponse(noteMapper.findById(id));
-    }
-
-    private Long requireDefaultProfileId() {
-        Long profileId = studyProfileMapper.findDefaultProfileId();
-        if (profileId == null) {
-            throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "默认学习档案不存在");
-        }
-        return profileId;
     }
 
     private void requireSupportedExistingTarget(ContentTargetType targetType, Long targetId) {

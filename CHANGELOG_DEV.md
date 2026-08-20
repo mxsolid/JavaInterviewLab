@@ -1,5 +1,20 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P01 后端稳定性与 API 契约
+
+- 新增 `CurrentProfileProvider`，统一当前学习档案解析，移除答题、进度、复习、笔记、收藏、Dashboard 和路线服务中的重复默认档案查询。
+- 进度提交改为 `profile_id + question_id` 粒度的 PostgreSQL 事务锁；同题提交串行，不同题目可并行。
+- 新增 `/api/v1/workbench`，复用既有 Dashboard、待复习和错题口径，所有数据来自 PostgreSQL。
+- 新增 `/api/v1/knowledge-map`，一次 SQL 聚合启用分类、专题、题量和当前档案掌握状态，避免 N+1 和大文本列表查询。
+- OpenAPI 发布两个 V0.3 路径；保留 `/api/dashboard` 兼容旧前端。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp test` 通过，29 个测试；`mvn -B -ntp package -DskipTests` 通过。
+- 并发测试：同题第二事务等待首事务提交；不同题目在首事务持锁期间可并行完成。
+- 本地 HTTP：Workbench、Knowledge Map、旧 Dashboard 均返回成功；OpenAPI 包含两个 `/api/v1` 路径。
+- `mvn clean test` 的清理阶段受 IntelliJ JPS 占用 `backend/target` 影响，本阶段未关闭用户 IDE；非清理测试和重新打包均通过。
+
 ## 2026-08-21 — V0.3 P00 基线锁定与复现证据
 
 - 锁定 V0.3 基线 `b99e7fb55995162d301d3690c14c3791beaef6c3`，创建 `feat/v03` 分支；未修改业务代码。

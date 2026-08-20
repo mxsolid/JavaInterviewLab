@@ -69,7 +69,7 @@
 | Phase | 任务 | 状态 |
 |---|---|---|
 | P00 | 锁定基线、复现问题、建立验收证据 | DONE |
-| P01 | 后端稳定性与 API 契约 | TODO |
+| P01 | 后端稳定性与 API 契约 | DONE |
 | P02 | Seed Import V2 与完整题库 | TODO |
 | P03 | Scenario / Source / Lab 后端 | TODO |
 | P04 | 前端 Design System 与 AppShell | TODO |
@@ -104,3 +104,6 @@
 - P00 基线锁定为 `b99e7fb55995162d301d3690c14c3791beaef6c3`，后续 phase 基于 `feat/v03` 继续。
 - 根目录 `AGENTS.md` 的日期格式 `yyyy-MM-dd HH:mm:ss` 高于旧启动包中的错误格式写法。
 - 日志继续遵守根目录 `AGENTS.md`，不记录密码、Token 或完整敏感数据；dev 环境不降低该约束。
+- P01 使用 `CurrentProfileProvider` 隔离当前档案解析；V0.3 仍由默认档案实现，后续账户上下文不进入现有业务服务。
+- 进度并发锁调整为 PostgreSQL `profile_id + question_id` 事务级 advisory lock；同题串行，不同题可并行。
+- `/api/v1/workbench` 与 `/api/v1/knowledge-map` 作为 V0.3 新契约；V0.2 `/api/dashboard` 继续兼容。

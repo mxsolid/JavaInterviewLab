@@ -14,9 +14,6 @@ import java.util.UUID;
 @Mapper
 public interface QuestionAttemptMapper {
 
-    /** 读取唯一默认学习档案。 */
-    Long findDefaultProfileId();
-
     /** 仅允许向存在且启用的题目追加练习历史。 */
     int countEnabledQuestionById(@Param("questionId") Long questionId);
 

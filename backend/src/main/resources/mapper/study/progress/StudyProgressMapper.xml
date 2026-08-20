@@ -7,16 +7,18 @@
 
     <!--
         首次答题时 study_progress 尚不存在，FOR UPDATE 无法锁住空结果。
-        先锁定 profile 行，将同一学习档案的提交串行化；提交或回滚时由 PostgreSQL 自动释放该行锁。
+        使用 profile + question 的稳定哈希作为事务锁键，同题串行而不同题可并行；提交或回滚时自动释放。
     -->
-    <select id="lockProfileForProgress" resultType="long">
-        SELECT id
-        FROM profile
-        WHERE id = #{profileId}
-        FOR UPDATE
+    <select id="lockProgress" resultType="int">
+        SELECT 1
+        FROM (
+            SELECT pg_advisory_xact_lock(
+                hashtextextended(CONCAT(#{profileId}, ':', #{questionId}), 0)
+            )
+        ) AS lock_result
     </select>
 
-    <!-- profile 行锁已串行化同一档案的提交，读取最新快照即可作为掌握度计算前态。 -->
+    <!-- profile + question 事务锁已串行化同题提交，读取最新快照即可作为掌握度计算前态。 -->
     <select id="findByProfileIdAndQuestionId" resultType="com.javainterviewlab.study.progress.repository.model.StudyProgressEntity">
         SELECT id, profile_id AS "profileId", question_id AS "questionId", stage,
                mastery_level AS "masteryLevel", attempt_count AS "attemptCount", wrong_count AS "wrongCount",

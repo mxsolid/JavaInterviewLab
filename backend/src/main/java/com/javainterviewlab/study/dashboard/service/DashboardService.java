@@ -1,7 +1,5 @@
 package com.javainterviewlab.study.dashboard.service;
 
-import com.javainterviewlab.common.api.ApiErrorCode;
-import com.javainterviewlab.common.exception.BusinessException;
 import com.javainterviewlab.study.dashboard.dto.DashboardResponse;
 import com.javainterviewlab.study.dashboard.dto.RecentStudyItemResponse;
 import com.javainterviewlab.study.dashboard.repository.DashboardMapper;
@@ -10,7 +8,7 @@ import com.javainterviewlab.study.dashboard.repository.model.RecentStudyRow;
 import com.javainterviewlab.study.plan.dto.CurrentPlanResponse;
 import com.javainterviewlab.study.plan.dto.TodayStudyResponse;
 import com.javainterviewlab.study.plan.service.StudyPlanService;
-import com.javainterviewlab.study.profile.repository.StudyProfileMapper;
+import com.javainterviewlab.study.profile.service.CurrentProfileProvider;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -29,25 +27,25 @@ public class DashboardService {
     private static final int RECENT_STUDY_LIMIT = 8;
 
     private final DashboardMapper dashboardMapper;
-    private final StudyProfileMapper studyProfileMapper;
+    private final CurrentProfileProvider currentProfileProvider;
     private final StudyPlanService studyPlanService;
     private final Clock clock;
 
     public DashboardService(
             DashboardMapper dashboardMapper,
-            StudyProfileMapper studyProfileMapper,
+            CurrentProfileProvider currentProfileProvider,
             StudyPlanService studyPlanService,
             Clock clock
     ) {
         this.dashboardMapper = dashboardMapper;
-        this.studyProfileMapper = studyProfileMapper;
+        this.currentProfileProvider = currentProfileProvider;
         this.studyPlanService = studyPlanService;
         this.clock = clock;
     }
 
     /** 一次返回首页主要数据，减少多个卡片分别发起 HTTP 请求。 */
     public DashboardResponse getDashboard() {
-        Long profileId = requireDefaultProfileId();
+        Long profileId = currentProfileProvider.requireProfileId();
         DashboardStatsRow stats = dashboardMapper.getStats(profileId);
         CurrentPlanResponse currentPlan = studyPlanService.getCurrentPlan();
         TodayStudyResponse todayStudy = studyPlanService.getTodayStudy();
@@ -75,14 +73,6 @@ public class DashboardService {
                 stats.favoriteQuestionCount(),
                 recentItems
         );
-    }
-
-    private Long requireDefaultProfileId() {
-        Long profileId = studyProfileMapper.findDefaultProfileId();
-        if (profileId == null) {
-            throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "默认学习档案不存在");
-        }
-        return profileId;
     }
 
     private RecentStudyItemResponse toRecentResponse(RecentStudyRow row) {

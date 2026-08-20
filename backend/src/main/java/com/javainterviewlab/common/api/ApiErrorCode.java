@@ -13,6 +13,7 @@ public enum ApiErrorCode {
     RESOURCE_NOT_FOUND("RESOURCE_NOT_FOUND", "资源不存在", HttpStatus.NOT_FOUND),
     VERSION_CONFLICT("VERSION_CONFLICT", "内容已被其他操作更新，请刷新后重试", HttpStatus.CONFLICT),
     BUSINESS_RULE_VIOLATED("BUSINESS_RULE_VIOLATED", "当前操作不被允许", HttpStatus.CONFLICT),
+    CONTENT_VALIDATION_FAILED("CONTENT_VALIDATION_FAILED", "内容校验未通过", HttpStatus.UNPROCESSABLE_ENTITY),
     INTERNAL_ERROR("INTERNAL_ERROR", "系统异常，请稍后重试", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;

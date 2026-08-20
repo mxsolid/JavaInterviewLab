@@ -30,8 +30,6 @@ public interface StudyPlanMapper {
     /** 读取单日已解析的学习目标。 */
     List<StudyPlanItemRow> findItemsByDayId(@Param("dayId") Long dayId);
 
-    Long findDefaultProfileId();
-
     /** 锁住默认 profile，使路线切换在同一 profile 内串行，避免同时产生两条 current plan。 */
     Long lockDefaultProfileId();
 

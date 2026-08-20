@@ -1,0 +1,12 @@
+:root {
+  font-family: Inter, "Microsoft YaHei", sans-serif;
+  color: #1f2937;
+  background: #f7f9ff;
+}
+
+body { margin: 0; }
+
+.app-shell { min-height: 100vh; background: linear-gradient(135deg, #f8faff 0%, #f5f1ff 52%, #f0fbf9 100%); }
+.brand { height: 64px; display: flex; align-items: center; padding: 0 24px; font-weight: 700; color: #4f6df5; }
+.app-header { background: rgba(255, 255, 255, 0.76); padding: 0 32px; color: #64748b; }
+.app-content { margin: 24px; padding: 32px; border-radius: 16px; background: rgba(255, 255, 255, 0.90); box-shadow: 0 8px 28px rgba(45, 73, 145, 0.10); }

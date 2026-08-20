@@ -1,5 +1,30 @@
 # 开发变更记录
 
+## 2026-08-20 — A03 React 前端骨架与白色主题
+
+### 完成内容
+
+- 创建 React 19、TypeScript、Vite 8、React Router、Ant Design 和 TanStack Query 工程。
+- 提供统一主题 Token、AppShell、首页空骨架、Loading / Empty / Error 状态组件和 API Client。
+- 页面只展示未接入数据的空状态，不加入题库 mock 数据。
+
+### 验证
+
+- 使用已安装的 Node 22.13.0 直接执行 TypeScript 与 Vite 构建：通过。
+- 本机默认 Node 18 保持不变；Vite 8 构建需显式使用 `D:\Develop\node\nvm\v22.13.0\node.exe`。
+
+## 2026-08-20 — A03 环境核验
+
+### 结果
+
+- 未创建前端工程。
+- 本机 Node.js 为 18.20.8；Vite 8 和 @vitejs/plugin-react 要求 Node `^20.19.0 || >=22.12.0`。
+- 为避免用不兼容运行时生成不可验证工程，A03 已标记 BLOCKED。
+
+### 后续处理
+
+- 已确认 Node 22.13.0 已通过 NVM 安装；前端构建将显式使用该版本，不切换全局 Node 18。
+
 ## 2026-08-20 — 基础设施修复
 
 ### 完成内容

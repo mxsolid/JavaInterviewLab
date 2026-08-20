@@ -13,7 +13,7 @@
 | ID | 子任务 | 状态 | 难度 | 相对工作量 | 建议 Agent Token 预算 |
 |---|---|---|---|---|---|
 | A01 | 初始化目录、Git、基础文档 | DONE | ★★ | 短 | 8k–20k |
-| A02 | Spring Boot 后端骨架 | TODO | ★★★ | 中 | 15k–35k |
+| A02 | Spring Boot 后端骨架 | DONE | ★★★ | 中 | 15k–35k |
 | A03 | React 前端骨架 + 白色主题 | TODO | ★★★ | 中 | 15k–35k |
 | A04 | PostgreSQL + Flyway 基线 | TODO | ★★★ | 中 | 15k–35k |
 | A05 | 分类 / 专题 / 标签 API | TODO | ★★★ | 中 | 15k–35k |

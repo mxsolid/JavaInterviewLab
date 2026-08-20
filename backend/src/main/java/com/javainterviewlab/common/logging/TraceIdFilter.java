@@ -23,8 +23,8 @@ public class TraceIdFilter extends OncePerRequestFilter {
     public static final String TRACE_ID_HEADER = "X-Trace-Id";
 
     private static final int TRACE_ID_LENGTH = 6;
-    private static final String TRACE_ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private static final Pattern TRACE_ID_PATTERN = Pattern.compile("[A-Za-z0-9]{" + TRACE_ID_LENGTH + "}");
+    private static final String TRACE_ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final Pattern TRACE_ID_PATTERN = Pattern.compile("[A-Z0-9]{" + TRACE_ID_LENGTH + "}");
 
     @Override
     protected void doFilterInternal(

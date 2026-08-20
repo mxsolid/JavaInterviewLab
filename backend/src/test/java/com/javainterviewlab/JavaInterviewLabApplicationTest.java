@@ -27,8 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(JavaInterviewLabApplicationTest.TestFailureController.class)
 class JavaInterviewLabApplicationTest {
 
-    private static final String TEST_TRACE_ID = "Ab12Cd";
-    private static final String TRACE_ID_PATTERN = "[A-Za-z0-9]{6}";
+    private static final String TEST_TRACE_ID = "AB12CD";
+    private static final String TRACE_ID_PATTERN = "[A-Z0-9]{6}";
 
     @Autowired
     private MockMvc mockMvc;

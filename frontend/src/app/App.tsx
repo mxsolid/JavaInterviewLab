@@ -8,6 +8,7 @@ const DashboardPage = lazy(() => import('../features/dashboard/DashboardPage').t
 const StudyPlanPage = lazy(() => import('../features/study/StudyPlanPage').then((module) => ({ default: module.StudyPlanPage })));
 const QuestionBankPage = lazy(() => import('../features/content/QuestionBankPage').then((module) => ({ default: module.QuestionBankPage })));
 const QuestionDetailPage = lazy(() => import('../features/content/QuestionDetailPage').then((module) => ({ default: module.QuestionDetailPage })));
+const KnowledgePage = lazy(() => import('../features/knowledge/KnowledgePage').then((module) => ({ default: module.KnowledgePage })));
 const ReviewCenterPage = lazy(() => import('../features/review/ReviewCenterPage').then((module) => ({ default: module.ReviewCenterPage })));
 const ContentManagerPage = lazy(() => import('../features/content/ContentManagerPage').then((module) => ({ default: module.ContentManagerPage })));
 
@@ -18,7 +19,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/study" element={<StudyPlanPage />} />
-          <Route path="/knowledge" element={<ModulePlaceholderPage title="知识地图" description="知识域、专题和掌握度将在核心学习工作区阶段接入真实聚合 API。" />} />
+          <Route path="/knowledge" element={<KnowledgePage />} />
           <Route path="/questions" element={<QuestionBankPage />} />
           <Route path="/questions/:id" element={<QuestionDetailPage />} />
           <Route path="/scenarios" element={<ModulePlaceholderPage title="场景训练" description="场景、Case 和方案矩阵将在场景工作区阶段接入数据库内容。" />} />

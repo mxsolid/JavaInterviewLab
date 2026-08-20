@@ -23,6 +23,7 @@ public record QuestionDetailRow(
         String designReason,
         String commonMistakes,
         String scorePoints,
+        String sourceVersion,
         Long version
 ) {
 }

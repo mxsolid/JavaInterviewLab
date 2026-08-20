@@ -73,7 +73,7 @@
 | P02 | Seed Import V2 与完整题库 | DONE |
 | P03 | Scenario / Source / Lab 后端 | DONE |
 | P04 | 前端 Design System 与 AppShell | DONE |
-| P05 | Workbench / Knowledge / Question 核心页面 | TODO |
+| P05 | Workbench / Knowledge / Question 核心页面 | DONE |
 | P06 | Scenario / Source / Lab / Interview 页面 | TODO |
 | P07 | 真实端到端联调 | TODO |
 | P08 | E2E / Visual / Performance | TODO |
@@ -117,3 +117,6 @@
 - TopBar 路线选择读取并提交真实 StudyPlan API；GlobalSearch 只把用户输入传给题库 `keyword` 参数，不在 shell 造搜索结果。
 - OpenAPI JSON 与生成的 TypeScript schema 一并版本化；`npm run openapi:generate` 可离线复现，现有学习路线类型已接入生成契约。
 - P04 Playwright 使用本机 Chrome channel；四视口 screenshot baseline 固定 reduced motion，避免动画像素漂移。
+- P05 练习模式首屏只读取 `/api/v1/questions/{id}` 元数据；学习模式或显式 answer-view 后才返回教学内容，避免参考答案在首屏响应泄漏。
+- `question_answer_view` 采用 append-only 与 `(profile_id, client_view_id)` 幂等约束；查看答案不推进掌握度，只有 attempt 提交更新 progress/review。
+- Workbench 首屏收敛到单个 `/api/v1/workbench` 请求；错题操作后失效聚合查询，Knowledge Map 在答题提交后同步失效。

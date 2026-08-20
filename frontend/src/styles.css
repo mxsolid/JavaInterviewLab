@@ -104,6 +104,15 @@ button, input, textarea { font: inherit; }
 .markdown-content .ant-typography { white-space: pre-wrap; color: var(--jil-text); }
 .markdown-content pre { margin: 0; overflow: auto; padding: 14px; border-radius: var(--jil-radius-sm); color: var(--jil-code-text); background: var(--jil-code-bg); }
 .practice-panel { border: 1px solid #dbeafe; background: linear-gradient(135deg, #fbfcff, #f8f5ff); }
+.practice-panel .practice-result-group { display: flex; flex-wrap: wrap; gap: var(--jil-gap-sm); margin-top: var(--jil-gap-sm); }
+.practice-panel .practice-result-group .ant-radio-button-wrapper { border: 1px solid var(--jil-border); border-radius: var(--jil-radius-sm); }
+.practice-panel .practice-result-group .ant-radio-button-wrapper::before { display: none; }
+.question-workspace > .ant-col { min-width: 0; }
+.knowledge-filters .ant-input-affix-wrapper { width: min(360px, 100%); }
+.knowledge-filters .ant-select { min-width: 180px; }
+.knowledge-topic-card { height: 100%; }
+.knowledge-topic-card .ant-card-body { min-height: 250px; }
+.knowledge-topic-card .ant-card-actions { border-top-color: var(--jil-border); background: var(--jil-surface-soft); }
 .plan-day-current { padding: 10px 14px; border-radius: var(--jil-radius-sm); background: var(--jil-primary-soft); }
 .dashboard-list, .data-list { display: grid; }
 .dashboard-list-item, .data-list-item { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: var(--jil-gap-md); padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
@@ -137,6 +146,13 @@ button, input, textarea { font: inherit; }
   .app-content { padding: 12px 12px 78px; }
   .page-header { align-items: flex-start; flex-direction: column; }
   .page-header .ant-typography-title { font-size: 22px; }
+  .hero-card .ant-card-body, .section-card .ant-card-body { padding: 16px; }
+  .question-hero .ant-space-align-start { flex-direction: column; }
+  .question-hero .ant-space-align-start > .ant-space-item:last-child { align-self: flex-start; }
+  .practice-panel .practice-result-group { width: 100%; }
+  .practice-panel .practice-result-group .ant-radio-button-wrapper { flex: 1 0 44%; text-align: center; }
+  .knowledge-filters .ant-space, .knowledge-filters .ant-input-affix-wrapper, .knowledge-filters .ant-select { width: 100%; }
+  .dashboard-list-item, .data-list-item { align-items: flex-start; flex-direction: column; }
 }
 
 @media (prefers-reduced-motion: reduce) {

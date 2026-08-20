@@ -1,5 +1,22 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P05 核心学习工作区
+
+- 新增 Flyway V14 与 `question_answer_view`，记录答案披露行为并以 `(profile_id, client_view_id)` 保证重试幂等。
+- 新增题目工作区元数据、学习内容和 answer-view 三个 V1 API；练习首屏不返回答案、讲解或追问参考答案。
+- Workbench 改为单聚合 API 首屏，接入真实计划、统计、待复习、错题和最近学习；mutation 后正确失效聚合查询。
+- 新增真实 Knowledge 页面，支持知识域、状态、关键词筛选和专题到题库联动。
+- 重建 Question 8/4 工作区，接入学习/练习模式、固定答案标签、进度、收藏、串行笔记、追问、术语和相关题目。
+- 增加 P05 Playwright 用例与 1720/390 screenshot baseline；统一清理 AntD 6 废弃属性产生的 console warning。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp test` 通过，43 个测试；`mvn -B -ntp package -DskipTests` 通过。
+- Node 22.13.0：`npm run typecheck`、`npm run build` 通过；生产构建保留共享 chunk 超过 500 kB 的既有 P08 优化项。
+- Playwright 7/7 通过；核心流覆盖无答案泄漏、answer-view、attempt、刷新和笔记自动保存回读，console/page error 0，非预期 4xx/5xx 0。
+- P05 保存 Workbench/Knowledge/Question 桌面 1720 截图及 Workbench/Question 移动 390 截图并完成人工检查。
+- `mvn clean test` 清理阶段受本机 IntelliJ JPS 占用 `backend/target` 影响；未终止用户 IDE，非 clean 全量测试和打包均通过。
+
 ## 2026-08-21 — V0.3 P04 Frontend Design System 与 AppShell
 
 - Design Token 对齐 canonical：`#f0f4f9` 背景、`#0284c7` 主蓝、`#3b82f6` accent，以及统一 radius、shadow、gap 和 motion。

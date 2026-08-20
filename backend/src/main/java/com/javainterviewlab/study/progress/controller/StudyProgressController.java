@@ -17,7 +17,7 @@ import java.util.List;
 /** 学习进度 HTTP 边界；错题状态始终落在学习进度快照，不维护题目副本。 */
 @Tag(name = "学习进度", description = "单题当前快照与错题状态")
 @RestController
-@RequestMapping("/api/study")
+@RequestMapping({"/api/study", "/api/v1/study"})
 public class StudyProgressController {
 
     private final StudyProgressService studyProgressService;

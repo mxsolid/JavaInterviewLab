@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.content.question.repository.QuestionAnswerViewMapper">
+
+    <select id="find" resultType="com.javainterviewlab.content.question.repository.model.QuestionAnswerViewRow">
+        SELECT question_id AS "questionId", client_view_id AS "clientViewId", created_at AS "createdAt"
+        FROM question_answer_view
+        WHERE profile_id = #{profileId} AND client_view_id = #{clientViewId}
+    </select>
+
+    <!-- INSERT RETURNING 使用 select 映射，必须清理写前 find 的一级缓存。 -->
+    <select id="insertIgnore" resultType="java.time.Instant" flushCache="true" useCache="false">
+        INSERT INTO question_answer_view (profile_id, question_id, client_view_id)
+        VALUES (#{profileId}, #{questionId}, #{clientViewId})
+        ON CONFLICT (profile_id, client_view_id) DO NOTHING
+        RETURNING created_at
+    </select>
+</mapper>

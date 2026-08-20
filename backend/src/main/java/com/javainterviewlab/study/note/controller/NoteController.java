@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** 笔记 HTTP 边界；乐观锁和目标校验由 Service 统一执行。 */
 @Tag(name = "学习笔记", description = "内容笔记与乐观锁保存")
 @RestController
-@RequestMapping("/api/study/notes")
+@RequestMapping({"/api/study/notes", "/api/v1/study/notes"})
 public class NoteController {
 
     private final NoteService noteService;

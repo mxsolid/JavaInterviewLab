@@ -71,7 +71,7 @@ export function StudyPlanPage() {
         <DayItems day={today.data.day} />
       </SectionCard>
     ) : (
-      <Alert type="info" showIcon message="尚未选择学习路线" description="选择后才开始计算 Day N；中断学习不会把知识内容自动记为完成。" />
+      <Alert type="info" showIcon title="尚未选择学习路线" description="选择后才开始计算 Day N；中断学习不会把知识内容自动记为完成。" />
     )}
 
     <SectionCard title={<Space><ReadOutlined /><span>系统预设路线</span></Space>}>

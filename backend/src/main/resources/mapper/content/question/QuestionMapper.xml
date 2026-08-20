@@ -49,7 +49,7 @@
                q.difficulty, q.frequency_level AS "frequencyLevel", q.origin_type AS "originType",
                q.status, q.one_liner AS "oneLiner", q.plain_explanation AS "plainExplanation",
                q.design_reason AS "designReason", q.common_mistakes AS "commonMistakes",
-               q.score_points AS "scorePoints", q.version
+               q.score_points AS "scorePoints", q.source_version AS "sourceVersion", q.version
         <include refid="questionJoin" />
         WHERE q.id = #{id}
     </select>

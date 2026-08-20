@@ -72,14 +72,18 @@ test('全部 shell 导航入口无 console 与网络错误', async ({ page }) =>
   expect(errors).toEqual([]);
 });
 
-test('基础 Loading、Empty、Error 状态可见', async ({ page }) => {
-  await page.route('**/api/dashboard', async (route) => {
+test('基础 Loading 与 Error 状态可见', async ({ page }) => {
+  await page.route('**/api/v1/workbench', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
     await route.fulfill({ status: 500, contentType: 'application/json', body: '{"success":false}' });
   });
   await page.goto('/');
   await expect(page.getByLabel('内容加载中')).toBeVisible();
-  await expect(page.getByText('学习看板加载失败')).toBeVisible();
+  await expect(page.getByText('学习工作台加载失败')).toBeVisible();
+  await page.unroute('**/api/v1/workbench');
+  await page.route('**/api/v1/knowledge-map', async (route) => {
+    await route.fulfill({ status: 500, contentType: 'application/json', body: '{"success":false}' });
+  });
   await page.goto('/knowledge');
-  await expect(page.getByText('当前工作区正在接入真实 API')).toBeVisible();
+  await expect(page.getByText('知识地图加载失败')).toBeVisible();
 });

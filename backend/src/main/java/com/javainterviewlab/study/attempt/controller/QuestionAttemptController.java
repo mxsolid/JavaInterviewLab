@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** 答题历史 HTTP 边界，只接受一次练习提交，不提供历史修改或删除接口。 */
 @Tag(name = "练习记录", description = "追加答题历史并按客户端 UUID 幂等")
 @RestController
-@RequestMapping("/api/study/attempts")
+@RequestMapping({"/api/study/attempts", "/api/v1/study/attempts"})
 public class QuestionAttemptController {
 
     private final StudySubmissionService studySubmissionService;

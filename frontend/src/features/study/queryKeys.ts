@@ -1,6 +1,8 @@
 export const studyQueryKeys = {
-  dashboard: ['dashboard'] as const,
-  question: (questionId: number) => ['content', 'question', questionId] as const,
+  dashboard: ['v1', 'workbench'] as const,
+  knowledgeMap: ['v1', 'knowledge-map'] as const,
+  question: (questionId: number) => ['v1', 'questions', questionId] as const,
+  questionLearning: (questionId: number) => ['v1', 'questions', questionId, 'learning'] as const,
   questionProgress: (questionId: number) => ['study', 'questions', questionId, 'progress'] as const,
   note: (targetType: 'QUESTION' | 'TOPIC', targetId: number) => ['study', 'notes', targetType, targetId] as const,
   plans: ['study', 'plans'] as const,

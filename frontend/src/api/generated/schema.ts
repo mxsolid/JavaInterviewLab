@@ -4,39 +4,7 @@
  */
 
 export interface paths {
-    "/api/topics/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["update"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/tags/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["update_1"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/study/questions/{questionId}/wrong-book/resolve": {
+    "/api/v1/study/questions/{questionId}/wrong-book/resolve": {
         parameters: {
             query?: never;
             header?: never;
@@ -53,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/study/questions/{questionId}/wrong-book/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 标记错题已解决 */
+        put: operations["resolveWrongBook_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/study/notes/{id}": {
         parameters: {
             query?: never;
@@ -62,7 +47,56 @@ export interface paths {
         };
         get?: never;
         /** 保存笔记 */
+        put: operations["update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/notes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 保存笔记 */
+        put: operations["update_1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/topics/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
         put: operations["update_2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tags/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update_3"];
         post?: never;
         delete?: never;
         options?: never;
@@ -86,7 +120,7 @@ export interface paths {
          * 修改题目
          * @description version 过期时返回 409，调用方应先重新读取详情。
          */
-        put: operations["update_3"];
+        put: operations["update_4"];
         post?: never;
         delete?: never;
         options?: never;
@@ -102,7 +136,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["update_4"];
+        put: operations["update_5"];
         post?: never;
         delete?: never;
         options?: never;
@@ -190,6 +224,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/study/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取笔记 */
+        get: operations["find"];
+        put?: never;
+        /** 创建笔记 */
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取笔记 */
+        get: operations["find_1"];
+        put?: never;
+        /** 创建笔记 */
+        post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/favorites/questions/{questionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 收藏题目 */
+        post: operations["favorite"];
+        /** 取消收藏题目 */
+        delete: operations["unfavorite"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/study/favorites/questions/{questionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 收藏题目 */
+        post: operations["favorite_1"];
+        /** 取消收藏题目 */
+        delete: operations["unfavorite_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/study/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 提交答题历史
+         * @description 相同 clientAttemptId 的网络重试不会产生第二条答题记录。
+         */
+        post: operations["submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 提交答题历史
+         * @description 相同 clientAttemptId 的网络重试不会产生第二条答题记录。
+         */
+        post: operations["submit_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/scenario-attempts": {
         parameters: {
             query?: never;
@@ -199,7 +345,27 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["submit"];
+        post: operations["submit_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questions/{id}/answer-view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 显式披露参考答案
+         * @description 按 clientViewId 幂等记录披露行为并返回教学内容。
+         */
+        post: operations["reveal"];
         delete?: never;
         options?: never;
         head?: never;
@@ -215,7 +381,7 @@ export interface paths {
         };
         get: operations["list"];
         put?: never;
-        post: operations["create"];
+        post: operations["create_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -231,7 +397,7 @@ export interface paths {
         };
         get: operations["list_1"];
         put?: never;
-        post: operations["create_1"];
+        post: operations["create_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -258,62 +424,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/study/notes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 读取笔记 */
-        get: operations["find"];
-        put?: never;
-        /** 创建笔记 */
-        post: operations["create_2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/study/favorites/questions/{questionId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** 收藏题目 */
-        post: operations["favorite"];
-        /** 取消收藏题目 */
-        delete: operations["unfavorite"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/study/attempts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * 提交答题历史
-         * @description 相同 clientAttemptId 的网络重试不会产生第二条答题记录。
-         */
-        post: operations["submit_1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/questions": {
         parameters: {
             query?: never;
@@ -331,7 +441,7 @@ export interface paths {
          * 创建题目
          * @description 专题和标签必须存在；同一种答案只能提交一次。
          */
-        post: operations["create_3"];
+        post: operations["create_4"];
         delete?: never;
         options?: never;
         head?: never;
@@ -347,7 +457,7 @@ export interface paths {
         };
         get: operations["list_3"];
         put?: never;
-        post: operations["create_4"];
+        post: operations["create_5"];
         delete?: never;
         options?: never;
         head?: never;
@@ -370,6 +480,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/study/wrong-questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 错题列表 */
+        get: operations["listWrongQuestions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/wrong-questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 错题列表 */
+        get: operations["listWrongQuestions_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/questions/{questionId}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 单题学习进度 */
+        get: operations["getQuestionProgress"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/study/questions/{questionId}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 单题学习进度 */
+        get: operations["getQuestionProgress_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/study/favorites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 收藏题目列表 */
+        get: operations["list_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study/favorites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 收藏题目列表 */
+        get: operations["list_5"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/source-snippets": {
         parameters: {
             query?: never;
@@ -377,7 +589,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_4"];
+        get: operations["list_6"];
         put?: never;
         post?: never;
         delete?: never;
@@ -409,7 +621,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_5"];
+        get: operations["list_7"];
         put?: never;
         post?: never;
         delete?: never;
@@ -450,6 +662,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/questions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 读取练习元数据
+         * @description 不返回答案、讲解或追问参考答案。
+         */
+        get: operations["metadata"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questions/{id}/learning": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 读取学习模式内容
+         * @description 用户主动进入学习模式后返回完整教学内容。
+         */
+        get: operations["learning"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/labs": {
         parameters: {
             query?: never;
@@ -457,7 +709,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_6"];
+        get: operations["list_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -498,23 +750,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/study/wrong-questions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 错题列表 */
-        get: operations["listWrongQuestions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/study/today": {
         parameters: {
             query?: never;
@@ -543,7 +778,7 @@ export interface paths {
             cookie?: never;
         };
         /** 复习任务列表 */
-        get: operations["list_7"];
+        get: operations["list_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -589,23 +824,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/study/questions/{questionId}/progress": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 单题学习进度 */
-        get: operations["getQuestionProgress"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/study/plans": {
         parameters: {
             query?: never;
@@ -638,23 +856,6 @@ export interface paths {
          * @description 包含逐日学习主题与关联内容。
          */
         get: operations["getPlan"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/study/favorites": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 收藏题目列表 */
-        get: operations["list_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -704,6 +905,39 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ApiResponseVoid: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: unknown;
+            traceId?: string;
+        };
+        SaveNoteRequest: {
+            content: string;
+            /** Format: int64 */
+            version: number;
+        };
+        ApiResponseNoteResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["NoteResponse"];
+            traceId?: string;
+        };
+        NoteResponse: {
+            /** Format: int64 */
+            id?: number;
+            targetType?: string;
+            /** Format: int64 */
+            targetId?: number;
+            content?: string;
+            /** Format: int64 */
+            version?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
         TopicRequest: {
             /** Format: int64 */
             categoryId: number;
@@ -755,39 +989,6 @@ export interface components {
             id?: number;
             code?: string;
             name?: string;
-        };
-        ApiResponseVoid: {
-            success?: boolean;
-            code?: string;
-            message?: string;
-            data?: unknown;
-            traceId?: string;
-        };
-        SaveNoteRequest: {
-            content: string;
-            /** Format: int64 */
-            version: number;
-        };
-        ApiResponseNoteResponse: {
-            success?: boolean;
-            code?: string;
-            message?: string;
-            data?: components["schemas"]["NoteResponse"];
-            traceId?: string;
-        };
-        NoteResponse: {
-            /** Format: int64 */
-            id?: number;
-            targetType?: string;
-            /** Format: int64 */
-            targetId?: number;
-            content?: string;
-            /** Format: int64 */
-            version?: number;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
         };
         QuestionAnswerRequest: {
             /** @enum {string} */
@@ -963,66 +1164,6 @@ export interface components {
             durationMs?: number;
             warnings?: string[];
         };
-        SubmitScenarioAttemptRequest: {
-            /** Format: uuid */
-            clientAttemptId: string;
-            /** Format: int64 */
-            scenarioId: number;
-            /** Format: int64 */
-            caseId?: number;
-            answerText: string;
-            /** Format: int32 */
-            selfRating?: number;
-            /** @enum {string} */
-            resultType: "NEEDS_WORK" | "PARTIAL" | "SOLID";
-            /** Format: int32 */
-            durationSeconds?: number;
-        };
-        ApiResponseScenarioAttemptResponse: {
-            success?: boolean;
-            code?: string;
-            message?: string;
-            data?: components["schemas"]["ScenarioAttemptResponse"];
-            traceId?: string;
-        };
-        ScenarioAttemptResponse: {
-            /** Format: int64 */
-            id?: number;
-            /** Format: uuid */
-            clientAttemptId?: string;
-            /** Format: int64 */
-            scenarioId?: number;
-            /** Format: int64 */
-            caseId?: number;
-            /** Format: int32 */
-            selfRating?: number;
-            resultType?: string;
-            resultDescription?: string;
-            /** Format: int32 */
-            durationSeconds?: number;
-            /** Format: date-time */
-            createdAt?: string;
-            duplicated?: boolean;
-        };
-        ApiResponseCurrentPlanResponse: {
-            success?: boolean;
-            code?: string;
-            message?: string;
-            data?: components["schemas"]["CurrentPlanResponse"];
-            traceId?: string;
-        };
-        CurrentPlanResponse: {
-            /** Format: int64 */
-            planId?: number;
-            planCode?: string;
-            planName?: string;
-            /** Format: int32 */
-            durationDays?: number;
-            /** Format: date-time */
-            startedAt?: string;
-            /** Format: int32 */
-            timeProgressDay?: number;
-        };
         CreateNoteRequest: {
             /** @enum {string} */
             targetType: "QUESTION" | "TOPIC" | "SCENARIO";
@@ -1099,6 +1240,97 @@ export interface components {
             progress?: components["schemas"]["StudyProgressResponse"];
             review?: components["schemas"]["ScheduledReviewResponse"];
             duplicated?: boolean;
+        };
+        SubmitScenarioAttemptRequest: {
+            /** Format: uuid */
+            clientAttemptId: string;
+            /** Format: int64 */
+            scenarioId: number;
+            /** Format: int64 */
+            caseId?: number;
+            answerText: string;
+            /** Format: int32 */
+            selfRating?: number;
+            /** @enum {string} */
+            resultType: "NEEDS_WORK" | "PARTIAL" | "SOLID";
+            /** Format: int32 */
+            durationSeconds?: number;
+        };
+        ApiResponseScenarioAttemptResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["ScenarioAttemptResponse"];
+            traceId?: string;
+        };
+        ScenarioAttemptResponse: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: uuid */
+            clientAttemptId?: string;
+            /** Format: int64 */
+            scenarioId?: number;
+            /** Format: int64 */
+            caseId?: number;
+            /** Format: int32 */
+            selfRating?: number;
+            resultType?: string;
+            resultDescription?: string;
+            /** Format: int32 */
+            durationSeconds?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            duplicated?: boolean;
+        };
+        AnswerViewRequest: {
+            /** Format: uuid */
+            clientViewId: string;
+        };
+        AnswerViewResponse: {
+            /** Format: uuid */
+            clientViewId?: string;
+            duplicated?: boolean;
+            /** Format: date-time */
+            viewedAt?: string;
+            learning?: components["schemas"]["QuestionLearningResponse"];
+        };
+        ApiResponseAnswerViewResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["AnswerViewResponse"];
+            traceId?: string;
+        };
+        QuestionLearningResponse: {
+            /** Format: int64 */
+            questionId?: number;
+            contentMode?: string;
+            oneLiner?: string;
+            plainExplanation?: string;
+            designReason?: string;
+            commonMistakes?: string;
+            scorePoints?: string;
+            answers?: components["schemas"]["AnswerItem"][];
+            followUps?: components["schemas"]["FollowUpItem"][];
+        };
+        ApiResponseCurrentPlanResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["CurrentPlanResponse"];
+            traceId?: string;
+        };
+        CurrentPlanResponse: {
+            /** Format: int64 */
+            planId?: number;
+            planCode?: string;
+            planName?: string;
+            /** Format: int32 */
+            durationDays?: number;
+            /** Format: date-time */
+            startedAt?: string;
+            /** Format: int32 */
+            timeProgressDay?: number;
         };
         /** @description 新增题目请求 */
         QuestionCreateRequest: {
@@ -1208,6 +1440,38 @@ export interface components {
             wrongCount?: number;
             /** Format: date-time */
             lastStudiedAt?: string;
+        };
+        ApiResponseListWrongQuestionResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["WrongQuestionResponse"][];
+            traceId?: string;
+        };
+        ApiResponseStudyProgressResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["StudyProgressResponse"];
+            traceId?: string;
+        };
+        ApiResponseListFavoriteResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["FavoriteResponse"][];
+            traceId?: string;
+        };
+        FavoriteResponse: {
+            /** Format: int64 */
+            favoriteId?: number;
+            /** Format: int64 */
+            questionId?: number;
+            title?: string;
+            /** Format: int32 */
+            starLevel?: number;
+            /** Format: date-time */
+            createdAt?: string;
         };
         ApiResponseListSourceSnippetSummaryResponse: {
             success?: boolean;
@@ -1349,6 +1613,40 @@ export interface components {
             solutions?: components["schemas"]["ScenarioSolutionResponse"][];
             cells?: components["schemas"]["ScenarioMatrixCellResponse"][];
         };
+        ApiResponseQuestionWorkspaceResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["QuestionWorkspaceResponse"];
+            traceId?: string;
+        };
+        QuestionWorkspaceResponse: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            topicId?: number;
+            topicName?: string;
+            /** Format: int64 */
+            categoryId?: number;
+            categoryName?: string;
+            title?: string;
+            questionType?: string;
+            /** Format: int32 */
+            starLevel?: number;
+            difficulty?: string;
+            frequencyLevel?: string;
+            originType?: string;
+            sourceVersion?: string;
+            contentMode?: string;
+            tags?: components["schemas"]["TagItem"][];
+        };
+        ApiResponseQuestionLearningResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["QuestionLearningResponse"];
+            traceId?: string;
+        };
         ApiResponseListLabDefinitionResponse: {
             success?: boolean;
             code?: string;
@@ -1434,13 +1732,6 @@ export interface components {
             data?: components["schemas"]["TagResponse"][];
             traceId?: string;
         };
-        ApiResponseListWrongQuestionResponse: {
-            success?: boolean;
-            code?: string;
-            message?: string;
-            data?: components["schemas"]["WrongQuestionResponse"][];
-            traceId?: string;
-        };
         ApiResponseTodayStudyResponse: {
             success?: boolean;
             code?: string;
@@ -1478,13 +1769,6 @@ export interface components {
             data?: components["schemas"]["ReviewTaskResponse"][];
             traceId?: string;
         };
-        ApiResponseStudyProgressResponse: {
-            success?: boolean;
-            code?: string;
-            message?: string;
-            data?: components["schemas"]["StudyProgressResponse"];
-            traceId?: string;
-        };
         ApiResponseListStudyPlanSummaryResponse: {
             success?: boolean;
             code?: string;
@@ -1517,24 +1801,6 @@ export interface components {
             durationDays?: number;
             description?: string;
             days?: components["schemas"]["StudyPlanDayResponse"][];
-        };
-        ApiResponseListFavoriteResponse: {
-            success?: boolean;
-            code?: string;
-            message?: string;
-            data?: components["schemas"]["FavoriteResponse"][];
-            traceId?: string;
-        };
-        FavoriteResponse: {
-            /** Format: int64 */
-            favoriteId?: number;
-            /** Format: int64 */
-            questionId?: number;
-            title?: string;
-            /** Format: int32 */
-            starLevel?: number;
-            /** Format: date-time */
-            createdAt?: string;
         };
         QuestionQuery: {
             keyword?: string;
@@ -1613,7 +1879,103 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    resolveWrongBook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    resolveWrongBook_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
     update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseNoteResponse"];
+                };
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseNoteResponse"];
+                };
+            };
+        };
+    };
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1639,7 +2001,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1661,54 +2023,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseTagResponse"];
-                };
-            };
-        };
-    };
-    resolveWrongBook: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                questionId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseVoid"];
-                };
-            };
-        };
-    };
-    update_2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SaveNoteRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseNoteResponse"];
                 };
             };
         };
@@ -1735,7 +2049,7 @@ export interface operations {
             };
         };
     };
-    update_3: {
+    update_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -1761,7 +2075,7 @@ export interface operations {
             };
         };
     };
-    update_4: {
+    update_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -1899,142 +2213,6 @@ export interface operations {
             };
         };
     };
-    submit: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SubmitScenarioAttemptRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseScenarioAttemptResponse"];
-                };
-            };
-        };
-    };
-    list: {
-        parameters: {
-            query?: {
-                categoryId?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseListTopicResponse"];
-                };
-            };
-        };
-    };
-    create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TopicRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseTopicResponse"];
-                };
-            };
-        };
-    };
-    list_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseListTagResponse"];
-                };
-            };
-        };
-    };
-    create_1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TagRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseTagResponse"];
-                };
-            };
-        };
-    };
-    activatePlan: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                planId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseCurrentPlanResponse"];
-                };
-            };
-        };
-    };
     find: {
         parameters: {
             query: {
@@ -2058,7 +2236,54 @@ export interface operations {
             };
         };
     };
-    create_2: {
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseNoteResponse"];
+                };
+            };
+        };
+    };
+    find_1: {
+        parameters: {
+            query: {
+                targetType: "QUESTION" | "TOPIC" | "SCENARIO";
+                targetId: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseNoteResponse"];
+                };
+            };
+        };
+    };
+    create_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2126,6 +2351,74 @@ export interface operations {
             };
         };
     };
+    favorite_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    unfavorite_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseVoid"];
+                };
+            };
+        };
+    };
+    submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitAttemptRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseSubmitAttemptResponse"];
+                };
+            };
+        };
+    };
     submit_1: {
         parameters: {
             query?: never;
@@ -2146,6 +2439,168 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseSubmitAttemptResponse"];
+                };
+            };
+        };
+    };
+    submit_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitScenarioAttemptRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseScenarioAttemptResponse"];
+                };
+            };
+        };
+    };
+    reveal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerViewRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseAnswerViewResponse"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: {
+                categoryId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListTopicResponse"];
+                };
+            };
+        };
+    };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TopicRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseTopicResponse"];
+                };
+            };
+        };
+    };
+    list_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListTagResponse"];
+                };
+            };
+        };
+    };
+    create_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TagRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseTagResponse"];
+                };
+            };
+        };
+    };
+    activatePlan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                planId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseCurrentPlanResponse"];
                 };
             };
         };
@@ -2172,7 +2627,7 @@ export interface operations {
             };
         };
     };
-    create_3: {
+    create_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -2216,7 +2671,7 @@ export interface operations {
             };
         };
     };
-    create_4: {
+    create_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2260,7 +2715,131 @@ export interface operations {
             };
         };
     };
+    listWrongQuestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListWrongQuestionResponse"];
+                };
+            };
+        };
+    };
+    listWrongQuestions_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListWrongQuestionResponse"];
+                };
+            };
+        };
+    };
+    getQuestionProgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseStudyProgressResponse"];
+                };
+            };
+        };
+    };
+    getQuestionProgress_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                questionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseStudyProgressResponse"];
+                };
+            };
+        };
+    };
     list_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListFavoriteResponse"];
+                };
+            };
+        };
+    };
+    list_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseListFavoriteResponse"];
+                };
+            };
+        };
+    };
+    list_6: {
         parameters: {
             query?: {
                 topicId?: number;
@@ -2305,7 +2884,7 @@ export interface operations {
             };
         };
     };
-    list_5: {
+    list_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -2369,7 +2948,51 @@ export interface operations {
             };
         };
     };
-    list_6: {
+    metadata: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseQuestionWorkspaceResponse"];
+                };
+            };
+        };
+    };
+    learning: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseQuestionLearningResponse"];
+                };
+            };
+        };
+    };
+    list_8: {
         parameters: {
             query?: never;
             header?: never;
@@ -2431,26 +3054,6 @@ export interface operations {
             };
         };
     };
-    listWrongQuestions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseListWrongQuestionResponse"];
-                };
-            };
-        };
-    };
     getTodayStudy: {
         parameters: {
             query?: never;
@@ -2471,7 +3074,7 @@ export interface operations {
             };
         };
     };
-    list_7: {
+    list_9: {
         parameters: {
             query?: {
                 status?: "PENDING" | "COMPLETED" | "CANCELLED";
@@ -2533,28 +3136,6 @@ export interface operations {
             };
         };
     };
-    getQuestionProgress: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                questionId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseStudyProgressResponse"];
-                };
-            };
-        };
-    };
     listPlans: {
         parameters: {
             query?: never;
@@ -2593,26 +3174,6 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ApiResponseStudyPlanDetailResponse"];
-                };
-            };
-        };
-    };
-    list_8: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["ApiResponseListFavoriteResponse"];
                 };
             };
         };

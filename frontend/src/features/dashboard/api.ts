@@ -1,31 +1,8 @@
 import { request } from '../../api/client';
-import type { CurrentPlan } from '../study/api';
+import type { components } from '../../api/generated/schema';
 
-export interface RecentStudyItem {
-  questionId: number;
-  title: string;
-  starLevel: number;
-  masteryLevel: string;
-  lastStudiedAt: string;
-}
-
-export interface DashboardData {
-  currentPlan: CurrentPlan | null;
-  timeProgressDay: number | null;
-  planDurationDays: number | null;
-  todayPlanItemCount: number;
-  todayReviewCount: number;
-  dueReviewCount: number;
-  totalQuestionCount: number;
-  touchedQuestionCount: number;
-  solidQuestionCount: number;
-  masteredQuestionCount: number;
-  fiveStarMasteryRate: number;
-  activeWrongQuestionCount: number;
-  favoriteQuestionCount: number;
-  recentStudyItems: RecentStudyItem[];
-}
+export type WorkbenchData = components['schemas']['WorkbenchResponse'];
 
 export const dashboardApi = {
-  get: () => request<DashboardData>('/api/dashboard'),
+  getWorkbench: () => request<WorkbenchData>('/api/v1/workbench'),
 };

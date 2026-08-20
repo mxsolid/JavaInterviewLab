@@ -17,7 +17,7 @@ import java.util.List;
 /** 收藏题目的 HTTP 边界；Controller 只负责请求路由，不承担偏好状态规则。 */
 @Tag(name = "收藏", description = "题目收藏与取消收藏")
 @RestController
-@RequestMapping("/api/study/favorites")
+@RequestMapping({"/api/study/favorites", "/api/v1/study/favorites"})
 public class FavoriteController {
 
     private final FavoriteService favoriteService;

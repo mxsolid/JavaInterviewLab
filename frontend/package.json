@@ -8,6 +8,7 @@
     "openapi:fetch": "node scripts/fetch-openapi.mjs",
     "openapi:generate": "openapi-typescript openapi/openapi.json -o src/api/generated/schema.ts",
     "screenshot:shell": "playwright test e2e/shell.visual.spec.ts --project=chromium",
+    "e2e": "playwright test --project=chromium",
     "typecheck": "tsc -b --pretty false",
     "build": "tsc -b && vite build"
   },

@@ -11,6 +11,10 @@ const QuestionDetailPage = lazy(() => import('../features/content/QuestionDetail
 const KnowledgePage = lazy(() => import('../features/knowledge/KnowledgePage').then((module) => ({ default: module.KnowledgePage })));
 const ReviewCenterPage = lazy(() => import('../features/review/ReviewCenterPage').then((module) => ({ default: module.ReviewCenterPage })));
 const ContentManagerPage = lazy(() => import('../features/content/ContentManagerPage').then((module) => ({ default: module.ContentManagerPage })));
+const ScenarioPage = lazy(() => import('../features/scenario/ScenarioPage').then((module) => ({ default: module.ScenarioPage })));
+const SourcePage = lazy(() => import('../features/source/SourcePage').then((module) => ({ default: module.SourcePage })));
+const LabPage = lazy(() => import('../features/lab/LabPage').then((module) => ({ default: module.LabPage })));
+const InterviewPage = lazy(() => import('../features/interview/InterviewPage').then((module) => ({ default: module.InterviewPage })));
 
 export function App() {
   return (
@@ -22,11 +26,11 @@ export function App() {
           <Route path="/knowledge" element={<KnowledgePage />} />
           <Route path="/questions" element={<QuestionBankPage />} />
           <Route path="/questions/:id" element={<QuestionDetailPage />} />
-          <Route path="/scenarios" element={<ModulePlaceholderPage title="场景训练" description="场景、Case 和方案矩阵将在场景工作区阶段接入数据库内容。" />} />
+          <Route path="/scenarios" element={<ScenarioPage />} />
           <Route path="/review" element={<ReviewCenterPage />} />
-          <Route path="/source" element={<ModulePlaceholderPage title="源码阅读" description="短源码片段和行级注释将在场景工作区阶段接入 Source API。" />} />
-          <Route path="/lab" element={<ModulePlaceholderPage title="动画实验室" description="实验元数据和纯 TypeScript step engine 将在实验工作区阶段接入。" />} />
-          <Route path="/interview" element={<ModulePlaceholderPage title="模拟面试" description="文本输入与规则评分将在模拟面试阶段接入，不依赖外部 LLM。" />} />
+          <Route path="/source" element={<SourcePage />} />
+          <Route path="/lab" element={<LabPage />} />
+          <Route path="/interview" element={<InterviewPage />} />
           <Route path="/ai" element={<ModulePlaceholderPage title="AI 专题" description="当前版本不接入外部模型，保留可扩展的专题入口。" />} />
           <Route path="/settings" element={<ContentManagerPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

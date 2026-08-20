@@ -74,7 +74,7 @@
 | P03 | Scenario / Source / Lab 后端 | DONE |
 | P04 | 前端 Design System 与 AppShell | DONE |
 | P05 | Workbench / Knowledge / Question 核心页面 | DONE |
-| P06 | Scenario / Source / Lab / Interview 页面 | TODO |
+| P06 | Scenario / Source / Lab / Interview 页面 | DONE |
 | P07 | 真实端到端联调 | TODO |
 | P08 | E2E / Visual / Performance | TODO |
 | P09 | Windows 部署与最终验收 | TODO |
@@ -120,3 +120,7 @@
 - P05 练习模式首屏只读取 `/api/v1/questions/{id}` 元数据；学习模式或显式 answer-view 后才返回教学内容，避免参考答案在首屏响应泄漏。
 - `question_answer_view` 采用 append-only 与 `(profile_id, client_view_id)` 幂等约束；查看答案不推进掌握度，只有 attempt 提交更新 progress/review。
 - Workbench 首屏收敛到单个 `/api/v1/workbench` 请求；错题操作后失效聚合查询，Knowledge Map 在答题提交后同步失效。
+- P06 场景提交继续复用 append-only `scenario_attempt` 与 UUID 幂等约束；前端候选关系和方案矩阵只读取数据库 API。
+- Source 片段通过 V16 关联真实 Topic；代码查看器只展示项目自写教学伪代码，不复制第三方完整源码。
+- Lab 固定为五个纯 TypeScript 状态机，后端只提供版本化定义；前后步骤不会产生数据库写入。
+- Interview 基线采用本地可解释规则评分，四维权重固定为准确性 40、深度 25、结构 20、示例 15；外部 provider 仅保留关闭的 feature flag，不伪造 AI 能力。

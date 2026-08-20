@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.interview.repository.InterviewMapper">
+
+    <sql id="questionFields">
+        q.id, q.title, t.code AS "topicCode",
+        CONCAT_WS(E'\n', q.one_liner, q.score_points, standard_answer.content) AS "rubricText"
+    </sql>
+
+    <sql id="questionJoin">
+        FROM question q
+        JOIN topic t ON t.id = q.topic_id
+        LEFT JOIN LATERAL (
+            SELECT qa.content
+            FROM question_answer qa
+            WHERE qa.question_id = q.id AND qa.answer_type = 'STANDARD'
+            ORDER BY qa.sort_order, qa.id
+            LIMIT 1
+        ) standard_answer ON TRUE
+    </sql>
+
+    <!-- 题库仅 336 道，RANDOM 模式按数据库随机抽取；指定专题时仍只扫描该专题启用题。 -->
+    <select id="findQuestion" resultType="com.javainterviewlab.interview.repository.model.InterviewQuestionRow">
+        SELECT <include refid="questionFields" />
+        <include refid="questionJoin" />
+        WHERE q.status = 'ENABLED'
+        <if test="topicCode != null">AND t.code = #{topicCode}</if>
+        ORDER BY RANDOM()
+        LIMIT 1
+    </select>
+
+    <select id="findQuestionById" resultType="com.javainterviewlab.interview.repository.model.InterviewQuestionRow">
+        SELECT <include refid="questionFields" />
+        <include refid="questionJoin" />
+        WHERE q.id = #{questionId} AND q.status = 'ENABLED'
+    </select>
+
+    <select id="insertSession" resultType="long">
+        INSERT INTO interview_session (profile_id, question_id, mode, topic_code)
+        VALUES (#{profileId}, #{questionId}, #{request.mode}, #{request.topicCode})
+        RETURNING id
+    </select>
+
+    <select id="findSession" resultType="com.javainterviewlab.interview.repository.model.InterviewSessionRow">
+        SELECT id, profile_id AS "profileId", question_id AS "questionId", mode,
+               topic_code AS "topicCode", status, total_score AS "totalScore",
+               started_at AS "startedAt", finished_at AS "finishedAt"
+        FROM interview_session
+        WHERE id = #{sessionId} AND profile_id = #{profileId}
+    </select>
+
+    <!-- 同一会话的 sequenceNo 由此锁保护，不依赖应用进程内互斥。 -->
+    <select id="findSessionForUpdate" resultType="com.javainterviewlab.interview.repository.model.InterviewSessionRow">
+        SELECT id, profile_id AS "profileId", question_id AS "questionId", mode,
+               topic_code AS "topicCode", status, total_score AS "totalScore",
+               started_at AS "startedAt", finished_at AS "finishedAt"
+        FROM interview_session
+        WHERE id = #{sessionId} AND profile_id = #{profileId}
+        FOR UPDATE
+    </select>
+
+    <select id="findTurnByClientId" resultType="com.javainterviewlab.interview.repository.model.InterviewTurnRow">
+        SELECT id, session_id AS "sessionId", client_turn_id AS "clientTurnId",
+               sequence_no AS "sequenceNo", prompt, score, feedback,
+               accuracy_score AS "accuracyScore", completeness_score AS "completenessScore",
+               depth_score AS "depthScore", expression_score AS "expressionScore", created_at AS "createdAt"
+        FROM interview_turn
+        WHERE session_id = #{sessionId} AND client_turn_id = #{clientTurnId}
+    </select>
+
+    <select id="countTurns" resultType="int">
+        SELECT COUNT(*) FROM interview_turn WHERE session_id = #{sessionId}
+    </select>
+
+    <select id="findFollowUpPrompt" resultType="string">
+        SELECT title
+        FROM question_follow_up
+        WHERE question_id = #{questionId}
+        ORDER BY sort_order, id
+        LIMIT 1 OFFSET #{offset}
+    </select>
+
+    <select id="insertTurn" resultType="long" flushCache="true" useCache="false">
+        INSERT INTO interview_turn (
+            session_id, client_turn_id, sequence_no, prompt, answer_text, score, feedback,
+            accuracy_score, completeness_score, depth_score, expression_score
+        ) VALUES (
+            #{sessionId}, #{request.clientTurnId}, #{sequenceNo}, #{prompt}, #{request.answerText},
+            #{score.total}, #{feedback}, #{score.accuracy}, #{score.completeness},
+            #{score.depth}, #{score.expression}
+        )
+        RETURNING id
+    </select>
+
+    <select id="findTurnById" resultType="com.javainterviewlab.interview.repository.model.InterviewTurnRow">
+        SELECT id, session_id AS "sessionId", client_turn_id AS "clientTurnId",
+               sequence_no AS "sequenceNo", prompt, score, feedback,
+               accuracy_score AS "accuracyScore", completeness_score AS "completenessScore",
+               depth_score AS "depthScore", expression_score AS "expressionScore", created_at AS "createdAt"
+        FROM interview_turn
+        WHERE id = #{id}
+    </select>
+
+    <select id="findTurns" resultType="com.javainterviewlab.interview.repository.model.InterviewTurnRow">
+        SELECT id, session_id AS "sessionId", client_turn_id AS "clientTurnId",
+               sequence_no AS "sequenceNo", prompt, score, feedback,
+               accuracy_score AS "accuracyScore", completeness_score AS "completenessScore",
+               depth_score AS "depthScore", expression_score AS "expressionScore", created_at AS "createdAt"
+        FROM interview_turn
+        WHERE session_id = #{sessionId}
+        ORDER BY sequence_no, id
+    </select>
+
+    <update id="finishSession">
+        UPDATE interview_session
+        SET status = 'FINISHED', total_score = #{totalScore}, finished_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{sessionId} AND profile_id = #{profileId} AND status = 'ACTIVE'
+    </update>
+</mapper>

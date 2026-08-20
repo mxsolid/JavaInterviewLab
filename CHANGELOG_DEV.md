@@ -1,5 +1,20 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P06 场景、源码、实验与面试工作区
+
+- 重建 Scenario 工作区：CaseSwitcher、约束时间线、候选方案、API 矩阵和真实 attempt 提交均接入 PostgreSQL。
+- 重建 Source 工作区：Library/版本/文件筛选、可选代码行、行级注释和关联题目入口；V16 将 3 个教学片段关联真实专题。
+- 新增五个纯 TypeScript Lab 引擎：B+ 树插入分裂、LRU、HashMap 扩容、Redis 渐进 rehash、线程池提交流程；统一输出 `LabStep<S>`。
+- 新增 Interview 会话 API、轮次幂等、会话行锁、四维本地规则评分与结束汇总；文本输入始终可用，浏览器语音仅作可选增强。
+- 新增 P06 Playwright 工作区用例和 1720/390 screenshot baseline；旧 shell 导航断言同步到正式页面标题。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp test` 通过，46 个测试；`mvn -B -ntp package -DskipTests` 通过；Flyway 已到 V16。
+- Node 22.13.0：`npm run typecheck`、`npm run test`、`npm run build` 通过；Vitest 5/5。
+- Playwright 12/12 通过；场景写库、Source 关联跳转、五实验状态推进、面试四维评分与结束汇总均通过，console/page error 0，非预期 4xx/5xx 0。
+- 保存 Scenario/Source/Lab/Interview 桌面 1720 截图及 Scenario/Interview 移动 390 截图，并完成人工视觉检查。
+
 ## 2026-08-21 — V0.3 P05 核心学习工作区
 
 - 新增 Flyway V14 与 `question_answer_view`，记录答案披露行为并以 `(profile_id, client_view_id)` 保证重试幂等。

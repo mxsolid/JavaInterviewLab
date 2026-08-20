@@ -5,6 +5,7 @@ public record InterviewEvaluationContext(
         Long sessionId,
         Integer sequenceNo,
         String prompt,
-        String answerText
+        String answerText,
+        String rubricText
 ) {
 }

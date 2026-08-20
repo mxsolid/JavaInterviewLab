@@ -9,6 +9,7 @@
     "openapi:generate": "openapi-typescript openapi/openapi.json -o src/api/generated/schema.ts",
     "screenshot:shell": "playwright test e2e/shell.visual.spec.ts --project=chromium",
     "e2e": "playwright test --project=chromium",
+    "test": "vitest run src",
     "typecheck": "tsc -b --pretty false",
     "build": "tsc -b && vite build"
   },
@@ -27,6 +28,7 @@
     "@vitejs/plugin-react": "^6.0.0",
     "openapi-typescript": "^7.13.0",
     "typescript": "~5.9.3",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "4.1.11"
   }
 }

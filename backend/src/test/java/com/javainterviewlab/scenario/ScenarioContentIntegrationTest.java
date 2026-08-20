@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -112,7 +113,10 @@ class ScenarioContentIntegrationTest {
 
         mockMvc.perform(get("/api/v1/labs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(3)))
+                .andExpect(jsonPath("$.data", hasSize(5)))
+                .andExpect(jsonPath("$.data[*].algorithm", containsInAnyOrder(
+                        "BPLUS_TREE_INSERT", "HASHMAP_RESIZE", "LRU_CACHE",
+                        "THREAD_POOL_SUBMIT", "REDIS_REHASH")))
                 .andExpect(jsonPath("$.data[0].initialDataset").isMap());
         mockMvc.perform(get("/api/v1/labs/hashmap-resize"))
                 .andExpect(status().isOk())

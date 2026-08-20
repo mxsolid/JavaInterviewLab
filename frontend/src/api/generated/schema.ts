@@ -372,6 +372,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/interviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 创建面试会话 */
+        post: operations["create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/interviews/{id}/turns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 提交单轮回答并返回规则评分 */
+        post: operations["submit_3"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/interviews/{id}/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 结束面试并汇总多轮评分 */
+        post: operations["finish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics": {
         parameters: {
             query?: never;
@@ -381,7 +432,7 @@ export interface paths {
         };
         get: operations["list"];
         put?: never;
-        post: operations["create_2"];
+        post: operations["create_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -397,7 +448,7 @@ export interface paths {
         };
         get: operations["list_1"];
         put?: never;
-        post: operations["create_3"];
+        post: operations["create_4"];
         delete?: never;
         options?: never;
         head?: never;
@@ -441,7 +492,7 @@ export interface paths {
          * 创建题目
          * @description 专题和标签必须存在；同一种答案只能提交一次。
          */
-        post: operations["create_4"];
+        post: operations["create_5"];
         delete?: never;
         options?: never;
         head?: never;
@@ -457,7 +508,7 @@ export interface paths {
         };
         get: operations["list_3"];
         put?: never;
-        post: operations["create_5"];
+        post: operations["create_6"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1312,6 +1363,91 @@ export interface components {
             scorePoints?: string;
             answers?: components["schemas"]["AnswerItem"][];
             followUps?: components["schemas"]["FollowUpItem"][];
+        };
+        CreateInterviewRequest: {
+            /** @enum {string} */
+            mode: "RANDOM" | "TOPIC";
+            topicCode?: string;
+        };
+        ApiResponseInterviewSessionResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["InterviewSessionResponse"];
+            traceId?: string;
+        };
+        InterviewSessionResponse: {
+            /** Format: int64 */
+            id?: number;
+            mode?: string;
+            topicCode?: string;
+            status?: string;
+            /** Format: int64 */
+            questionId?: number;
+            /** Format: int32 */
+            sequenceNo?: number;
+            prompt?: string;
+            provider?: string;
+            providerEnabled?: boolean;
+            /** Format: date-time */
+            startedAt?: string;
+        };
+        SubmitInterviewTurnRequest: {
+            /** Format: uuid */
+            clientTurnId: string;
+            answerText: string;
+        };
+        ApiResponseInterviewTurnResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["InterviewTurnResponse"];
+            traceId?: string;
+        };
+        InterviewDimensionResponse: {
+            code?: string;
+            label?: string;
+            /** Format: double */
+            score?: number;
+            /** Format: double */
+            maxScore?: number;
+            reason?: string;
+        };
+        InterviewTurnResponse: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: uuid */
+            clientTurnId?: string;
+            /** Format: int32 */
+            sequenceNo?: number;
+            prompt?: string;
+            /** Format: double */
+            totalScore?: number;
+            dimensions?: components["schemas"]["InterviewDimensionResponse"][];
+            nextPrompt?: string;
+            duplicated?: boolean;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        ApiResponseInterviewFinishResponse: {
+            success?: boolean;
+            code?: string;
+            message?: string;
+            data?: components["schemas"]["InterviewFinishResponse"];
+            traceId?: string;
+        };
+        InterviewFinishResponse: {
+            /** Format: int64 */
+            sessionId?: number;
+            status?: string;
+            /** Format: double */
+            totalScore?: number;
+            dimensions?: components["schemas"]["InterviewDimensionResponse"][];
+            /** Format: int32 */
+            turnCount?: number;
+            summary?: string;
+            /** Format: date-time */
+            finishedAt?: string;
         };
         ApiResponseCurrentPlanResponse: {
             success?: boolean;
@@ -2493,6 +2629,78 @@ export interface operations {
             };
         };
     };
+    create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInterviewRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseInterviewSessionResponse"];
+                };
+            };
+        };
+    };
+    submit_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitInterviewTurnRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseInterviewTurnResponse"];
+                };
+            };
+        };
+    };
+    finish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiResponseInterviewFinishResponse"];
+                };
+            };
+        };
+    };
     list: {
         parameters: {
             query?: {
@@ -2515,7 +2723,7 @@ export interface operations {
             };
         };
     };
-    create_2: {
+    create_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2559,7 +2767,7 @@ export interface operations {
             };
         };
     };
-    create_3: {
+    create_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -2627,7 +2835,7 @@ export interface operations {
             };
         };
     };
-    create_4: {
+    create_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2671,7 +2879,7 @@ export interface operations {
             };
         };
     };
-    create_5: {
+    create_6: {
         parameters: {
             query?: never;
             header?: never;

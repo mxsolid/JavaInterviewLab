@@ -59,7 +59,7 @@ test('全部 shell 导航入口无 console 与网络错误', async ({ page }) =>
     ['/questions', '题库'],
     ['/scenarios', '场景训练'],
     ['/review', '复习中心'],
-    ['/source', '源码阅读'],
+    ['/source', '源码 + 注释阅读'],
     ['/lab', '动画实验室'],
     ['/interview', '模拟面试'],
     ['/ai', 'AI 专题'],

@@ -1,0 +1,95 @@
+{
+  "seedPack": "starter-topics-v1",
+  "topics": [
+    {
+      "externalKey": "topic-java-foundation",
+      "category": "JAVA",
+      "name": "Java 基础",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-collections",
+      "category": "JAVA",
+      "name": "集合框架与 JDK 源码",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-concurrency",
+      "category": "JAVA",
+      "name": "并发编程",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-jvm",
+      "category": "JAVA",
+      "name": "JVM",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-spring",
+      "category": "FRAMEWORK",
+      "name": "Spring 核心",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-mybatis",
+      "category": "FRAMEWORK",
+      "name": "MyBatis",
+      "starLevel": 4
+    },
+    {
+      "externalKey": "topic-db",
+      "category": "DATA",
+      "name": "数据库与 SQL",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-redis",
+      "category": "MIDDLEWARE",
+      "name": "Redis",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-mq",
+      "category": "MIDDLEWARE",
+      "name": "消息队列",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-distributed",
+      "category": "ARCH",
+      "name": "分布式与高并发",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-network",
+      "category": "CS",
+      "name": "网络基础",
+      "starLevel": 4
+    },
+    {
+      "externalKey": "topic-linux",
+      "category": "OPS",
+      "name": "Linux 与线上排查",
+      "starLevel": 5
+    },
+    {
+      "externalKey": "topic-patterns",
+      "category": "DESIGN",
+      "name": "设计模式",
+      "starLevel": 4
+    },
+    {
+      "externalKey": "topic-jdk-new",
+      "category": "JAVA",
+      "name": "JDK 11/17/21/25 新特性",
+      "starLevel": 4
+    },
+    {
+      "externalKey": "topic-ai",
+      "category": "AI",
+      "name": "AI / LLM / RAG / Agent / MCP",
+      "starLevel": 4
+    }
+  ]
+}

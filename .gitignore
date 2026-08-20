@@ -1,0 +1,32 @@
+# 启动包已展开到项目根目录，仅保留为本地参考。
+/Agent_Starter_Pack/
+
+# Java / Maven
+/backend/target/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# Node.js / Vite
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.vite/
+
+# 本地环境与日志
+.env
+.env.*
+!.env.example
+*.log
+/backend/src/main/resources/application-local.yml
+
+# IDE 与操作系统文件
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+.DS_Store
+Thumbs.db

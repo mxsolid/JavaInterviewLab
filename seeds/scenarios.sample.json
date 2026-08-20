@@ -1,0 +1,100 @@
+{
+  "seedPack": "starter-scenarios-v1",
+  "scenarios": [
+    {
+      "externalKey": "scenario-payment-duplicate",
+      "title": "支付重复处理",
+      "starLevel": 5,
+      "summary": "同一个支付业务在不同链路上可能被重复触发。必须区分请求层、业务层、消息层和数据库最终防线。",
+      "cases": [
+        {
+          "code": "A",
+          "title": "用户疯狂点击支付按钮",
+          "rootCause": "前端重复操作、网络慢导致用户误以为未提交",
+          "candidateSolutions": [
+            "request-idempotency-key",
+            "db-unique-key",
+            "state-machine"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "支付平台重复回调 5 次",
+          "rootCause": "第三方支付通常采用至少一次通知语义，未收到成功响应会重试",
+          "candidateSolutions": [
+            "payment-flow-unique",
+            "state-machine",
+            "db-unique-key"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "网关超时，客户端自动重试",
+          "rootCause": "客户端不知道服务端是否已经成功执行",
+          "candidateSolutions": [
+            "request-idempotency-key",
+            "query-before-retry",
+            "db-unique-key"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "MQ 重复投递支付成功消息",
+          "rootCause": "消息系统发生重试或消费确认异常",
+          "candidateSolutions": [
+            "consumer-idempotency",
+            "db-unique-key",
+            "state-machine"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "两个实例同时处理同一个支付通知",
+          "rootCause": "分布式部署下同一事件可能并发到达",
+          "candidateSolutions": [
+            "db-conditional-update",
+            "db-unique-key",
+            "distributed-lock"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "request-idempotency-key",
+          "name": "请求幂等号",
+          "principle": "客户端或服务端为一次业务操作生成唯一业务键，重复请求返回同一业务结果。"
+        },
+        {
+          "code": "db-unique-key",
+          "name": "数据库唯一约束",
+          "principle": "用数据库唯一性作为最终数据防线，阻止重复业务记录落库。"
+        },
+        {
+          "code": "state-machine",
+          "name": "状态机 / 条件更新",
+          "principle": "只允许合法状态迁移，例如只有待支付才能变为已支付。"
+        },
+        {
+          "code": "payment-flow-unique",
+          "name": "支付流水唯一约束",
+          "principle": "第三方交易号或本地支付流水号唯一，重复通知不会生成第二笔支付结果。"
+        },
+        {
+          "code": "consumer-idempotency",
+          "name": "消费幂等",
+          "principle": "消费前判断业务事件是否已处理，或依赖唯一键和状态更新抵御重复消息。"
+        },
+        {
+          "code": "db-conditional-update",
+          "name": "数据库条件更新",
+          "principle": "利用 WHERE status = expected 的原子更新限制并发状态迁移。"
+        },
+        {
+          "code": "distributed-lock",
+          "name": "分布式锁",
+          "principle": "在确实需要跨实例互斥时控制临界区，但不应替代数据库最终约束。"
+        }
+      ]
+    }
+  ]
+}

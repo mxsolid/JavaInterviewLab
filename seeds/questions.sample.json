@@ -1,0 +1,110 @@
+{
+  "seedPack": "starter-questions-v1",
+  "questions": [
+    {
+      "externalKey": "q-hashmap-why-power-of-two",
+      "topic": "topic-collections",
+      "title": "HashMap 为什么数组长度通常设计为 2 的幂？",
+      "starLevel": 5,
+      "difficulty": "MEDIUM",
+      "frequencyLevel": "VERY_HIGH",
+      "oneLiner": "为了用位运算快速定位桶，并让扩容时元素迁移更高效。",
+      "plainExplanation": "当容量是 2 的幂时，可以用 (n - 1) & hash 代替取模。JDK 8 扩容时，节点通常只需要判断 hash 的某一位，就能确定留在原索引还是移动到原索引 + oldCap。",
+      "designReason": "这是一种性能、实现复杂度和散列分布之间的工程权衡，而不是单纯为了“位运算更快”这一句话。",
+      "answers": {
+        "QUICK_30S": "HashMap 容量使用 2 的幂，可以通过 `(n - 1) & hash` 高效确定桶位置，并使 JDK 8 扩容时节点只需判断一位即可决定新位置，减少重新计算。",
+        "STANDARD": "回答时应说明桶定位、扩容迁移、hash 扰动三者之间的关系，并指出真正的分布质量仍依赖 hashCode 和 HashMap 的扰动处理。",
+        "DEEP": "深入时可结合 resize 说明：容量翻倍后，旧元素的新索引要么不变，要么增加 oldCap。这来自新增的容量位是否在 hash 中为 1。"
+      },
+      "followUps": [
+        "为什么不是任意偶数？",
+        "JDK 8 resize 时为什么不需要重新计算完整 hash？",
+        "如果 key 的 hashCode 很差会怎样？"
+      ]
+    },
+    {
+      "externalKey": "q-threadpool-execute-flow",
+      "topic": "topic-concurrency",
+      "title": "ThreadPoolExecutor.execute() 的核心执行流程是什么？",
+      "starLevel": 5,
+      "difficulty": "MEDIUM",
+      "frequencyLevel": "VERY_HIGH",
+      "oneLiner": "核心线程未满先创建核心线程；否则尝试入队；队列无法接收时再创建非核心线程；仍失败则拒绝。",
+      "plainExplanation": "线程池不是一上来就创建 maximumPoolSize 个线程。它先控制核心线程规模，再利用队列吸收突发任务，最后才扩容到最大线程数。",
+      "designReason": "这样做是为了在资源占用、任务排队和突发吞吐之间取得平衡，并防止任务一多就无限创建线程。",
+      "answers": {
+        "QUICK_30S": "核心线程不足时创建核心线程；达到核心数后任务先入队；队列满且仍在运行时创建非核心线程直到最大线程数；再失败执行拒绝策略。",
+        "STANDARD": "还要补充入队后的二次检查：任务入队后线程池可能已关闭，因此需要 recheck，必要时移除任务并拒绝；若没有 Worker 还需要补一个 Worker。",
+        "DEEP": "深入回答可继续解释 ctl、高低位状态、addWorker、runWorker、getTask 以及不同队列如何改变线程池行为。"
+      },
+      "followUps": [
+        "为什么达到 corePoolSize 后是先入队，而不是继续创建线程？",
+        "无界队列会让 maximumPoolSize 失效到什么程度？",
+        "线程池满了怎么定位是任务慢还是配置小？"
+      ]
+    },
+    {
+      "externalKey": "q-spring-tx-self-invoke",
+      "topic": "topic-spring",
+      "title": "为什么同一个类内部自调用可能导致 @Transactional 失效？",
+      "starLevel": 5,
+      "difficulty": "MEDIUM",
+      "frequencyLevel": "VERY_HIGH",
+      "oneLiner": "常见代理模式下，内部 this 调用没有经过 Spring 代理对象，因此事务拦截器没有机会介入。",
+      "plainExplanation": "外部调用通常先进入代理对象，再由代理对象开启事务并调用目标方法；同一个对象内部直接调用另一个方法时，相当于绕开代理。",
+      "designReason": "Spring 的声明式事务借助 AOP 代理实现。理解“调用是否经过代理”比死背失效场景更重要。",
+      "answers": {
+        "QUICK_30S": "因为 Spring 声明式事务通常基于代理。类内部 `this.xxx()` 直接调用目标对象自身方法，没有经过代理，所以事务切面不会执行。",
+        "STANDARD": "还需要说明 public 方法、代理创建、TransactionInterceptor 的关系，以及可通过拆分 Bean 等方式让调用经过代理。",
+        "DEEP": "深入可沿着 AOP Advisor、MethodInterceptor、事务属性解析和事务管理器展开。"
+      },
+      "followUps": [
+        "把方法改成 public 就一定生效吗？",
+        "JDK 动态代理和 CGLIB 对这个问题有什么区别？",
+        "为什么 @Async 也可能出现类似问题？"
+      ]
+    },
+    {
+      "externalKey": "q-strategy-pattern-payment",
+      "topic": "topic-patterns",
+      "title": "支付渠道为什么常用策略模式？",
+      "starLevel": 4,
+      "difficulty": "EASY",
+      "frequencyLevel": "HIGH",
+      "oneLiner": "不同支付渠道具有相同业务目标但实现会变化，策略模式可以把变化隔离到独立策略中。",
+      "plainExplanation": "支付宝、微信、银行卡支付都需要“发起支付”，但参数、签名、返回值和异常处理不同。如果全部写在一个巨大 if/else 中，新增渠道会不断修改原方法。",
+      "designReason": "策略模式适合“算法或业务规则可替换”的变化点；如果实际上只有一个实现且不会变化，就没必要为了模式而模式。",
+      "answers": {
+        "QUICK_30S": "支付渠道具有统一入口但实现不同，用策略模式可以将每个渠道独立实现，由工厂或 Map 按渠道选择，减少巨大 if/else。",
+        "STANDARD": "回答时要补充开放封闭原则、策略注册方式、Spring 注入 Map 的实践，以及公共流程是否需要再配合模板方法。",
+        "DEEP": "进一步可讨论策略模式与简单工厂、模板方法、责任链的组合边界。"
+      },
+      "followUps": [
+        "策略模式会不会导致类数量很多？",
+        "Spring 中怎么优雅注册多个策略？",
+        "策略模式和模板方法有什么区别？"
+      ]
+    },
+    {
+      "externalKey": "q-cache-db-consistency",
+      "topic": "topic-redis",
+      "title": "缓存和数据库一致性为什么常用“更新数据库，再删除缓存”？",
+      "starLevel": 5,
+      "difficulty": "HARD",
+      "frequencyLevel": "VERY_HIGH",
+      "oneLiner": "Cache Aside 下数据库是事实源，写成功后让缓存失效，下一次读取再重建，通常比主动双写缓存更容易保证最终一致。",
+      "plainExplanation": "直接同时修改数据库和缓存会出现两个系统之间的部分失败问题。删除缓存让数据重新从数据库加载，可以降低双写复杂度。",
+      "designReason": "这不是强一致方案，而是在大多数互联网读多写少场景中，用简单机制换取可接受的最终一致性。",
+      "answers": {
+        "QUICK_30S": "常见做法是先更新数据库，提交成功后删除缓存。缓存删除后下一次读会从数据库加载新值，可以避免主动维护两份数据。",
+        "STANDARD": "还应讨论删除失败、并发读写、消息重试或监听 binlog 等补偿方案，以及为什么先删缓存存在较明显的旧值回填窗口。",
+        "DEEP": "深入可画并发时序，比较先删缓存、后删缓存、延迟双删、消息队列和 CDC 方案的风险边界。"
+      },
+      "followUps": [
+        "删除缓存失败怎么办？",
+        "为什么不先删缓存再更新数据库？",
+        "延迟双删能保证强一致吗？"
+      ]
+    }
+  ]
+}

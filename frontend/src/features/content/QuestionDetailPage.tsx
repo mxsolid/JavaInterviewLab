@@ -47,11 +47,11 @@ export function QuestionDetailPage() {
   const terms = findTechnicalTerms(termText);
   const standardAnswer = item.answers.find((answer) => answer.answerType === 'STANDARD')?.content ?? item.answers[0]?.content;
 
-  return <Space direction="vertical" size={20} style={{ width: '100%' }}>
+  return <Space orientation="vertical" size={20} style={{ width: '100%' }}>
     <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>返回题库</Button>
     <PageHeader title="题目学习" description="先理解，再输出；掌握度只在提交练习后更新。" />
     <SectionCard className="question-hero">
-      <Space direction="vertical" size={14} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={14} style={{ width: '100%' }}>
         <Space align="start" style={{ width: '100%', justifyContent: 'space-between' }}>
           <Typography.Title level={2} style={{ margin: 0 }}>{item.title}</Typography.Title>
           <Button icon={isFavorite ? <StarFilled /> : <StarOutlined />} loading={favoriteMutation.isPending} onClick={() => favoriteMutation.mutate(isFavorite)}>{isFavorite ? '已收藏' : '收藏'}</Button>
@@ -61,7 +61,7 @@ export function QuestionDetailPage() {
       </Space>
     </SectionCard>
     <Segmented value={mode} options={['学习模式', '练习模式']} onChange={(value) => setMode(value as '学习模式' | '练习模式')} />
-    {mode === '学习模式' ? <Space direction="vertical" size={16} style={{ width: '100%' }}>
+    {mode === '学习模式' ? <Space orientation="vertical" size={16} style={{ width: '100%' }}>
       <KnowledgeSection title="一句话理解" content={item.oneLiner} />
       <KnowledgeSection title="通俗讲解" content={item.plainExplanation} />
       <KnowledgeSection title="为什么这样设计" content={item.designReason} />
@@ -70,7 +70,7 @@ export function QuestionDetailPage() {
       <KnowledgeSection title="面试得分点" content={item.scorePoints} />
     </Space> : <PracticePanel questionId={item.id} referenceAnswer={standardAnswer} />}
     <SectionCard title="我的笔记"><NoteEditor targetType="QUESTION" targetId={item.id} /></SectionCard>
-    {item.followUps.length > 0 && <SectionCard title="高频追问"><Space direction="vertical" style={{ width: '100%' }}>{item.followUps.map((followUp) => <Alert key={followUp.id} type="info" message={followUp.title} description={followUp.referenceAnswer} />)}</Space></SectionCard>}
+    {item.followUps.length > 0 && <SectionCard title="高频追问"><Space orientation="vertical" style={{ width: '100%' }}>{item.followUps.map((followUp) => <Alert key={followUp.id} type="info" message={followUp.title} description={followUp.referenceAnswer} />)}</Space></SectionCard>}
     {terms.length > 0 && <SectionCard title="相关英文术语发音"><Space wrap>{terms.map((term) => <Space key={term.key}><span>{term.label}</span><EnglishTermSpeaker text={term.label} speechText={term.speechText} /></Space>)}</Space></SectionCard>}
   </Space>;
 }

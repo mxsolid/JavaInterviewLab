@@ -1,0 +1,32 @@
+
+> java-interview-lab-frontend@0.1.0 build
+> tsc -b && vite build
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 3157 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                0.63 kB │ gzip:   0.36 kB
+dist/assets/index-BjuIgjjT.css                 9.24 kB │ gzip:   2.75 kB
+dist/assets/rolldown-runtime-CbXtAM7H.js       0.58 kB │ gzip:   0.36 kB
+dist/assets/ClockCircleOutlined-BGv43krA.js    1.02 kB │ gzip:   0.66 kB
+dist/assets/StudyTags-DtfLxSUd.js              1.12 kB │ gzip:   0.67 kB
+dist/assets/useClosable-BnQRY_jH.js            1.24 kB │ gzip:   0.66 kB
+dist/assets/useBreakpoint-DZqda4_A.js          1.86 kB │ gzip:   0.90 kB
+dist/assets/ReviewCenterPage-CiEsTMjv.js       4.00 kB │ gzip:   1.37 kB
+dist/assets/row-BHos1_KX.js                    4.40 kB │ gzip:   2.00 kB
+dist/assets/StudyPlanPage-mXvne9-5.js          5.15 kB │ gzip:   2.55 kB
+dist/assets/alert-CE0dAerc.js                  6.37 kB │ gzip:   2.69 kB
+dist/assets/QuestionBankPage-C-dPFK1F.js       7.63 kB │ gzip:   2.82 kB
+dist/assets/tag-DoHSHl8M.js                    8.54 kB │ gzip:   3.36 kB
+dist/assets/DashboardPage-0RonZjLx.js         10.45 kB │ gzip:   4.12 kB
+dist/assets/progress-BC8QV9mw.js              14.78 kB │ gzip:   5.70 kB
+dist/assets/api-BjLLcyn5.js                   18.06 kB │ gzip:   6.44 kB
+dist/assets/QuestionDetailPage-tbQsP9fn.js    36.68 kB │ gzip:  13.33 kB
+dist/assets/ContentManagerPage-DsqxOjc4.js    37.01 kB │ gzip:  13.01 kB
+dist/assets/index-Xvhydx35.js                159.98 kB │ gzip:  54.33 kB
+dist/assets/table-CaINHTn0.js                277.41 kB │ gzip:  85.63 kB
+dist/assets/PageHeader-BSKjBDIB.js           649.36 kB │ gzip: 211.07 kB
+
+✓ built in 578ms

@@ -1,5 +1,20 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P04 Frontend Design System 与 AppShell
+
+- Design Token 对齐 canonical：`#f0f4f9` 背景、`#0284c7` 主蓝、`#3b82f6` accent，以及统一 radius、shadow、gap 和 motion。
+- 重建 224px SideNav、66px TopBar、GlobalSearch 和真实学习路线选择；增加 10 个模块导航入口及 980/620 响应式断点。
+- 现有路由改为 lazy loading；新增 ProgressRing、StatusBadge、PageSkeleton，统一 Loading/Empty/Error 容器和 reduced-motion/focus-visible 行为。
+- 保存 OpenAPI JSON 并生成 TypeScript schema；现有学习路线类型改为从生成契约派生。
+- 建立 Playwright 配置、截图 helper 和 shell 验收用例；清除 AntD 6 `Space.direction`/`List` 弃用 console 输出。
+
+### 验证
+
+- Node 22.13.0：`npm ci`、`npm run openapi:generate`、`npm run typecheck`、`npm run build` 均通过。
+- Playwright 4/4 通过：1440、1720、1920、390 四视口截图；10 个导航入口 console/page error 0，非预期 4xx/5xx 0。
+- GlobalSearch 键盘跳转、刷新保持筛选值及 Loading/Empty/Error 状态均通过浏览器验证。
+- 入口 JS 从 P00 的 1,240.10 kB 单包拆为 159.98 kB 入口与路由 chunks；共享 PageHeader chunk 仍有 649.36 kB 告警，P08 继续处理。
+
 ## 2026-08-21 — V0.3 P03 Scenario / Source / Lab 后端
 
 - 新增 Flyway V12/V13，增量升级旧 Scenario 草案表，并建立场景作答、种子历史、Source、Lab 和 Interview 持久化结构。

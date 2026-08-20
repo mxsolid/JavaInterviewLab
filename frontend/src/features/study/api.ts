@@ -1,13 +1,12 @@
 import { request } from '../../api/client';
+import type { components } from '../../api/generated/schema';
 import type { NoteData, StudyProgress, SubmitAttemptRequest, SubmitAttemptResponse } from './types';
 
-export interface StudyPlanSummary {
-  id: number;
-  code: string;
-  name: string;
-  durationDays: number;
-  description?: string;
-}
+type StudyPlanSummaryContract = components['schemas']['StudyPlanSummaryResponse'];
+type CurrentPlanContract = components['schemas']['CurrentPlanResponse'];
+
+export type StudyPlanSummary = Required<Pick<StudyPlanSummaryContract, 'id' | 'code' | 'name' | 'durationDays'>>
+  & Pick<StudyPlanSummaryContract, 'description'>;
 
 export interface StudyPlanItem {
   id: number;
@@ -29,14 +28,7 @@ export interface StudyPlanDetail extends StudyPlanSummary {
   days: StudyPlanDay[];
 }
 
-export interface CurrentPlan {
-  planId: number;
-  planCode: string;
-  planName: string;
-  durationDays: number;
-  startedAt: string;
-  timeProgressDay: number;
-}
+export type CurrentPlan = Required<Pick<CurrentPlanContract, 'planId' | 'planCode' | 'planName' | 'durationDays' | 'startedAt' | 'timeProgressDay'>>;
 
 export interface TodayStudy {
   currentPlan: CurrentPlan;

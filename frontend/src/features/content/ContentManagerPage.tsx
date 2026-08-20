@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Col, Form, Input, InputNumber, Modal, Row, Select, Space, Table, Tabs, Upload, message } from 'antd';
 import { useState } from 'react';
 import { ErrorState, LoadingState } from '../../components/states';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { contentApi } from './api';
 
 type Editor = 'category' | 'topic' | 'tag' | undefined;
@@ -14,7 +15,8 @@ export function ContentManagerPage() {
   const importSeed = async () => { const { file } = await seedForm.validateFields(); const result = await contentApi.importSeed(file[0].originFileObj as File); await invalidate(); message.success(`导入完成：新增 ${result.created}，跳过 ${result.skipped}`); setSeedOpen(false); };
   if (categories.isLoading || topics.isLoading || tags.isLoading) return <LoadingState />; if (categories.isError || topics.isError || tags.isError) return <ErrorState description="内容管理加载失败" />;
   const categoryItems = categories.data ?? [];
-  return <Space direction="vertical" size={20} style={{ width: '100%' }}>
+  return <Space orientation="vertical" size={20} style={{ width: '100%' }}>
+    <PageHeader title="内容管理" description="维护分类、专题、标签和版本化题库种子。" />
     <Card><Space><Button type="primary" icon={<PlusOutlined />} onClick={() => setEditor('category')}>新增分类</Button><Button icon={<PlusOutlined />} onClick={() => setEditor('topic')}>新增专题</Button><Button icon={<PlusOutlined />} onClick={() => setEditor('tag')}>新增标签</Button><Button icon={<DatabaseOutlined />} onClick={() => setSeedOpen(true)}>导入 JSON 种子</Button></Space></Card>
     <Tabs items={[{ key: 'categories', label: '分类', children: <Table rowKey="id" size="small" dataSource={categories.data} columns={[{ title: '编码', dataIndex: 'code' }, { title: '名称', dataIndex: 'name' }, { title: '状态', dataIndex: 'status' }, { title: '排序', dataIndex: 'sortOrder' }]} /> }, { key: 'topics', label: '专题', children: <Table rowKey="id" size="small" dataSource={topics.data} columns={[{ title: '分类', dataIndex: 'categoryName' }, { title: '编码', dataIndex: 'code' }, { title: '名称', dataIndex: 'name' }, { title: '星级', dataIndex: 'starLevel' }, { title: '状态', dataIndex: 'status' }]} /> }, { key: 'tags', label: '标签', children: <Table rowKey="id" size="small" dataSource={tags.data} columns={[{ title: '编码', dataIndex: 'code' }, { title: '名称', dataIndex: 'name' }]} /> }]} />
     <Modal open={Boolean(editor)} title={editor === 'category' ? '新增分类' : editor === 'topic' ? '新增专题' : '新增标签'} onCancel={() => setEditor(undefined)} onOk={() => void save()} destroyOnHidden>

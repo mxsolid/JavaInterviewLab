@@ -72,7 +72,7 @@
 | P01 | 后端稳定性与 API 契约 | DONE |
 | P02 | Seed Import V2 与完整题库 | DONE |
 | P03 | Scenario / Source / Lab 后端 | DONE |
-| P04 | 前端 Design System 与 AppShell | TODO |
+| P04 | 前端 Design System 与 AppShell | DONE |
 | P05 | Workbench / Knowledge / Question 核心页面 | TODO |
 | P06 | Scenario / Source / Lab / Interview 页面 | TODO |
 | P07 | 真实端到端联调 | TODO |
@@ -113,3 +113,7 @@
 - P03 场景包的 12 种方案定义跨 12 个场景完全一致，数据库按全局方案词典保存 12 条，通过 Case 关系驱动矩阵，避免复制 144 条同义记录。
 - P03 保留旧基线已存在的空 Scenario 表并用 V12/V13 增量升级；`scenario_attempt` 继续采用 append-only 与 `(profile_id, client_attempt_id)` 幂等约束。
 - Source 只录入 3 段项目自写教学伪代码；Interview 本阶段只提供持久化结构与 evaluator 接口，不伪造外部模型能力。
+- P04 统一采用 canonical 的 `#f0f4f9/#0284c7/#3b82f6` 主色体系；不再使用 `#5b6cf8` 作为品牌主色。
+- TopBar 路线选择读取并提交真实 StudyPlan API；GlobalSearch 只把用户输入传给题库 `keyword` 参数，不在 shell 造搜索结果。
+- OpenAPI JSON 与生成的 TypeScript schema 一并版本化；`npm run openapi:generate` 可离线复现，现有学习路线类型已接入生成契约。
+- P04 Playwright 使用本机 Chrome channel；四视口 screenshot baseline 固定 reduced motion，避免动画像素漂移。

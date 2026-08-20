@@ -1,6 +1,6 @@
 import { CheckCircleOutlined, ClockCircleOutlined, ReadOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Col, Empty, List, Row, Space, Tag, Typography, message } from 'antd';
+import { Alert, Button, Card, Col, Empty, Row, Space, Tag, Typography, message } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorState, LoadingState } from '../../components/states';
@@ -14,7 +14,7 @@ function DayItems({ day }: { day: StudyPlanDay }) {
   if (day.items.length === 0) {
     return <Typography.Text type="secondary">今天用于复盘、输出或查漏补缺。</Typography.Text>;
   }
-  return <Space direction="vertical" size={4}>
+  return <Space orientation="vertical" size={4}>
     {day.items.map((item) => {
       const route = targetRoute(item);
       return <Button key={item.id} type="link" disabled={!route} style={{ paddingInline: 0 }} onClick={() => route && navigate(route)}>
@@ -61,7 +61,7 @@ export function StudyPlanPage() {
   if (plans.isLoading || currentPlan.isLoading || today.isLoading) return <LoadingState />;
   if (plans.isError || currentPlan.isError || today.isError || !plans.data) return <ErrorState description="学习路线加载失败" />;
 
-  return <Space direction="vertical" size={20} style={{ width: '100%' }}>
+  return <Space orientation="vertical" size={20} style={{ width: '100%' }}>
     <PageHeader title="开始学习" description="先选择适合自己的路线，再按每日主题进入题库学习。" />
 
     {today.data ? (
@@ -80,7 +80,7 @@ export function StudyPlanPage() {
           const active = currentPlan.data?.planId === plan.id;
           return <Col xs={24} md={8} key={plan.id}>
             <Card className="section-card" size="small" hoverable={selectedPlanId === plan.id || (!selectedPlanId && plan.id === displayPlanId)} onClick={() => setSelectedPlanId(plan.id)}>
-              <Space direction="vertical" size={8} style={{ width: '100%' }}>
+              <Space orientation="vertical" size={8} style={{ width: '100%' }}>
                 <Typography.Title level={4} style={{ margin: 0 }}>{plan.name}</Typography.Title>
                 <Tag>{plan.durationDays} 天</Tag>
                 <Typography.Text type="secondary">{plan.description}</Typography.Text>
@@ -96,10 +96,7 @@ export function StudyPlanPage() {
 
     <SectionCard title={detail.data ? `${detail.data.name} · 每日计划` : '每日计划'}>
       {detail.isError && <Typography.Text type="danger">路线详情加载失败</Typography.Text>}
-      {detail.data && <List
-        dataSource={detail.data.days}
-        renderItem={(day) => <List.Item className={today.data?.day.id === day.id ? 'plan-day-current' : undefined}><List.Item.Meta title={`Day ${day.dayNumber} · ${day.title}`} description={day.description} /><DayItems day={day} /></List.Item>}
-      />}
+      {detail.data && <div className="data-list">{detail.data.days.map((day) => <div className={`data-list-item ${today.data?.day.id === day.id ? 'plan-day-current' : ''}`} key={day.id}><div className="data-list-meta"><Typography.Text strong>{`Day ${day.dayNumber} · ${day.title}`}</Typography.Text>{day.description && <Typography.Text type="secondary">{day.description}</Typography.Text>}</div><DayItems day={day} /></div>)}</div>}
       {!detail.isLoading && !detail.data && !detail.isError && <Empty description="暂无学习计划" />}
     </SectionCard>
   </Space>;

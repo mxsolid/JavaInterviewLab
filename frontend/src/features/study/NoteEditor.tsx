@@ -95,7 +95,7 @@ export function NoteEditor({ targetType, targetId }: NoteEditorProps) {
   };
 
   const statusText: Record<EditorStatus, string> = { IDLE: '', DIRTY: '待保存', SAVING: '保存中…', SAVED: '已保存', ERROR: '保存失败，输入内容仍在本地' };
-  return <Space direction="vertical" size={8} style={{ width: '100%' }}>
+  return <Space orientation="vertical" size={8} style={{ width: '100%' }}>
     <Typography.Text type="secondary">学习笔记　{statusText[status]}</Typography.Text>
     {conflict && <Alert type="warning" message="其他页面已修改笔记" description="当前输入没有被覆盖。重新加载会读取对方已保存的版本。" action={<Button size="small" onClick={() => void reload()}>重新加载</Button>} />}
     {status === 'ERROR' && !conflict && <Alert type="error" message="笔记保存失败，输入内容仍在本地" action={<Button size="small" onClick={() => void flush()}>重新保存</Button>} />}

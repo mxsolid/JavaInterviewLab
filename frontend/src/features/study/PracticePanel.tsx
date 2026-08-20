@@ -61,11 +61,11 @@ export function PracticePanel({ questionId, referenceAnswer }: PracticePanelProp
   const visibleProgress = result?.progress ?? progress.data;
 
   return <Card className="section-card practice-panel" title="练习区">
-    {phase === 'READY' && <Space direction="vertical" size={12}>
+    {phase === 'READY' && <Space orientation="vertical" size={12}>
       <Typography.Text type="secondary">先组织自己的答案，再查看参考答案并完成自评。</Typography.Text>
       <Button type="primary" onClick={start}>开始练习</Button>
     </Space>}
-    {phase !== 'READY' && phase !== 'SUBMITTED' && <Space direction="vertical" size={16} style={{ width: '100%' }}>
+    {phase !== 'READY' && phase !== 'SUBMITTED' && <Space orientation="vertical" size={16} style={{ width: '100%' }}>
       <Input.TextArea value={answerText} onChange={(event) => setAnswerText(event.target.value)} rows={6} maxLength={10000} placeholder="写下你的回答。内容会随本次练习保存，便于后续回看。" />
       {phase === 'ANSWERING' && <Button type="primary" onClick={() => setPhase('REVEALED')}>查看参考答案</Button>}
       {phase === 'REVEALED' && <>
@@ -76,7 +76,7 @@ export function PracticePanel({ questionId, referenceAnswer }: PracticePanelProp
         <Space><Button type="primary" loading={submit.isPending} disabled={!canSubmit} onClick={() => submit.mutate()}>提交练习</Button>{submit.isError && <Button loading={submit.isPending} disabled={!canSubmit} onClick={() => submit.mutate()}>重试提交</Button>}</Space>
       </>}
     </Space>}
-    {phase === 'SUBMITTED' && result && <Space direction="vertical" size={12} style={{ width: '100%' }}>
+    {phase === 'SUBMITTED' && result && <Space orientation="vertical" size={12} style={{ width: '100%' }}>
       <Alert type="success" showIcon message={result.duplicated ? '服务器已收到此前提交，本次已恢复原结果。' : '本次练习已保存'} />
       <Space wrap><span>当前掌握度：</span><MasteryBadge value={result.progress.masteryLevel} description={result.progress.masteryDescription} /><span>练习 {result.progress.attemptCount} 次</span><span>错误 {result.progress.wrongCount} 次</span></Space>
       <Typography.Text type="secondary">下次复习：{result.review ? new Date(result.review.dueAt).toLocaleString('zh-CN') : '当前无需安排'}</Typography.Text>

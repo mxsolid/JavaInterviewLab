@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "openapi:fetch": "node scripts/fetch-openapi.mjs",
+    "openapi:generate": "openapi-typescript openapi/openapi.json -o src/api/generated/schema.ts",
+    "screenshot:shell": "playwright test e2e/shell.visual.spec.ts --project=chromium",
     "typecheck": "tsc -b --pretty false",
     "build": "tsc -b && vite build"
   },
@@ -17,9 +20,11 @@
     "react-router-dom": "^7.9.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^6.0.0",
+    "openapi-typescript": "^7.13.0",
     "typescript": "~5.9.3",
     "vite": "^8.2.2"
   }

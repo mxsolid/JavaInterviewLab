@@ -6,8 +6,9 @@ interface SectionCardProps {
   extra?: ReactNode;
   children: ReactNode;
   className?: string;
+  hoverable?: boolean;
 }
 
-export function SectionCard({ title, extra, children, className }: SectionCardProps) {
-  return <Card className={`section-card ${className ?? ''}`} title={title} extra={extra}>{children}</Card>;
+export function SectionCard({ title, extra, children, className, hoverable = false }: SectionCardProps) {
+  return <Card className={`section-card ${hoverable ? 'section-card-hoverable' : ''} ${className ?? ''}`} title={title} extra={extra}>{children}</Card>;
 }

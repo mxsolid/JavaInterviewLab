@@ -1,0 +1,13 @@
+
+> java-interview-lab-frontend@0.1.0 screenshot:shell
+> playwright test e2e/shell.visual.spec.ts --project=chromium
+
+
+Running 4 tests using 1 worker
+
+  ok 1 [chromium] › e2e\shell.visual.spec.ts:8:1 › canonical shell 在桌面和移动端保持可用 (4.8s)
+  ok 2 [chromium] › e2e\shell.visual.spec.ts:32:1 › 全局搜索支持键盘、刷新和真实题库参数 (2.4s)
+  ok 3 [chromium] › e2e\shell.visual.spec.ts:46:1 › 全部 shell 导航入口无 console 与网络错误 (7.5s)
+  ok 4 [chromium] › e2e\shell.visual.spec.ts:75:1 › 基础 Loading、Empty、Error 状态可见 (4.4s)
+
+  4 passed (26.0s)

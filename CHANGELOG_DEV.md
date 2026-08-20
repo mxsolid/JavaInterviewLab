@@ -1,5 +1,27 @@
 # 开发变更记录
 
+## 2026-08-20 — B01 学习路线 / 每日计划模型
+
+- 新增 Flyway V4：默认学习档案、学习路线、逐日计划、计划项和当前路线选择；同一档案通过部分唯一索引限制为一条 active 路线。
+- 提供 10 天突击、15 天推荐、30 天加强三条内置路线。路线定义由后端 JSON 幂等写入 PostgreSQL，题库 Seed 导入后自动补齐专题和题目关联。
+- 新增 `/api/study/plans`、`/current-plan`、`/today` 和路线选择接口；`timeProgressDay` 仅表示自然时间，不冒充学习完成度。
+- 前端 `/study` 已替换为路线选择、今日任务和逐日计划页面；Server State 由 TanStack Query 维护，queryKey 集中定义。
+- 新增 B01 业务、数据库和接口文档，以及学习路线 API 集成测试。
+
+### 验证
+
+- `POSTGRES_PASSWORD=<本地测试密码>; mvn -B -ntp test`：5 个测试通过，包含路线写入、选择、当前路线和 Day 1 查询。
+- `npm run build`（Node 22.13.0）：通过；保留第三方组件导致主包超过 500 KB 的既有构建警告。
+- 本地 HTTP（8080）：路线列表返回 3 条；选择 15 天推荐后，当前路线和今日任务均返回 Day 1 集合框架概览及 1 个关联项。
+
+## 2026-08-20 — V0.1.1 工程质量整改
+
+- 全部 MyBatis SQL 已迁移至 `backend/src/main/resources/mapper`，题目列表改用 `QuestionQuery`，不再使用 `Object` 查询参数。
+- 题目创建与更新 DTO 分离；更新继续通过 `version` 返回 409 保护并发编辑。
+- Seed 导入改为 multipart JSON 上传，删除服务端文件路径参数；增加结构校验和导入日志。
+- 新增 Springdoc OpenAPI、数据库/API/代码结构说明，README 更新为 V0.1 运行说明。
+- 前端补齐 typecheck 脚本、2 空格规则与 multipart 导入调用；本机原有 features 文件将纳入 Git 跟踪。
+
 ## 2026-08-20 — A05～A12 V0.1 题库完成
 
 - 新增分类、专题、标签的查询与管理 API；题目支持星级、难度、高频度、状态、多层答案、追问、标签与乐观锁更新。

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.content.tag.repository.TagMapper">
+
+    <select id="findAll" resultType="com.javainterviewlab.content.tag.dto.TagResponse">
+        SELECT id, code, name FROM tag ORDER BY name, id
+    </select>
+
+    <select id="findById" resultType="com.javainterviewlab.content.tag.dto.TagResponse">
+        SELECT id, code, name FROM tag WHERE id = #{id}
+    </select>
+
+    <select id="insert" resultType="long">
+        INSERT INTO tag (code, name) VALUES (#{code}, #{name}) RETURNING id
+    </select>
+
+    <update id="update">
+        UPDATE tag SET code = #{code}, name = #{name} WHERE id = #{id}
+    </update>
+
+    <!-- 一次 IN 查询校验所有标签，避免题目保存时逐个访问数据库。 -->
+    <select id="countByIds" resultType="int">
+        SELECT COUNT(1)
+        FROM tag
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

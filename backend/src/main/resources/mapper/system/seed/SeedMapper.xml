@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.system.seed.repository.SeedMapper">
+
+    <select id="questionExists" resultType="int">
+        SELECT COUNT(1) FROM question WHERE external_key = #{externalKey}
+    </select>
+    <select id="findTopicId" resultType="long">SELECT id FROM topic WHERE code = #{code}</select>
+    <select id="findCategoryId" resultType="long">SELECT id FROM category WHERE code = #{code}</select>
+
+    <!-- 唯一 code 使重试导入能够更新元信息而不新增重复分类。 -->
+    <select id="upsertCategory" resultType="long">
+        INSERT INTO category (code, name, sort_order, status)
+        VALUES (#{code}, #{name}, 0, 'ENABLED')
+        ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name
+        RETURNING id
+    </select>
+    <select id="upsertTopic" resultType="long">
+        INSERT INTO topic (category_id, code, name, star_level, sort_order, status)
+        VALUES (#{categoryId}, #{code}, #{name}, #{starLevel}, 0, 'ENABLED')
+        ON CONFLICT (code) DO UPDATE
+        SET category_id = EXCLUDED.category_id, name = EXCLUDED.name, star_level = EXCLUDED.star_level
+        RETURNING id
+    </select>
+    <select id="insertQuestion" resultType="long">
+        INSERT INTO question (
+            topic_id, external_key, title, question_type, star_level, difficulty,
+            frequency_level, origin_type, status, one_liner, plain_explanation,
+            design_reason, common_mistakes, score_points
+        ) VALUES (
+            #{topicId}, #{externalKey}, #{title}, 'KNOWLEDGE', #{starLevel}, #{difficulty},
+            #{frequencyLevel}, 'IMPORTED', 'ENABLED', #{oneLiner}, #{plainExplanation},
+            #{designReason}, NULL, NULL
+        ) RETURNING id
+    </select>
+    <insert id="insertAnswer">
+        INSERT INTO question_answer (question_id, answer_type, content, sort_order)
+        VALUES (#{questionId}, #{answerType}, #{content}, #{sortOrder})
+    </insert>
+    <insert id="insertFollowUp">
+        INSERT INTO question_follow_up (question_id, title, sort_order)
+        VALUES (#{questionId}, #{title}, #{sortOrder})
+    </insert>
+    <insert id="markImported">
+        INSERT INTO seed_import (seed_pack, version, imported_at)
+        VALUES (#{seedPack}, #{version}, CURRENT_TIMESTAMP)
+        ON CONFLICT (seed_pack) DO UPDATE
+        SET version = EXCLUDED.version, imported_at = EXCLUDED.imported_at
+    </insert>
+</mapper>

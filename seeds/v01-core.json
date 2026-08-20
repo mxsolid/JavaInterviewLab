@@ -1,0 +1,84 @@
+{
+  "seedPack": "v01-core",
+  "version": "1",
+  "categories": {
+    "JAVA": "Java 基础",
+    "FRAMEWORK": "框架",
+    "MIDDLEWARE": "中间件",
+    "DESIGN": "设计模式"
+  },
+  "topics": [
+    { "externalKey": "topic-collections", "category": "JAVA", "name": "集合框架与 JDK 源码", "starLevel": 5 },
+    { "externalKey": "topic-concurrency", "category": "JAVA", "name": "并发编程", "starLevel": 5 },
+    { "externalKey": "topic-spring", "category": "FRAMEWORK", "name": "Spring 核心", "starLevel": 5 },
+    { "externalKey": "topic-redis", "category": "MIDDLEWARE", "name": "Redis", "starLevel": 5 },
+    { "externalKey": "topic-patterns", "category": "DESIGN", "name": "设计模式", "starLevel": 4 }
+  ],
+  "questions": [
+    {
+      "externalKey": "q-hashmap-why-power-of-two",
+      "topic": "topic-collections",
+      "title": "HashMap 为什么数组长度通常设计为 2 的幂？",
+      "starLevel": 5,
+      "difficulty": "MEDIUM",
+      "frequencyLevel": "VERY_HIGH",
+      "oneLiner": "为了用位运算快速定位桶，并让扩容时元素迁移更高效。",
+      "plainExplanation": "容量为 2 的幂时，可以使用 (n - 1) & hash 定位桶。",
+      "designReason": "这是性能、实现复杂度和散列分布之间的工程权衡。",
+      "answers": { "QUICK_30S": "通过 (n - 1) & hash 高效确定桶位置。", "STANDARD": "扩容后元素的新位置通常不变或增加 oldCap。", "DEEP": "分布质量仍依赖 hashCode 与扰动函数。" },
+      "followUps": ["为什么不是任意偶数？", "JDK 8 resize 时为什么不必重新计算完整 hash？"]
+    },
+    {
+      "externalKey": "q-threadpool-execute-flow",
+      "topic": "topic-concurrency",
+      "title": "ThreadPoolExecutor.execute() 的核心执行流程是什么？",
+      "starLevel": 5,
+      "difficulty": "MEDIUM",
+      "frequencyLevel": "VERY_HIGH",
+      "oneLiner": "核心线程未满先创建；否则入队；队列满后创建非核心线程；仍失败则拒绝。",
+      "plainExplanation": "线程池先平衡核心线程、队列和最大线程数。",
+      "designReason": "避免任务一多就无限创建线程。",
+      "answers": { "QUICK_30S": "先核心线程，再入队，再非核心线程，最后拒绝。", "STANDARD": "入队后还会二次检查线程池是否关闭。", "DEEP": "可沿 ctl、addWorker 和 runWorker 深入。" },
+      "followUps": ["无界队列会怎样影响 maximumPoolSize？"]
+    },
+    {
+      "externalKey": "q-spring-tx-self-invoke",
+      "topic": "topic-spring",
+      "title": "为什么同一个类内部自调用可能导致 @Transactional 失效？",
+      "starLevel": 5,
+      "difficulty": "MEDIUM",
+      "frequencyLevel": "VERY_HIGH",
+      "oneLiner": "内部 this 调用没有经过 Spring 代理对象，事务拦截器不能介入。",
+      "plainExplanation": "声明式事务通常由代理在外部调用进入目标方法前开启。",
+      "designReason": "理解调用是否经过代理，比死记失效场景更可靠。",
+      "answers": { "QUICK_30S": "this.xxx() 绕过代理，所以事务切面不执行。", "STANDARD": "拆分 Bean 可以让调用重新经过代理。", "DEEP": "可继续分析 TransactionInterceptor。" },
+      "followUps": ["改成 public 就一定生效吗？"]
+    },
+    {
+      "externalKey": "q-cache-db-consistency",
+      "topic": "topic-redis",
+      "title": "缓存和数据库一致性为什么常用更新数据库后删除缓存？",
+      "starLevel": 5,
+      "difficulty": "HARD",
+      "frequencyLevel": "VERY_HIGH",
+      "oneLiner": "数据库是事实源，写成功后失效缓存，下一次读取重建。",
+      "plainExplanation": "删除缓存比维护两份数据的主动双写更简单。",
+      "designReason": "用可接受的最终一致性换取较低的系统复杂度。",
+      "answers": { "QUICK_30S": "先更新数据库，提交成功后删除缓存。", "STANDARD": "需要考虑删除失败和并发回填。", "DEEP": "可比较延迟双删、MQ 与 CDC 的边界。" },
+      "followUps": ["删除缓存失败怎么办？"]
+    },
+    {
+      "externalKey": "q-strategy-pattern-payment",
+      "topic": "topic-patterns",
+      "title": "支付渠道为什么常用策略模式？",
+      "starLevel": 4,
+      "difficulty": "EASY",
+      "frequencyLevel": "HIGH",
+      "oneLiner": "不同渠道目标相同、实现会变化，策略模式可以隔离变化。",
+      "plainExplanation": "各渠道的参数、签名和异常处理不同。",
+      "designReason": "只有真实存在可替换规则时才使用策略模式。",
+      "answers": { "QUICK_30S": "把渠道实现分到独立策略，避免巨大 if/else。", "STANDARD": "可由 Spring 注入 Map 完成策略注册。", "DEEP": "公共流程可再和模板方法组合。" },
+      "followUps": ["策略模式会不会导致类数量过多？"]
+    }
+  ]
+}

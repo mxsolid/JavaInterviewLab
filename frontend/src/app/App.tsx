@@ -5,6 +5,7 @@ import { EmptyState } from '../components/states';
 import { ContentManagerPage } from '../features/content/ContentManagerPage';
 import { QuestionBankPage } from '../features/content/QuestionBankPage';
 import { QuestionDetailPage } from '../features/content/QuestionDetailPage';
+import { StudyPlanPage } from '../features/study/StudyPlanPage';
 
 const { Header, Content, Sider } = Layout;
 
@@ -27,10 +28,6 @@ function HomePage() {
   );
 }
 
-function PlaceholderPage() {
-  return <EmptyState description="该功能将在对应任务中实现" />;
-}
-
 export function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,7 +48,7 @@ export function App() {
         <Content className="app-content">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/study" element={<PlaceholderPage />} />
+            <Route path="/study" element={<StudyPlanPage />} />
             <Route path="/questions" element={<QuestionBankPage />} />
             <Route path="/questions/:id" element={<QuestionDetailPage />} />
             <Route path="/settings" element={<ContentManagerPage />} />

@@ -1,5 +1,5 @@
 # 复制为 application-local.yml 后按本机 PostgreSQL 配置；该文件被 Git 忽略。
-# A04 完成后移除 application.yml 中的数据源自动配置排除项，再启用以下配置。
+# 密码只从环境变量读取，禁止提交到仓库。
 spring:
   datasource:
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/java_interview_lab}

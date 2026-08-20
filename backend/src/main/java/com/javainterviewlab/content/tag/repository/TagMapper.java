@@ -1,14 +1,26 @@
 package com.javainterviewlab.content.tag.repository;
 
 import com.javainterviewlab.content.tag.dto.TagResponse;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 @Mapper
 public interface TagMapper {
-    @Select("SELECT id,code,name FROM tag ORDER BY name,id") List<TagResponse> findAll();
-    @Select("SELECT id,code,name FROM tag WHERE id=#{id}") TagResponse findById(@Param("id") Long id);
-    @Select("INSERT INTO tag(code,name) VALUES(#{code},#{name}) RETURNING id") Long insert(@Param("code") String code,@Param("name") String name);
-    @Update("UPDATE tag SET code=#{code},name=#{name} WHERE id=#{id}") int update(@Param("id") Long id,@Param("code") String code,@Param("name") String name);
-    @Select("<script>SELECT COUNT(1) FROM tag WHERE id IN <foreach collection='ids' item='id' open='(' separator=',' close=')'>#{id}</foreach></script>") int countByIds(@Param("ids") List<Long> ids);
+
+    List<TagResponse> findAll();
+
+    TagResponse findById(@Param("id") Long id);
+
+    Long insert(@Param("code") String code, @Param("name") String name);
+
+    int update(
+            @Param("id") Long id,
+            @Param("code") String code,
+            @Param("name") String name
+    );
+
+    /** 批量校验标签引用，避免逐条查询产生 N+1 访问。 */
+    int countByIds(@Param("ids") List<Long> ids);
 }

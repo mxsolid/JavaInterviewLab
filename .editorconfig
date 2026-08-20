@@ -10,5 +10,8 @@ indent_size = 4
 [*.{json,yml,yaml,md}]
 indent_size = 2
 
+[*.{ts,tsx,js,jsx,css,scss}]
+indent_size = 2
+
 [*.ps1]
 end_of_line = crlf

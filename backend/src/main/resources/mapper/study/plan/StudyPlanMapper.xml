@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.study.plan.repository.StudyPlanMapper">
+
+    <select id="findEnabledPlans" resultType="com.javainterviewlab.study.plan.dto.StudyPlanSummaryResponse">
+        SELECT id, code, name, duration_days AS "durationDays", description
+        FROM study_plan
+        WHERE status = 'ENABLED'
+        ORDER BY sort_order, id
+    </select>
+
+    <select id="findEnabledPlanById" resultType="com.javainterviewlab.study.plan.dto.StudyPlanSummaryResponse">
+        SELECT id, code, name, duration_days AS "durationDays", description
+        FROM study_plan
+        WHERE id = #{planId} AND status = 'ENABLED'
+    </select>
+
+    <select id="findDaysByPlanId" resultType="com.javainterviewlab.study.plan.repository.StudyPlanDayRow">
+        SELECT id, day_number AS "dayNumber", title, description
+        FROM study_plan_day
+        WHERE study_plan_id = #{planId}
+        ORDER BY day_number
+    </select>
+
+    <!-- 按目标类型关联已有内容；SCENARIO 在 V0.3 前没有目标表，因此保留为空标题。 -->
+    <select id="findItemsByDayId" resultType="com.javainterviewlab.study.plan.dto.StudyPlanItemResponse">
+        SELECT i.id, i.target_type AS "targetType", i.target_id AS "targetId",
+               CASE
+                   WHEN i.target_type = 'TOPIC' THEN t.name
+                   WHEN i.target_type = 'QUESTION' THEN q.title
+                   ELSE NULL
+               END AS "targetTitle",
+               i.sort_order AS "sortOrder"
+        FROM study_plan_item i
+        LEFT JOIN topic t ON i.target_type = 'TOPIC' AND t.id = i.target_id
+        LEFT JOIN question q ON i.target_type = 'QUESTION' AND q.id = i.target_id
+        WHERE i.study_plan_day_id = #{dayId}
+        ORDER BY i.sort_order, i.id
+    </select>
+
+    <select id="findDefaultProfileId" resultType="long">
+        SELECT id FROM profile WHERE is_default = TRUE
+    </select>
+
+    <select id="lockDefaultProfileId" resultType="long">
+        SELECT id FROM profile WHERE is_default = TRUE FOR UPDATE
+    </select>
+
+    <select id="findActivePlanByProfileId" resultType="com.javainterviewlab.study.plan.repository.StudyPlanMapper$CurrentPlanRow">
+        SELECT sp.id AS "planId", sp.code AS "planCode", sp.name AS "planName",
+               sp.duration_days AS "durationDays", pp.started_at AS "startedAt"
+        FROM profile_plan pp
+        JOIN study_plan sp ON sp.id = pp.study_plan_id
+        WHERE pp.profile_id = #{profileId} AND pp.active = TRUE
+    </select>
+
+    <update id="deactivateActivePlans">
+        UPDATE profile_plan
+        SET active = FALSE, updated_at = CURRENT_TIMESTAMP
+        WHERE profile_id = #{profileId} AND active = TRUE
+    </update>
+
+    <!-- 历史选择记录不删除；再次选择同一路线时重置该路线的新一轮开始时间。 -->
+    <insert id="activatePlan">
+        INSERT INTO profile_plan (profile_id, study_plan_id, started_at, selected_at, active)
+        VALUES (#{profileId}, #{planId}, #{startedAt}, CURRENT_TIMESTAMP, TRUE)
+        ON CONFLICT (profile_id, study_plan_id) DO UPDATE
+        SET started_at = EXCLUDED.started_at,
+            selected_at = EXCLUDED.selected_at,
+            active = TRUE,
+            updated_at = CURRENT_TIMESTAMP
+    </insert>
+
+    <select id="findDayByPlanIdAndDayNumber" resultType="com.javainterviewlab.study.plan.repository.StudyPlanDayRow">
+        SELECT id, day_number AS "dayNumber", title, description
+        FROM study_plan_day
+        WHERE study_plan_id = #{planId} AND day_number = #{dayNumber}
+    </select>
+
+    <!-- 系统路线内容使用数据库 upsert，重复启动或重复导入不会产生第二套路线。 -->
+    <select id="upsertPlan" resultType="long">
+        INSERT INTO study_plan (code, name, duration_days, description, sort_order, status)
+        VALUES (#{code}, #{name}, #{durationDays}, #{description}, #{sortOrder}, 'ENABLED')
+        ON CONFLICT (code) DO UPDATE
+        SET name = EXCLUDED.name,
+            duration_days = EXCLUDED.duration_days,
+            description = EXCLUDED.description,
+            sort_order = EXCLUDED.sort_order,
+            updated_at = CURRENT_TIMESTAMP
+        RETURNING id
+    </select>
+
+    <select id="upsertDay" resultType="long">
+        INSERT INTO study_plan_day (study_plan_id, day_number, title, description)
+        VALUES (#{planId}, #{dayNumber}, #{title}, #{description})
+        ON CONFLICT (study_plan_id, day_number) DO UPDATE
+        SET title = EXCLUDED.title,
+            description = EXCLUDED.description,
+            updated_at = CURRENT_TIMESTAMP
+        RETURNING id
+    </select>
+
+    <select id="findTopicIdByCode" resultType="long">
+        SELECT id FROM topic WHERE code = #{code} AND status = 'ENABLED'
+    </select>
+
+    <select id="findQuestionIdByExternalKey" resultType="long">
+        SELECT id FROM question WHERE external_key = #{externalKey} AND status = 'ENABLED'
+    </select>
+
+    <insert id="upsertItem">
+        INSERT INTO study_plan_item (study_plan_day_id, target_type, target_id, sort_order)
+        VALUES (#{dayId}, #{targetType}, #{targetId}, #{sortOrder})
+        ON CONFLICT (study_plan_day_id, target_type, target_id) DO UPDATE
+        SET sort_order = EXCLUDED.sort_order
+    </insert>
+</mapper>

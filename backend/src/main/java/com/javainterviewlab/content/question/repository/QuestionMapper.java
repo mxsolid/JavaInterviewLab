@@ -1,31 +1,57 @@
 package com.javainterviewlab.content.question.repository;
 
-import com.javainterviewlab.content.question.dto.*;
-import org.apache.ibatis.annotations.*;
+import com.javainterviewlab.content.question.dto.QuestionCreateRequest;
+import com.javainterviewlab.content.question.dto.QuestionDetailResponse;
+import com.javainterviewlab.content.question.dto.QuestionDetailRow;
+import com.javainterviewlab.content.question.dto.QuestionQuery;
+import com.javainterviewlab.content.question.dto.QuestionSummaryResponse;
+import com.javainterviewlab.content.question.dto.QuestionUpdateRequest;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 @Mapper
 public interface QuestionMapper {
-    String BASE = " FROM question q JOIN topic t ON t.id=q.topic_id JOIN category c ON c.id=t.category_id ";
-    String FILTER = "<where><if test='keyword != null and keyword != \"\"'>(q.title ILIKE CONCAT('%',#{keyword},'%') OR q.one_liner ILIKE CONCAT('%',#{keyword},'%'))</if><if test='categoryId != null'> AND c.id=#{categoryId}</if><if test='topicId != null'> AND t.id=#{topicId}</if><if test='starLevel != null'> AND q.star_level=#{starLevel}</if><if test='difficulty != null'> AND q.difficulty=#{difficulty}</if><if test='frequencyLevel != null'> AND q.frequency_level=#{frequencyLevel}</if><if test='status != null'> AND q.status=#{status}</if></where>";
-    @Select("<script>SELECT q.id,q.topic_id AS topicId,t.name AS topicName,c.id AS categoryId,c.name AS categoryName,q.title,q.star_level AS starLevel,q.difficulty,q.frequency_level AS frequencyLevel,q.status,q.one_liner AS oneLiner,q.version" + BASE + FILTER + " ORDER BY q.updated_at DESC,q.id DESC LIMIT #{limit} OFFSET #{offset}</script>")
-    List<QuestionSummaryResponse> findPage(@Param("keyword") String keyword,@Param("categoryId") Long categoryId,@Param("topicId") Long topicId,@Param("starLevel") Integer starLevel,@Param("difficulty") Object difficulty,@Param("frequencyLevel") Object frequencyLevel,@Param("status") Object status,@Param("limit") int limit,@Param("offset") int offset);
-    @Select("<script>SELECT COUNT(1)" + BASE + FILTER + "</script>")
-    long count(@Param("keyword") String keyword,@Param("categoryId") Long categoryId,@Param("topicId") Long topicId,@Param("starLevel") Integer starLevel,@Param("difficulty") Object difficulty,@Param("frequencyLevel") Object frequencyLevel,@Param("status") Object status);
-    @Select("SELECT q.id,q.topic_id AS topicId,t.name AS topicName,c.id AS categoryId,c.name AS categoryName,q.title,q.question_type AS questionType,q.star_level AS starLevel,q.difficulty,q.frequency_level AS frequencyLevel,q.origin_type AS originType,q.status,q.one_liner AS oneLiner,q.plain_explanation AS plainExplanation,q.design_reason AS designReason,q.common_mistakes AS commonMistakes,q.score_points AS scorePoints,q.version FROM question q JOIN topic t ON t.id=q.topic_id JOIN category c ON c.id=t.category_id WHERE q.id=#{id}")
+
+    List<QuestionSummaryResponse> findPage(QuestionQuery query);
+
+    long count(QuestionQuery query);
+
     QuestionDetailRow findDetail(@Param("id") Long id);
-    @Select("INSERT INTO question(topic_id,title,question_type,star_level,difficulty,frequency_level,origin_type,status,one_liner,plain_explanation,design_reason,common_mistakes,score_points) VALUES(#{topicId},#{title},#{questionType},#{starLevel},#{difficulty},#{frequencyLevel},#{originType},#{status},#{oneLiner},#{plainExplanation},#{designReason},#{commonMistakes},#{scorePoints}) RETURNING id")
-    Long insert(@Param("topicId") Long topicId,@Param("title") String title,@Param("questionType") String questionType,@Param("starLevel") Integer starLevel,@Param("difficulty") String difficulty,@Param("frequencyLevel") String frequencyLevel,@Param("originType") String originType,@Param("status") String status,@Param("oneLiner") String oneLiner,@Param("plainExplanation") String plainExplanation,@Param("designReason") String designReason,@Param("commonMistakes") String commonMistakes,@Param("scorePoints") String scorePoints);
-    @Update("UPDATE question SET topic_id=#{topicId},title=#{title},question_type=#{questionType},star_level=#{starLevel},difficulty=#{difficulty},frequency_level=#{frequencyLevel},origin_type=#{originType},status=#{status},one_liner=#{oneLiner},plain_explanation=#{plainExplanation},design_reason=#{designReason},common_mistakes=#{commonMistakes},score_points=#{scorePoints},version=version+1,updated_at=CURRENT_TIMESTAMP WHERE id=#{id} AND version=#{version}")
-    int update(@Param("id") Long id,@Param("version") Long version,@Param("topicId") Long topicId,@Param("title") String title,@Param("questionType") String questionType,@Param("starLevel") Integer starLevel,@Param("difficulty") String difficulty,@Param("frequencyLevel") String frequencyLevel,@Param("originType") String originType,@Param("status") String status,@Param("oneLiner") String oneLiner,@Param("plainExplanation") String plainExplanation,@Param("designReason") String designReason,@Param("commonMistakes") String commonMistakes,@Param("scorePoints") String scorePoints);
-    @Delete("DELETE FROM question_answer WHERE question_id=#{questionId}") void deleteAnswers(@Param("questionId") Long questionId);
-    @Delete("DELETE FROM question_follow_up WHERE question_id=#{questionId}") void deleteFollowUps(@Param("questionId") Long questionId);
-    @Delete("DELETE FROM question_tag WHERE question_id=#{questionId}") void deleteTags(@Param("questionId") Long questionId);
-    @Insert("INSERT INTO question_answer(question_id,answer_type,content,sort_order) VALUES(#{questionId},#{answerType},#{content},#{sortOrder})") void insertAnswer(@Param("questionId") Long questionId,@Param("answerType") String answerType,@Param("content") String content,@Param("sortOrder") int sortOrder);
-    @Insert("INSERT INTO question_follow_up(question_id,title,reference_answer,sort_order) VALUES(#{questionId},#{title},#{referenceAnswer},#{sortOrder})") void insertFollowUp(@Param("questionId") Long questionId,@Param("title") String title,@Param("referenceAnswer") String referenceAnswer,@Param("sortOrder") int sortOrder);
-    @Insert("INSERT INTO question_tag(question_id,tag_id) VALUES(#{questionId},#{tagId})") void insertTag(@Param("questionId") Long questionId,@Param("tagId") Long tagId);
-    @Select("SELECT t.id,t.code,t.name FROM tag t JOIN question_tag qt ON qt.tag_id=t.id WHERE qt.question_id=#{questionId} ORDER BY t.name") List<QuestionDetailResponse.TagItem> findTags(@Param("questionId") Long questionId);
-    @Select("SELECT answer_type AS answerType,content,sort_order AS sortOrder FROM question_answer WHERE question_id=#{questionId} ORDER BY sort_order,id") List<QuestionDetailResponse.AnswerItem> findAnswers(@Param("questionId") Long questionId);
-    @Select("SELECT id,title,reference_answer AS referenceAnswer,sort_order AS sortOrder FROM question_follow_up WHERE question_id=#{questionId} ORDER BY sort_order,id") List<QuestionDetailResponse.FollowUpItem> findFollowUps(@Param("questionId") Long questionId);
-    @Select("SELECT COUNT(1) FROM question WHERE id=#{id}") int countById(@Param("id") Long id);
+
+    Long insert(@Param("request") QuestionCreateRequest request);
+
+    /** 使用 version 条件更新，返回 0 代表资源不存在或已被其他编辑者修改。 */
+    int update(@Param("id") Long id, @Param("request") QuestionUpdateRequest request);
+
+    void deleteAnswers(@Param("questionId") Long questionId);
+
+    void deleteFollowUps(@Param("questionId") Long questionId);
+
+    void deleteTags(@Param("questionId") Long questionId);
+
+    void insertAnswer(
+            @Param("questionId") Long questionId,
+            @Param("answerType") String answerType,
+            @Param("content") String content,
+            @Param("sortOrder") int sortOrder
+    );
+
+    void insertFollowUp(
+            @Param("questionId") Long questionId,
+            @Param("title") String title,
+            @Param("referenceAnswer") String referenceAnswer,
+            @Param("sortOrder") int sortOrder
+    );
+
+    void insertTag(@Param("questionId") Long questionId, @Param("tagId") Long tagId);
+
+    List<QuestionDetailResponse.TagItem> findTags(@Param("questionId") Long questionId);
+
+    List<QuestionDetailResponse.AnswerItem> findAnswers(@Param("questionId") Long questionId);
+
+    List<QuestionDetailResponse.FollowUpItem> findFollowUps(@Param("questionId") Long questionId);
+
+    int countById(@Param("id") Long id);
 }

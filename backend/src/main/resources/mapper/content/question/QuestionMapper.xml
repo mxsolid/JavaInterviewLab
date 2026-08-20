@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.content.question.repository.QuestionMapper">
+
+    <sql id="questionJoin">
+        FROM question q
+        JOIN topic t ON t.id = q.topic_id
+        JOIN category c ON c.id = t.category_id
+    </sql>
+
+    <sql id="questionFilters">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (q.title ILIKE CONCAT('%', #{keyword}, '%')
+                OR q.one_liner ILIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="categoryId != null">AND c.id = #{categoryId}</if>
+            <if test="topicId != null">AND t.id = #{topicId}</if>
+            <if test="starLevel != null">AND q.star_level = #{starLevel}</if>
+            <if test="difficulty != null">AND q.difficulty = #{difficulty}</if>
+            <if test="frequencyLevel != null">AND q.frequency_level = #{frequencyLevel}</if>
+            <if test="status != null">AND q.status = #{status}</if>
+        </where>
+    </sql>
+
+    <!-- 列表只读取摘要列；排序按最近编辑优先，符合题库维护后的复查习惯。 -->
+    <select id="findPage" resultType="com.javainterviewlab.content.question.dto.QuestionSummaryResponse">
+        <bind name="limit" value="_parameter.effectivePageSize()" />
+        <bind name="offset" value="_parameter.offset()" />
+        SELECT q.id, q.topic_id AS "topicId", t.name AS "topicName",
+               c.id AS "categoryId", c.name AS "categoryName", q.title,
+               q.star_level AS "starLevel", q.difficulty,
+               q.frequency_level AS "frequencyLevel", q.status,
+               q.one_liner AS "oneLiner", q.version
+        <include refid="questionJoin" />
+        <include refid="questionFilters" />
+        ORDER BY q.updated_at DESC, q.id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        <include refid="questionJoin" />
+        <include refid="questionFilters" />
+    </select>
+
+    <select id="findDetail" resultType="com.javainterviewlab.content.question.dto.QuestionDetailRow">
+        SELECT q.id, q.topic_id AS "topicId", t.name AS "topicName",
+               c.id AS "categoryId", c.name AS "categoryName", q.title,
+               q.question_type AS "questionType", q.star_level AS "starLevel",
+               q.difficulty, q.frequency_level AS "frequencyLevel", q.origin_type AS "originType",
+               q.status, q.one_liner AS "oneLiner", q.plain_explanation AS "plainExplanation",
+               q.design_reason AS "designReason", q.common_mistakes AS "commonMistakes",
+               q.score_points AS "scorePoints", q.version
+        <include refid="questionJoin" />
+        WHERE q.id = #{id}
+    </select>
+
+    <select id="insert" resultType="long">
+        INSERT INTO question (
+            topic_id, title, question_type, star_level, difficulty, frequency_level,
+            origin_type, status, one_liner, plain_explanation, design_reason,
+            common_mistakes, score_points
+        ) VALUES (
+            #{request.topicId}, #{request.title}, #{request.effectiveQuestionType},
+            #{request.starLevel}, #{request.difficulty}, #{request.frequencyLevel},
+            #{request.effectiveOriginType}, #{request.effectiveStatus}, #{request.oneLiner},
+            #{request.plainExplanation}, #{request.designReason}, #{request.commonMistakes},
+            #{request.scorePoints}
+        ) RETURNING id
+    </select>
+
+    <!-- version 是并发边界：旧页面保存时更新行数为 0，Service 将其转换为 409。 -->
+    <update id="update">
+        UPDATE question
+        SET topic_id = #{request.topicId}, title = #{request.title},
+            question_type = #{request.effectiveQuestionType}, star_level = #{request.starLevel},
+            difficulty = #{request.difficulty}, frequency_level = #{request.frequencyLevel},
+            origin_type = #{request.effectiveOriginType}, status = #{request.effectiveStatus},
+            one_liner = #{request.oneLiner}, plain_explanation = #{request.plainExplanation},
+            design_reason = #{request.designReason}, common_mistakes = #{request.commonMistakes},
+            score_points = #{request.scorePoints}, version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id} AND version = #{request.version}
+    </update>
+
+    <delete id="deleteAnswers">DELETE FROM question_answer WHERE question_id = #{questionId}</delete>
+    <delete id="deleteFollowUps">DELETE FROM question_follow_up WHERE question_id = #{questionId}</delete>
+    <delete id="deleteTags">DELETE FROM question_tag WHERE question_id = #{questionId}</delete>
+
+    <insert id="insertAnswer">
+        INSERT INTO question_answer (question_id, answer_type, content, sort_order)
+        VALUES (#{questionId}, #{answerType}, #{content}, #{sortOrder})
+    </insert>
+
+    <insert id="insertFollowUp">
+        INSERT INTO question_follow_up (question_id, title, reference_answer, sort_order)
+        VALUES (#{questionId}, #{title}, #{referenceAnswer}, #{sortOrder})
+    </insert>
+
+    <insert id="insertTag">
+        INSERT INTO question_tag (question_id, tag_id) VALUES (#{questionId}, #{tagId})
+    </insert>
+
+    <select id="findTags" resultType="com.javainterviewlab.content.question.dto.QuestionDetailResponse$TagItem">
+        SELECT t.id, t.code, t.name
+        FROM tag t JOIN question_tag qt ON qt.tag_id = t.id
+        WHERE qt.question_id = #{questionId}
+        ORDER BY t.name
+    </select>
+
+    <select id="findAnswers" resultType="com.javainterviewlab.content.question.dto.QuestionDetailResponse$AnswerItem">
+        SELECT answer_type AS "answerType", content, sort_order AS "sortOrder"
+        FROM question_answer WHERE question_id = #{questionId}
+        ORDER BY sort_order, id
+    </select>
+
+    <select id="findFollowUps" resultType="com.javainterviewlab.content.question.dto.QuestionDetailResponse$FollowUpItem">
+        SELECT id, title, reference_answer AS "referenceAnswer", sort_order AS "sortOrder"
+        FROM question_follow_up WHERE question_id = #{questionId}
+        ORDER BY sort_order, id
+    </select>
+
+    <select id="countById" resultType="int">
+        SELECT COUNT(1) FROM question WHERE id = #{id}
+    </select>
+</mapper>

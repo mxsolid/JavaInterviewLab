@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.content.topic.repository.TopicMapper">
+
+    <sql id="topicColumns">
+        t.id, t.category_id AS "categoryId", c.name AS "categoryName", t.code, t.name,
+        t.description, t.star_level AS "starLevel", t.sort_order AS "sortOrder", t.status
+    </sql>
+
+    <!-- JOIN 分类表以直接返回学习者可见的分类名，避免前端逐项补查。 -->
+    <select id="findAll" resultType="com.javainterviewlab.content.topic.dto.TopicResponse">
+        SELECT <include refid="topicColumns" />
+        FROM topic t
+        JOIN category c ON c.id = t.category_id
+        <where>
+            <if test="categoryId != null">t.category_id = #{categoryId}</if>
+        </where>
+        ORDER BY t.sort_order, t.id
+    </select>
+
+    <select id="findById" resultType="com.javainterviewlab.content.topic.dto.TopicResponse">
+        SELECT <include refid="topicColumns" />
+        FROM topic t
+        JOIN category c ON c.id = t.category_id
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="insert" resultType="long">
+        INSERT INTO topic (category_id, code, name, description, star_level, sort_order, status)
+        VALUES (#{categoryId}, #{code}, #{name}, #{description}, #{starLevel}, #{sortOrder}, #{status})
+        RETURNING id
+    </select>
+
+    <update id="update">
+        UPDATE topic
+        SET category_id = #{categoryId}, code = #{code}, name = #{name},
+            description = #{description}, star_level = #{starLevel}, sort_order = #{sortOrder},
+            status = #{status}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <select id="countById" resultType="int">
+        SELECT COUNT(1) FROM topic WHERE id = #{id}
+    </select>
+</mapper>

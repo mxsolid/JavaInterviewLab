@@ -1,5 +1,11 @@
 # 开发变更记录
 
+## 2026-08-20 — A04 PostgreSQL 与 Flyway 基线
+
+- 新增 V0.1 内容域 V1 Flyway migration。
+- local profile 从环境变量读取数据库密码，并对已执行草案的 devdb 启用 Flyway baseline。
+- Maven 测试通过；Flyway 已在 PostgreSQL 16 的 devdb 建立版本 1 基线。
+
 ## 2026-08-20 — traceId 格式收紧
 
 - traceId 统一为 6 位大写英文字母和数字。

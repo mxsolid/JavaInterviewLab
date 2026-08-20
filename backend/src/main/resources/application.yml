@@ -3,10 +3,6 @@ spring:
     name: java-interview-lab-backend
   profiles:
     default: local
-  autoconfigure:
-    # A04 才提供可迁移的数据库基线；此前禁止空骨架因缺少数据源而无法启动。
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 
 server:
   port: ${SERVER_PORT:8080}

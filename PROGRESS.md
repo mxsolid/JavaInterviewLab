@@ -15,7 +15,7 @@
 | A01 | 初始化目录、Git、基础文档 | DONE | ★★ | 短 | 8k–20k |
 | A02 | Spring Boot 后端骨架 | DONE | ★★★ | 中 | 15k–35k |
 | A03 | React 前端骨架 + 白色主题 | DONE | ★★★ | 中 | 15k–35k |
-| A04 | PostgreSQL + Flyway 基线 | TODO | ★★★ | 中 | 15k–35k |
+| A04 | PostgreSQL + Flyway 基线 | DONE | ★★★ | 中 | 15k–35k |
 | A05 | 分类 / 专题 / 标签 API | TODO | ★★★ | 中 | 15k–35k |
 | A06 | 题目 / 多层答案 / 追问 API | TODO | ★★★★ | 中 | 20k–45k |
 | A07 | 题库管理 CRUD 页面 | TODO | ★★★★ | 中 | 20k–45k |
@@ -56,4 +56,5 @@
 
 ## 当前阻塞
 
+- A04：当前 `devdb` 已手工执行包含 V0.1～V0.3 全部表的草案 SQL；仓库 V1 仅覆盖 V0.1 内容域。现有库必须以 Flyway baseline 接管，不能直接执行 V1。
 - B01～B08：BLOCKED。开发计划要求先完成 V0.1 的 A03～A12；当前 A04～A12 仍为 TODO，不能在缺少题库和数据库基线时开始 V0.2。

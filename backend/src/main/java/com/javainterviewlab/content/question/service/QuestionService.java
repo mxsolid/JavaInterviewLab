@@ -7,12 +7,18 @@ import com.javainterviewlab.content.question.dto.QuestionAnswerRequest;
 import com.javainterviewlab.content.question.dto.QuestionContentRequest;
 import com.javainterviewlab.content.question.dto.QuestionCreateRequest;
 import com.javainterviewlab.content.question.dto.QuestionDetailResponse;
-import com.javainterviewlab.content.question.dto.QuestionDetailRow;
 import com.javainterviewlab.content.question.dto.QuestionFollowUpRequest;
 import com.javainterviewlab.content.question.dto.QuestionQuery;
 import com.javainterviewlab.content.question.dto.QuestionSummaryResponse;
 import com.javainterviewlab.content.question.dto.QuestionUpdateRequest;
 import com.javainterviewlab.content.question.repository.QuestionMapper;
+import com.javainterviewlab.content.question.repository.model.QuestionAnswerRow;
+import com.javainterviewlab.content.question.repository.model.QuestionDetailRow;
+import com.javainterviewlab.content.question.repository.model.QuestionEntity;
+import com.javainterviewlab.content.question.repository.model.QuestionFollowUpRow;
+import com.javainterviewlab.content.question.repository.model.QuestionQueryModel;
+import com.javainterviewlab.content.question.repository.model.QuestionSummaryRow;
+import com.javainterviewlab.content.question.repository.model.QuestionTagRow;
 import com.javainterviewlab.content.tag.repository.TagMapper;
 import com.javainterviewlab.content.topic.repository.TopicMapper;
 import org.slf4j.Logger;
@@ -24,7 +30,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** 维护题目主数据与子项，事务边界保证聚合内容不会只保存一部分。 */
+/**
+ * 维护题目主数据与子项。
+ *
+ * <p>题目编辑提交的是完整聚合快照，因此主表与子项替换必须在同一事务中完成，避免详情出现半更新状态。</p>
+ */
 @Service
 public class QuestionService {
 
@@ -42,8 +52,12 @@ public class QuestionService {
 
     /** 按筛选条件分页返回摘要，避免列表页读取答案正文。 */
     public PageResponse<QuestionSummaryResponse> list(QuestionQuery query) {
-        List<QuestionSummaryResponse> items = questionMapper.findPage(query);
-        long total = questionMapper.count(query);
+        QuestionQueryModel model = new QuestionQueryModel(
+                query.keyword(), query.categoryId(), query.topicId(), query.starLevel(), query.difficulty(),
+                query.frequencyLevel(), query.status(), query.effectivePageSize(), query.offset()
+        );
+        List<QuestionSummaryResponse> items = questionMapper.findPage(model).stream().map(this::toSummaryResponse).toList();
+        long total = questionMapper.count(model);
         return new PageResponse<>(items, total, query.effectivePage(), query.effectivePageSize());
     }
 
@@ -56,7 +70,7 @@ public class QuestionService {
     @Transactional
     public QuestionDetailResponse create(QuestionCreateRequest request) {
         validateContent(request);
-        Long questionId = questionMapper.insert(request);
+        Long questionId = questionMapper.insert(toEntity(null, request, null));
         replaceChildren(questionId, request);
         LOGGER.info("题目创建成功, questionId={}, topicId={}", questionId, request.topicId());
         return requireDetail(questionId);
@@ -70,7 +84,7 @@ public class QuestionService {
     @Transactional
     public QuestionDetailResponse update(Long id, QuestionUpdateRequest request) {
         validateContent(request);
-        int updated = questionMapper.update(id, request);
+        int updated = questionMapper.update(toEntity(id, request, request.version()));
         if (updated == 0) {
             if (questionMapper.countById(id) == 0) {
                 throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "题目不存在");
@@ -141,8 +155,50 @@ public class QuestionService {
                 row.id(), row.topicId(), row.topicName(), row.categoryId(), row.categoryName(), row.title(),
                 row.questionType(), row.starLevel(), row.difficulty(), row.frequencyLevel(), row.originType(),
                 row.status(), row.oneLiner(), row.plainExplanation(), row.designReason(), row.commonMistakes(),
-                row.scorePoints(), row.version(), questionMapper.findTags(id), questionMapper.findAnswers(id),
-                questionMapper.findFollowUps(id)
+                row.scorePoints(), row.version(), questionMapper.findTags(id).stream().map(this::toTagItem).toList(),
+                questionMapper.findAnswers(id).stream().map(this::toAnswerItem).toList(),
+                questionMapper.findFollowUps(id).stream().map(this::toFollowUpItem).toList()
+        );
+    }
+
+    private QuestionEntity toEntity(Long id, QuestionContentRequest request, Long version) {
+        QuestionEntity entity = new QuestionEntity();
+        entity.setId(id);
+        entity.setTopicId(request.topicId());
+        entity.setTitle(request.title());
+        entity.setQuestionType(request.effectiveQuestionType());
+        entity.setStarLevel(request.starLevel());
+        entity.setDifficulty(request.difficulty());
+        entity.setFrequencyLevel(request.frequencyLevel());
+        entity.setOriginType(request.effectiveOriginType());
+        entity.setStatus(request.effectiveStatus());
+        entity.setOneLiner(request.oneLiner());
+        entity.setPlainExplanation(request.plainExplanation());
+        entity.setDesignReason(request.designReason());
+        entity.setCommonMistakes(request.commonMistakes());
+        entity.setScorePoints(request.scorePoints());
+        entity.setVersion(version);
+        return entity;
+    }
+
+    private QuestionSummaryResponse toSummaryResponse(QuestionSummaryRow row) {
+        return new QuestionSummaryResponse(
+                row.id(), row.topicId(), row.topicName(), row.categoryId(), row.categoryName(), row.title(),
+                row.starLevel(), row.difficulty(), row.frequencyLevel(), row.status(), row.oneLiner(), row.version()
+        );
+    }
+
+    private QuestionDetailResponse.TagItem toTagItem(QuestionTagRow row) {
+        return new QuestionDetailResponse.TagItem(row.id(), row.code(), row.name());
+    }
+
+    private QuestionDetailResponse.AnswerItem toAnswerItem(QuestionAnswerRow row) {
+        return new QuestionDetailResponse.AnswerItem(row.answerType(), row.content(), row.sortOrder());
+    }
+
+    private QuestionDetailResponse.FollowUpItem toFollowUpItem(QuestionFollowUpRow row) {
+        return new QuestionDetailResponse.FollowUpItem(
+                row.id(), row.title(), row.referenceAnswer(), row.sortOrder()
         );
     }
 }

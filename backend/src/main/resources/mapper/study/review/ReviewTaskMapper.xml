@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.study.review.repository.ReviewTaskMapper">
+    <!-- 同题的新提交替代旧 pending；已完成行保留而不是 delete，保留复习历史。 -->
+    <update id="completePendingByProfileAndQuestion">
+        UPDATE review_task
+        SET status = 'COMPLETED', completed_at = #{completedAt}
+        WHERE profile_id = #{profileId} AND question_id = #{questionId} AND status = 'PENDING'
+    </update>
+
+    <!-- 部分唯一索引 uk_review_task_pending 防止绕过 Service 的并发请求产生两个 pending。 -->
+    <select id="insertPending" resultType="com.javainterviewlab.study.review.repository.model.ReviewTaskEntity">
+        INSERT INTO review_task (profile_id, question_id, due_at, status)
+        VALUES (#{entity.profileId}, #{entity.questionId}, #{entity.dueAt}, 'PENDING')
+        RETURNING id, profile_id AS "profileId", question_id AS "questionId", due_at AS "dueAt", status,
+                  created_at AS "createdAt", completed_at AS "completedAt"
+    </select>
+
+    <select id="findByProfileAndStatus" resultType="com.javainterviewlab.study.review.repository.model.ReviewTaskRow">
+        SELECT r.id, q.id AS "questionId", q.title, q.star_level AS "starLevel", r.due_at AS "dueAt", r.status
+        FROM review_task r JOIN question q ON q.id = r.question_id
+        WHERE r.profile_id = #{profileId} AND r.status = #{status} AND q.status = 'ENABLED'
+        ORDER BY r.due_at ASC, r.id ASC
+    </select>
+
+    <select id="findPendingDueBetween" resultType="com.javainterviewlab.study.review.repository.model.ReviewTaskRow">
+        SELECT r.id, q.id AS "questionId", q.title, q.star_level AS "starLevel", r.due_at AS "dueAt", r.status
+        FROM review_task r JOIN question q ON q.id = r.question_id
+        WHERE r.profile_id = #{profileId} AND r.status = 'PENDING' AND q.status = 'ENABLED'
+          AND r.due_at >= #{start} AND r.due_at &lt; #{end}
+        ORDER BY r.due_at ASC, r.id ASC
+    </select>
+</mapper>

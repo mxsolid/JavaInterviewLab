@@ -8,6 +8,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 专题创建和更新请求。
+ *
+ * <p>专题必须明确所属分类；排序和状态省略时采用可预测的默认值。</p>
+ */
 public record TopicRequest(
         @NotNull Long categoryId,
         @NotBlank @Pattern(regexp = "[a-z][a-z0-9-]{1,63}") String code,

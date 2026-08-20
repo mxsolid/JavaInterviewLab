@@ -53,7 +53,7 @@ public class SeedImportService {
             ImportCount count = importQuestions(root.path("questions"));
             seedMapper.markImported(seedPack, version);
             // 题库导入后立即解析路线目标，避免用户刷新页面或重启应用才看到每日题目。
-            studyPlanBootstrapService.ensureSystemPlans();
+            studyPlanBootstrapService.syncSystemPlans();
             LOGGER.info("种子导入完成, seedPack={}, version={}, created={}, skipped={}", seedPack, version, count.created, count.skipped);
             return new SeedImportResponse(seedPack, version, count.created, count.skipped);
         } catch (IOException exception) {

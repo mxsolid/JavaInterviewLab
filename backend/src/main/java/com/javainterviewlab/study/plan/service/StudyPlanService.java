@@ -9,42 +9,45 @@ import com.javainterviewlab.study.plan.dto.StudyPlanItemResponse;
 import com.javainterviewlab.study.plan.dto.StudyPlanSummaryResponse;
 import com.javainterviewlab.study.plan.dto.TodayStudyResponse;
 import com.javainterviewlab.study.plan.repository.StudyPlanMapper;
-import com.javainterviewlab.study.plan.repository.StudyPlanDayRow;
+import com.javainterviewlab.study.plan.repository.model.CurrentPlanRow;
+import com.javainterviewlab.study.plan.repository.model.StudyPlanDayRow;
+import com.javainterviewlab.study.plan.repository.model.StudyPlanItemRow;
+import com.javainterviewlab.study.plan.repository.model.StudyPlanRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
+import java.time.Clock;
 import java.util.List;
 
-/** 学习路线的查询和选择服务；完成度将在 B03 基于学习进度快照计算。 */
+/**
+ * 学习路线的查询和选择服务。
+ *
+ * <p>查询接口只读取 PostgreSQL；路线目录同步由应用启动和种子导入显式触发，不能让 GET 请求产生写副作用。</p>
+ */
 @Service
 public class StudyPlanService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StudyPlanService.class);
 
     private final StudyPlanMapper studyPlanMapper;
-    private final StudyPlanBootstrapService bootstrapService;
+    private final Clock clock;
 
-    public StudyPlanService(StudyPlanMapper studyPlanMapper, StudyPlanBootstrapService bootstrapService) {
+    public StudyPlanService(StudyPlanMapper studyPlanMapper, Clock clock) {
         this.studyPlanMapper = studyPlanMapper;
-        this.bootstrapService = bootstrapService;
+        this.clock = clock;
     }
 
-    /** 返回系统预设路线，首次调用时确保其已经存入 PostgreSQL。 */
+    /** 返回已由启动同步写入的系统预设路线。 */
     public List<StudyPlanSummaryResponse> listPlans() {
-        bootstrapService.ensureSystemPlans();
-        return studyPlanMapper.findEnabledPlans();
+        return studyPlanMapper.findEnabledPlans().stream().map(this::toSummaryResponse).toList();
     }
 
     /** 查询路线的逐日内容；日内关联项由数据库中的目标关系返回。 */
     public StudyPlanDetailResponse getPlan(Long planId) {
-        bootstrapService.ensureSystemPlans();
-        StudyPlanSummaryResponse plan = requirePlan(planId);
+        StudyPlanRow plan = requirePlan(planId);
         return new StudyPlanDetailResponse(
                 plan.id(), plan.code(), plan.name(), plan.durationDays(), plan.description(), findDays(plan.id())
         );
@@ -52,7 +55,6 @@ public class StudyPlanService {
 
     /** 未选择路线时返回 null，前端应展示路线选择而不是伪造学习状态。 */
     public CurrentPlanResponse getCurrentPlan() {
-        bootstrapService.ensureSystemPlans();
         Long profileId = requireDefaultProfileId();
         return toCurrentPlan(studyPlanMapper.findActivePlanByProfileId(profileId));
     }
@@ -64,13 +66,12 @@ public class StudyPlanService {
      */
     @Transactional
     public CurrentPlanResponse activatePlan(Long planId) {
-        bootstrapService.ensureSystemPlans();
         requirePlan(planId);
         Long profileId = studyPlanMapper.lockDefaultProfileId();
         if (profileId == null) {
             throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "默认学习档案不存在");
         }
-        Instant startedAt = Instant.now();
+        Instant startedAt = Instant.now(clock);
         studyPlanMapper.deactivateActivePlans(profileId);
         studyPlanMapper.activatePlan(profileId, planId, startedAt);
         CurrentPlanResponse currentPlan = toCurrentPlan(studyPlanMapper.findActivePlanByProfileId(profileId));
@@ -93,8 +94,8 @@ public class StudyPlanService {
         return new TodayStudyResponse(currentPlan, withItems(day));
     }
 
-    private StudyPlanSummaryResponse requirePlan(Long planId) {
-        StudyPlanSummaryResponse plan = studyPlanMapper.findEnabledPlanById(planId);
+    private StudyPlanRow requirePlan(Long planId) {
+        StudyPlanRow plan = studyPlanMapper.findEnabledPlanById(planId);
         if (plan == null) {
             throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "学习路线不存在或已停用");
         }
@@ -114,20 +115,29 @@ public class StudyPlanService {
     }
 
     private StudyPlanDayResponse withItems(StudyPlanDayRow day) {
-        List<StudyPlanItemResponse> items = studyPlanMapper.findItemsByDayId(day.id());
+        List<StudyPlanItemResponse> items = studyPlanMapper.findItemsByDayId(day.id()).stream()
+                .map(this::toItemResponse)
+                .toList();
         return new StudyPlanDayResponse(day.id(), day.dayNumber(), day.title(), day.description(), items);
     }
 
-    private CurrentPlanResponse toCurrentPlan(StudyPlanMapper.CurrentPlanRow row) {
+    private CurrentPlanResponse toCurrentPlan(CurrentPlanRow row) {
         if (row == null) {
             return null;
         }
-        LocalDate startedDate = row.startedAt().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate today = LocalDate.now(ZoneId.systemDefault());
-        long elapsedDays = Math.max(0, ChronoUnit.DAYS.between(startedDate, today));
-        int timeProgressDay = (int) Math.min(row.durationDays(), elapsedDays + 1);
+        int timeProgressDay = StudyPlanTimeProgressCalculator.calculate(row.startedAt(), row.durationDays(), clock);
         return new CurrentPlanResponse(
                 row.planId(), row.planCode(), row.planName(), row.durationDays(), row.startedAt(), timeProgressDay
+        );
+    }
+
+    private StudyPlanSummaryResponse toSummaryResponse(StudyPlanRow row) {
+        return new StudyPlanSummaryResponse(row.id(), row.code(), row.name(), row.durationDays(), row.description());
+    }
+
+    private StudyPlanItemResponse toItemResponse(StudyPlanItemRow row) {
+        return new StudyPlanItemResponse(
+                row.id(), row.targetType().name(), row.targetId(), row.targetTitle(), row.sortOrder()
         );
     }
 }

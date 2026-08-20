@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.study.note.repository.NoteMapper">
+    <sql id="noteColumns">
+        id, profile_id AS "profileId", target_type AS "targetType", target_id AS "targetId", content,
+        version, created_at AS "createdAt", updated_at AS "updatedAt"
+    </sql>
+
+    <select id="findByProfileAndTarget" resultType="com.javainterviewlab.study.note.repository.model.NoteEntity">
+        SELECT <include refid="noteColumns" />
+        FROM note
+        WHERE profile_id = #{profileId} AND target_type = #{targetType} AND target_id = #{targetId}
+    </select>
+
+    <select id="insert" resultType="com.javainterviewlab.study.note.repository.model.NoteEntity">
+        INSERT INTO note (profile_id, target_type, target_id, content)
+        VALUES (#{entity.profileId}, #{entity.targetType}, #{entity.targetId}, #{entity.content})
+        RETURNING <include refid="noteColumns" />
+    </select>
+
+    <!-- 低冲突笔记不占用长事务；version 不匹配时拒绝写入，避免旧页面覆盖新内容。 -->
+    <update id="updateIfVersionMatches">
+        UPDATE note
+        SET content = #{entity.content},
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{entity.id}
+          AND version = #{entity.version}
+    </update>
+
+    <select id="countById" resultType="int">
+        SELECT COUNT(1) FROM note WHERE id = #{id}
+    </select>
+
+    <select id="findById" resultType="com.javainterviewlab.study.note.repository.model.NoteEntity">
+        SELECT <include refid="noteColumns" /> FROM note WHERE id = #{id}
+    </select>
+</mapper>

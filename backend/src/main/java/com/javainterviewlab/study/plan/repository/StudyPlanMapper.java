@@ -1,29 +1,41 @@
 package com.javainterviewlab.study.plan.repository;
 
-import com.javainterviewlab.study.plan.dto.StudyPlanItemResponse;
-import com.javainterviewlab.study.plan.dto.StudyPlanSummaryResponse;
+import com.javainterviewlab.study.plan.domain.StudyPlanTargetType;
+import com.javainterviewlab.study.plan.repository.model.CurrentPlanRow;
+import com.javainterviewlab.study.plan.repository.model.StudyPlanDayRow;
+import com.javainterviewlab.study.plan.repository.model.StudyPlanItemRow;
+import com.javainterviewlab.study.plan.repository.model.StudyPlanRow;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * 学习路线表的持久化 Mapper。
+ *
+ * <p>Mapper 只返回数据库投影；每日计划、当前路线等 HTTP 响应由 Service 组装。</p>
+ */
 @Mapper
 public interface StudyPlanMapper {
 
-    List<StudyPlanSummaryResponse> findEnabledPlans();
+    /** 读取可选择的系统路线。 */
+    List<StudyPlanRow> findEnabledPlans();
 
-    StudyPlanSummaryResponse findEnabledPlanById(@Param("planId") Long planId);
+    /** 按主键读取已启用路线。 */
+    StudyPlanRow findEnabledPlanById(@Param("planId") Long planId);
 
     List<StudyPlanDayRow> findDaysByPlanId(@Param("planId") Long planId);
 
-    List<StudyPlanItemResponse> findItemsByDayId(@Param("dayId") Long dayId);
+    /** 读取单日已解析的学习目标。 */
+    List<StudyPlanItemRow> findItemsByDayId(@Param("dayId") Long dayId);
 
     Long findDefaultProfileId();
 
     /** 锁住默认 profile，使路线切换在同一 profile 内串行，避免同时产生两条 current plan。 */
     Long lockDefaultProfileId();
 
+    /** 读取当前激活路线的元信息和开始时间。 */
     CurrentPlanRow findActivePlanByProfileId(@Param("profileId") Long profileId);
 
     void deactivateActivePlans(@Param("profileId") Long profileId);
@@ -60,17 +72,11 @@ public interface StudyPlanMapper {
 
     void upsertItem(
             @Param("dayId") Long dayId,
-            @Param("targetType") String targetType,
+            @Param("targetType") StudyPlanTargetType targetType,
             @Param("targetId") Long targetId,
             @Param("sortOrder") Integer sortOrder
     );
 
-    record CurrentPlanRow(
-            Long planId,
-            String planCode,
-            String planName,
-            Integer durationDays,
-            Instant startedAt
-    ) {
-    }
+    /** 删除单日旧目标，使 catalog 删除某项后数据库不会残留失效内容。 */
+    void deleteItemsByDayId(@Param("dayId") Long dayId);
 }

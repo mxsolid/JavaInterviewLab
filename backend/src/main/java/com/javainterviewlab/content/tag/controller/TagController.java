@@ -26,16 +26,19 @@ public class TagController {
         this.tagService = tagService;
     }
 
+    /** 查询全部标签。 */
     @GetMapping
     public ApiResponse<List<TagResponse>> list() {
         return ApiResponse.success(tagService.list());
     }
 
+    /** 创建标签。 */
     @PostMapping
     public ApiResponse<TagResponse> create(@Valid @RequestBody TagRequest request) {
         return ApiResponse.success(tagService.create(request));
     }
 
+    /** 更新指定标签。 */
     @PutMapping("/{id}")
     public ApiResponse<TagResponse> update(@PathVariable Long id, @Valid @RequestBody TagRequest request) {
         return ApiResponse.success(tagService.update(id, request));

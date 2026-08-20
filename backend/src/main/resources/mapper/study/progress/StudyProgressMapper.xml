@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.study.progress.repository.StudyProgressMapper">
+    <!--
+        首次答题时 study_progress 尚不存在，FOR UPDATE 无法锁住空结果。
+        先锁定 profile 行，将同一学习档案的提交串行化；提交或回滚时由 PostgreSQL 自动释放该行锁。
+    -->
+    <select id="lockProfileForProgress" resultType="long">
+        SELECT id
+        FROM profile
+        WHERE id = #{profileId}
+        FOR UPDATE
+    </select>
+
+    <!-- 已有快照行通过行锁串行化同题提交，保证 MasteryCalculator 总以最新前态计算。 -->
+    <select id="findByProfileIdAndQuestionIdForUpdate" resultType="com.javainterviewlab.study.progress.repository.model.StudyProgressEntity">
+        SELECT id, profile_id AS "profileId", question_id AS "questionId", stage,
+               mastery_level AS "masteryLevel", attempt_count AS "attemptCount", wrong_count AS "wrongCount",
+               wrong_book_active AS "wrongBookActive", last_studied_at AS "lastStudiedAt", version,
+               created_at AS "createdAt", updated_at AS "updatedAt"
+        FROM study_progress WHERE profile_id = #{profileId} AND question_id = #{questionId} FOR UPDATE
+    </select>
+    <!-- ON CONFLICT 以数据库行原子累加，避免两个标签页各自读取旧快照后覆盖计数。 -->
+    <select id="upsertAfterAttempt" resultType="com.javainterviewlab.study.progress.repository.model.StudyProgressEntity">
+        INSERT INTO study_progress (profile_id, question_id, stage, mastery_level, attempt_count, wrong_count,
+                                    wrong_book_active, last_studied_at)
+        VALUES (#{profileId}, #{questionId}, 'PRACTICING', #{masteryLevel}, 1,
+                CASE WHEN #{wrong} THEN 1 ELSE 0 END, #{wrong}, #{now})
+        ON CONFLICT (profile_id, question_id) DO UPDATE
+        SET stage = 'PRACTICING', mastery_level = EXCLUDED.mastery_level,
+            attempt_count = study_progress.attempt_count + 1,
+            wrong_count = study_progress.wrong_count + CASE WHEN #{wrong} THEN 1 ELSE 0 END,
+            wrong_book_active = study_progress.wrong_book_active OR #{wrong},
+            last_studied_at = EXCLUDED.last_studied_at,
+            version = study_progress.version + 1, updated_at = CURRENT_TIMESTAMP
+        RETURNING id, profile_id AS "profileId", question_id AS "questionId", stage,
+                  mastery_level AS "masteryLevel", attempt_count AS "attemptCount", wrong_count AS "wrongCount",
+                  wrong_book_active AS "wrongBookActive", last_studied_at AS "lastStudiedAt", version,
+                  created_at AS "createdAt", updated_at AS "updatedAt"
+    </select>
+
+    <!-- 错题本只关联题目摘要和 progress，不复制会随题库编辑变化的正文内容。 -->
+    <select id="findActiveWrongQuestions" resultType="com.javainterviewlab.study.progress.repository.model.WrongQuestionRow">
+        SELECT q.id AS "questionId", q.title, q.star_level AS "starLevel", p.mastery_level AS "masteryLevel",
+               p.attempt_count AS "attemptCount", p.wrong_count AS "wrongCount", p.last_studied_at AS "lastStudiedAt"
+        FROM study_progress p
+        JOIN question q ON q.id = p.question_id
+        WHERE p.profile_id = #{profileId}
+          AND p.wrong_book_active = TRUE
+          AND q.status = 'ENABLED'
+        ORDER BY p.last_studied_at DESC, p.id DESC
+    </select>
+
+    <!-- resolve 是当前状态更新；之后再次答错会在 B03 UPSERT 中重新激活。 -->
+    <update id="resolveWrongBook">
+        UPDATE study_progress
+        SET wrong_book_active = FALSE,
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE profile_id = #{profileId}
+          AND question_id = #{questionId}
+          AND wrong_book_active = TRUE
+    </update>
+</mapper>

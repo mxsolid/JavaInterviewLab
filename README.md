@@ -2,7 +2,7 @@
 
 Java 后端面试学习系统。本地运行，题库内容和后续学习数据以 PostgreSQL 为唯一事实源。
 
-当前版本：V0.1。已具备分类、专题、标签、题库编辑、分层答案、追问、搜索筛选、英文发音和 JSON Seed 导入。下一阶段为 V0.2 学习闭环，尚未开始。
+当前版本：V0.2。已具备题库、学习路线、追加答题历史、掌握度、错题本、收藏、笔记、间隔复习和学习进度看板。
 
 ## 技术栈
 
@@ -52,3 +52,5 @@ npm run dev
 在管理页选择 `seeds/v01-core.json` 上传导入。接口为 `POST /api/system/seeds/import`，表单字段名为 `file`。`seedPack`、`version` 和题目 `externalKey` 保证重复导入不产生重复题目。
 
 后端测试：`mvn -B -ntp test`。IDEA 可直接运行 `JavaInterviewLabApplication`，或运行 `backend/src/test` 下的测试类。
+
+V0.2 重启后数据检查：`pwsh -File .\scripts\05_v02_reliability_check.ps1`。脚本只读取既有学习数据。

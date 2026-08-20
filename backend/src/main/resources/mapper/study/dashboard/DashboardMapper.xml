@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.study.dashboard.repository.DashboardMapper">
+    <!--
+        按启用题目左连接当前档案快照，统一统计口径：有 progress 即“已接触”，
+        五星掌握仅将 SOLID/MASTERED 计入分子。避免把全表加载到 Java 造成无谓内存和 N+1 查询。
+    -->
+    <select id="getStats" resultType="com.javainterviewlab.study.dashboard.repository.model.DashboardStatsRow">
+        SELECT COUNT(q.id) AS "totalQuestionCount",
+               COUNT(p.question_id) AS "touchedQuestionCount",
+               COUNT(p.question_id) FILTER (WHERE p.mastery_level = 'SOLID') AS "solidQuestionCount",
+               COUNT(p.question_id) FILTER (WHERE p.mastery_level = 'MASTERED') AS "masteredQuestionCount",
+               COUNT(q.id) FILTER (WHERE q.star_level = 5) AS "totalFiveStarQuestionCount",
+               COUNT(p.question_id) FILTER (WHERE q.star_level = 5 AND p.mastery_level IN ('SOLID', 'MASTERED')) AS "solidFiveStarQuestionCount",
+               COUNT(p.question_id) FILTER (WHERE p.wrong_book_active = TRUE) AS "activeWrongQuestionCount",
+               COUNT(f.id) AS "favoriteQuestionCount"
+        FROM question q
+        LEFT JOIN study_progress p ON p.question_id = q.id AND p.profile_id = #{profileId}
+        LEFT JOIN favorite f ON f.target_id = q.id AND f.profile_id = #{profileId} AND f.target_type = 'QUESTION'
+        WHERE q.status = 'ENABLED'
+    </select>
+
+    <select id="countTodayReviews" resultType="long">
+        SELECT COUNT(r.id)
+        FROM review_task r JOIN question q ON q.id = r.question_id
+        WHERE r.profile_id = #{profileId} AND r.status = 'PENDING' AND q.status = 'ENABLED'
+          AND r.due_at >= #{start} AND r.due_at &lt; #{end}
+    </select>
+
+    <select id="findRecentStudyItems" resultType="com.javainterviewlab.study.dashboard.repository.model.RecentStudyRow">
+        SELECT q.id AS "questionId", q.title, q.star_level AS "starLevel", p.mastery_level AS "masteryLevel",
+               p.last_studied_at AS "lastStudiedAt"
+        FROM study_progress p JOIN question q ON q.id = p.question_id
+        WHERE p.profile_id = #{profileId} AND q.status = 'ENABLED'
+        ORDER BY p.last_studied_at DESC, p.id DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

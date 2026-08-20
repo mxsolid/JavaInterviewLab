@@ -18,7 +18,9 @@ function DayItems({ day }: { day: StudyPlanDay }) {
         key={item.id}
         type="link"
         style={{ paddingInline: 0 }}
-        onClick={() => item.targetType === 'QUESTION' && navigate(`/questions/${item.targetId}`)}
+        onClick={() => navigate(
+          item.targetType === 'QUESTION' ? `/questions/${item.targetId}` : `/questions?topicId=${item.targetId}`,
+        )}
       >
         {item.targetType === 'TOPIC' ? '专题：' : '题目：'}{item.targetTitle ?? '关联内容'}
       </Button>
@@ -32,7 +34,7 @@ export function StudyPlanPage() {
   const plans = useQuery({ queryKey: studyQueryKeys.plans, queryFn: studyApi.plans });
   const currentPlan = useQuery({ queryKey: studyQueryKeys.currentPlan, queryFn: studyApi.currentPlan });
   const today = useQuery({ queryKey: studyQueryKeys.today, queryFn: studyApi.today });
-  const displayPlanId = selectedPlanId ?? plans.data?.[0]?.id;
+  const displayPlanId = selectedPlanId ?? currentPlan.data?.planId ?? plans.data?.[0]?.id;
   const detail = useQuery({
     queryKey: displayPlanId ? studyQueryKeys.planDetail(displayPlanId) : ['study', 'plans', 'empty'],
     queryFn: () => studyApi.plan(displayPlanId!),
@@ -46,6 +48,9 @@ export function StudyPlanPage() {
         client.invalidateQueries({ queryKey: studyQueryKeys.today }),
       ]);
       message.success('学习路线已开始');
+    },
+    onError: () => {
+      message.error('学习路线启动失败，请稍后重试');
     },
   });
 

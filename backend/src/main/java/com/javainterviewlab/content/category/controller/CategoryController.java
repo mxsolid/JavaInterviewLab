@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 
+/** 分类 HTTP 接口，只转发校验后的请求给 Service。 */
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
@@ -24,16 +25,19 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    /** 查询全部分类。 */
     @GetMapping
     public ApiResponse<List<CategoryResponse>> list() {
         return ApiResponse.success(categoryService.list());
     }
 
+    /** 创建分类。 */
     @PostMapping
     public ApiResponse<CategoryResponse> create(@Valid @RequestBody CategoryRequest request) {
         return ApiResponse.success(categoryService.create(request));
     }
 
+    /** 更新指定分类。 */
     @PutMapping("/{id}")
     public ApiResponse<CategoryResponse> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
         return ApiResponse.success(categoryService.update(id, request));

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.study.attempt.repository.QuestionAttemptMapper">
+
+    <select id="findDefaultProfileId" resultType="long">
+        SELECT id FROM profile WHERE is_default = TRUE
+    </select>
+
+    <select id="countEnabledQuestionById" resultType="int">
+        SELECT COUNT(1) FROM question WHERE id = #{questionId} AND status = 'ENABLED'
+    </select>
+
+    <!-- 唯一键是并发幂等的最终裁决；不能先 select 再 insert，否则并发窗口仍会产生重复记录。 -->
+    <select id="insertIgnore" resultType="long">
+        INSERT INTO question_attempt (
+            profile_id, question_id, client_attempt_id, answer_text, viewed_answer, self_rating, result_type, elapsed_ms
+        ) VALUES (
+            #{entity.profileId}, #{entity.questionId}, #{entity.clientAttemptId}, #{entity.answerText},
+            #{entity.viewedAnswer}, #{entity.selfRating}, #{entity.resultType}, #{entity.elapsedMs}
+        ) ON CONFLICT (profile_id, client_attempt_id) DO NOTHING
+        RETURNING id
+    </select>
+
+    <select id="findById" resultType="com.javainterviewlab.study.attempt.repository.model.QuestionAttemptEntity">
+        SELECT id, profile_id AS "profileId", question_id AS "questionId", client_attempt_id AS "clientAttemptId",
+               answer_text AS "answerText", viewed_answer AS "viewedAnswer", self_rating AS "selfRating",
+               result_type AS "resultType", elapsed_ms AS "elapsedMs", created_at AS "createdAt"
+        FROM question_attempt
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByProfileIdAndClientAttemptId" resultType="com.javainterviewlab.study.attempt.repository.model.QuestionAttemptEntity">
+        SELECT id, profile_id AS "profileId", question_id AS "questionId", client_attempt_id AS "clientAttemptId",
+               answer_text AS "answerText", viewed_answer AS "viewedAnswer", self_rating AS "selfRating",
+               result_type AS "resultType", elapsed_ms AS "elapsedMs", created_at AS "createdAt"
+        FROM question_attempt
+        WHERE profile_id = #{profileId} AND client_attempt_id = #{clientAttemptId}
+    </select>
+</mapper>

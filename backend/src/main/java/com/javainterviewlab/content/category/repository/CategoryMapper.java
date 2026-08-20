@@ -1,32 +1,24 @@
 package com.javainterviewlab.content.category.repository;
 
-import com.javainterviewlab.content.category.dto.CategoryResponse;
+import com.javainterviewlab.content.category.repository.model.CategoryEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/** 分类表的读写 Mapper，只传递持久化实体，不依赖 HTTP DTO。 */
 @Mapper
 public interface CategoryMapper {
 
-    List<CategoryResponse> findAll();
+    /** 按配置顺序读取全部分类。 */
+    List<CategoryEntity> findAll();
 
-    CategoryResponse findById(@Param("id") Long id);
+    /** 按主键读取分类，用于编辑回读和专题归属校验。 */
+    CategoryEntity findById(@Param("id") Long id);
 
-    Long insert(
-            @Param("code") String code,
-            @Param("name") String name,
-            @Param("description") String description,
-            @Param("sortOrder") Integer sortOrder,
-            @Param("status") String status
-    );
+    /** 新建分类并返回数据库生成的主键。 */
+    Long insert(@Param("entity") CategoryEntity entity);
 
-    int update(
-            @Param("id") Long id,
-            @Param("code") String code,
-            @Param("name") String name,
-            @Param("description") String description,
-            @Param("sortOrder") Integer sortOrder,
-            @Param("status") String status
-    );
+    /** 更新分类；返回零表示资源已不存在。 */
+    int update(@Param("entity") CategoryEntity entity);
 }

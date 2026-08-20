@@ -20,6 +20,15 @@ management:
 mybatis:
   mapper-locations: classpath*:mapper/**/*.xml
 
+app:
+  review:
+    interval:
+      unknown: 1d
+      seen: 3d
+      basic: 7d
+      solid: 14d
+      mastered: 30d
+
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId:-}] %logger{36} - %msg%n"

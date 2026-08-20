@@ -1,5 +1,46 @@
 # 开发变更记录
 
+## 2026-08-20 — B03-B08 V0.2 学习闭环与可靠性验收
+
+- B03：新增 V7 `study_progress`、纯 Java 掌握度计算、profile 行锁和 attempt/progress 同事务提交；同 UUID 重试不重复推进快照。
+- B04：新增 V8 `favorite`、错题查询与解决接口；错题状态只存在于 progress，默认列表隐藏停用题目。
+- B05：新增 V9 `note`、1 秒防抖前端编辑器和 version 乐观锁；冲突返回 409，保存失败不会覆盖本地输入。
+- B06：新增 V10 `review_task`、可配置固定间隔 `ReviewPolicy`；新答题完成旧 pending 后创建下一条，部分唯一索引保证同题只有一个 pending。
+- B07：首页改为 PostgreSQL 聚合 Dashboard，分开显示路线时间和真实学习进度；五星掌握率口径固定为启用五星题中 SOLID/MASTERED 的占比。
+- B08：新增掌握度、学习闭环、复习策略和事务回滚测试，以及只读重启检查脚本与验收报告。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp test` 通过，22 个测试通过；本地 PostgreSQL 16 从 V7 升级至 V10。
+- Node 22.13.0：`npm run typecheck`、`npm run build` 通过；保留既有 Vite 主包超过 500 KB 警告。
+- 已完成一次停服务后再启动的持久化检查：测试题目的 attempt、progress、favorite、note、review 均可通过 HTTP 回读；脚本位于 `scripts/05_v02_reliability_check.ps1`。
+
+## 2026-08-20 — B02 Append-only 答题记录与 UUID 幂等
+
+- 新增 Flyway V6：`question_attempt` 记录 profile、题目、客户端 UUID、答案查看状态、自评、结果类型、耗时和创建时间；对本地旧基线已存在的表采用补列迁移，保留历史数据。
+- 新增 `AttemptResultType`、答题历史 Entity/Mapper/Service/Controller 和 `POST /api/study/attempts`。
+- 同一 `profileId + clientAttemptId` 使用 PostgreSQL 唯一约束与 `ON CONFLICT DO NOTHING` 实现幂等；重复请求返回原记录，不重复写入，不记录答案正文日志。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn test` 通过，13 个测试全部通过，包含同 UUID 重试、不同 UUID、题目不存在及参数边界。
+
+## 2026-08-20 — B01.1 代码质量、注释与学习路线边界整改
+
+- content 与 study/plan 补齐关键 Controller、Service、Mapper、DTO、Entity、Row 和业务枚举的中文 Javadoc；六个既有内容枚举及新增 `StudyPlanTargetType` 均提供 `description`。
+- 新增 `repository/model` 的 Entity / Row。分类、专题、标签、题目和学习路线 Mapper 不再返回 API Response DTO，也不再接收包含页面子项的题目请求 DTO；DTO 转换集中在 Service。
+- 题目主表使用 `QuestionEntity`，列表、详情、标签、答案、追问使用只读 Row；学习路线查询同样使用 Row，REST 响应字段保持不变。
+- `syncSystemPlans()` 改由应用启动和 Seed 导入后显式执行。所有路线 GET 接口只读；同步会清理目录已删除的当日项，未知 `targetType` 抛配置错误，未解析目标记录 WARN。
+- 新增 `Clock` Bean 与路线时间进度计算器；Day 1、Day 2、超出路线封顶及未来开始时间均有单元测试。
+- 新增 Flyway V5，删除被 UNIQUE / 部分唯一索引覆盖的 V4 重复索引。
+- 学习路线页默认详情优先级调整为“用户选中 → 当前路线 → 首条路线”，专题项跳转题库专题筛选页，路线启动失败显示错误提示。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn test` 通过，11 个测试全部通过；真实 PostgreSQL `devdb` 已从 V4 迁移至 V5。
+- Node 22.13.0：`npm run typecheck`、`npm run build` 通过；Vite 仍报告既有主包超过 500 KB 警告。
+- 本地 HTTP（8080）：`/api/study/plans` 返回 3 条路线；`/api/study/current-plan` 和 `/api/study/today` 均返回 Day 1，今日包含 1 个关联项。
+
 ## 2026-08-20 — B01 学习路线 / 每日计划模型
 
 - 新增 Flyway V4：默认学习档案、学习路线、逐日计划、计划项和当前路线选择；同一档案通过部分唯一索引限制为一条 active 路线。

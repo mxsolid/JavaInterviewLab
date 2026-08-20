@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.study.favorite.repository.FavoriteMapper">
+    <select id="countEnabledQuestionById" resultType="int">
+        SELECT COUNT(1) FROM question WHERE id = #{questionId} AND status = 'ENABLED'
+    </select>
+
+    <!-- 唯一约束负责并发下的收藏幂等，不能用先查后插替代。 -->
+    <select id="insertIgnore" resultType="com.javainterviewlab.study.favorite.repository.model.FavoriteEntity">
+        INSERT INTO favorite (profile_id, target_type, target_id)
+        VALUES (#{entity.profileId}, #{entity.targetType}, #{entity.targetId})
+        ON CONFLICT (profile_id, target_type, target_id) DO NOTHING
+        RETURNING id, profile_id AS "profileId", target_type AS "targetType", target_id AS "targetId", created_at AS "createdAt"
+    </select>
+
+    <delete id="deleteByProfileAndQuestion">
+        DELETE FROM favorite
+        WHERE profile_id = #{profileId}
+          AND target_type = 'QUESTION'
+          AND target_id = #{questionId}
+    </delete>
+
+    <!-- 收藏不复制题目正文；关联查询只投影列表页需要的摘要字段。 -->
+    <select id="findEnabledQuestionFavorites" resultType="com.javainterviewlab.study.favorite.repository.model.FavoriteQuestionRow">
+        SELECT f.id AS "favoriteId", q.id AS "questionId", q.title, q.star_level AS "starLevel", f.created_at AS "createdAt"
+        FROM favorite f
+        JOIN question q ON q.id = f.target_id
+        WHERE f.profile_id = #{profileId}
+          AND f.target_type = 'QUESTION'
+          AND q.status = 'ENABLED'
+        ORDER BY f.created_at DESC, f.id DESC
+    </select>
+</mapper>

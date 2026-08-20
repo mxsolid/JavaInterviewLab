@@ -8,7 +8,7 @@
     </sql>
 
     <!-- JOIN 分类表以直接返回学习者可见的分类名，避免前端逐项补查。 -->
-    <select id="findAll" resultType="com.javainterviewlab.content.topic.dto.TopicResponse">
+    <select id="findAll" resultType="com.javainterviewlab.content.topic.repository.model.TopicEntity">
         SELECT <include refid="topicColumns" />
         FROM topic t
         JOIN category c ON c.id = t.category_id
@@ -18,7 +18,7 @@
         ORDER BY t.sort_order, t.id
     </select>
 
-    <select id="findById" resultType="com.javainterviewlab.content.topic.dto.TopicResponse">
+    <select id="findById" resultType="com.javainterviewlab.content.topic.repository.model.TopicEntity">
         SELECT <include refid="topicColumns" />
         FROM topic t
         JOIN category c ON c.id = t.category_id
@@ -27,16 +27,16 @@
 
     <select id="insert" resultType="long">
         INSERT INTO topic (category_id, code, name, description, star_level, sort_order, status)
-        VALUES (#{categoryId}, #{code}, #{name}, #{description}, #{starLevel}, #{sortOrder}, #{status})
+        VALUES (#{entity.categoryId}, #{entity.code}, #{entity.name}, #{entity.description}, #{entity.starLevel}, #{entity.sortOrder}, #{entity.status})
         RETURNING id
     </select>
 
     <update id="update">
         UPDATE topic
-        SET category_id = #{categoryId}, code = #{code}, name = #{name},
-            description = #{description}, star_level = #{starLevel}, sort_order = #{sortOrder},
-            status = #{status}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = #{id}
+        SET category_id = #{entity.categoryId}, code = #{entity.code}, name = #{entity.name},
+            description = #{entity.description}, star_level = #{entity.starLevel}, sort_order = #{entity.sortOrder},
+            status = #{entity.status}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{entity.id}
     </update>
 
     <select id="countById" resultType="int">

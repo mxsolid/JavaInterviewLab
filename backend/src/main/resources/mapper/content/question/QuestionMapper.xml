@@ -24,9 +24,7 @@
     </sql>
 
     <!-- 列表只读取摘要列；排序按最近编辑优先，符合题库维护后的复查习惯。 -->
-    <select id="findPage" resultType="com.javainterviewlab.content.question.dto.QuestionSummaryResponse">
-        <bind name="limit" value="_parameter.effectivePageSize()" />
-        <bind name="offset" value="_parameter.offset()" />
+    <select id="findPage" resultType="com.javainterviewlab.content.question.repository.model.QuestionSummaryRow">
         SELECT q.id, q.topic_id AS "topicId", t.name AS "topicName",
                c.id AS "categoryId", c.name AS "categoryName", q.title,
                q.star_level AS "starLevel", q.difficulty,
@@ -44,7 +42,7 @@
         <include refid="questionFilters" />
     </select>
 
-    <select id="findDetail" resultType="com.javainterviewlab.content.question.dto.QuestionDetailRow">
+    <select id="findDetail" resultType="com.javainterviewlab.content.question.repository.model.QuestionDetailRow">
         SELECT q.id, q.topic_id AS "topicId", t.name AS "topicName",
                c.id AS "categoryId", c.name AS "categoryName", q.title,
                q.question_type AS "questionType", q.star_level AS "starLevel",
@@ -62,26 +60,26 @@
             origin_type, status, one_liner, plain_explanation, design_reason,
             common_mistakes, score_points
         ) VALUES (
-            #{request.topicId}, #{request.title}, #{request.effectiveQuestionType},
-            #{request.starLevel}, #{request.difficulty}, #{request.frequencyLevel},
-            #{request.effectiveOriginType}, #{request.effectiveStatus}, #{request.oneLiner},
-            #{request.plainExplanation}, #{request.designReason}, #{request.commonMistakes},
-            #{request.scorePoints}
+            #{entity.topicId}, #{entity.title}, #{entity.questionType},
+            #{entity.starLevel}, #{entity.difficulty}, #{entity.frequencyLevel},
+            #{entity.originType}, #{entity.status}, #{entity.oneLiner},
+            #{entity.plainExplanation}, #{entity.designReason}, #{entity.commonMistakes},
+            #{entity.scorePoints}
         ) RETURNING id
     </select>
 
     <!-- version 是并发边界：旧页面保存时更新行数为 0，Service 将其转换为 409。 -->
     <update id="update">
         UPDATE question
-        SET topic_id = #{request.topicId}, title = #{request.title},
-            question_type = #{request.effectiveQuestionType}, star_level = #{request.starLevel},
-            difficulty = #{request.difficulty}, frequency_level = #{request.frequencyLevel},
-            origin_type = #{request.effectiveOriginType}, status = #{request.effectiveStatus},
-            one_liner = #{request.oneLiner}, plain_explanation = #{request.plainExplanation},
-            design_reason = #{request.designReason}, common_mistakes = #{request.commonMistakes},
-            score_points = #{request.scorePoints}, version = version + 1,
+        SET topic_id = #{entity.topicId}, title = #{entity.title},
+            question_type = #{entity.questionType}, star_level = #{entity.starLevel},
+            difficulty = #{entity.difficulty}, frequency_level = #{entity.frequencyLevel},
+            origin_type = #{entity.originType}, status = #{entity.status},
+            one_liner = #{entity.oneLiner}, plain_explanation = #{entity.plainExplanation},
+            design_reason = #{entity.designReason}, common_mistakes = #{entity.commonMistakes},
+            score_points = #{entity.scorePoints}, version = version + 1,
             updated_at = CURRENT_TIMESTAMP
-        WHERE id = #{id} AND version = #{request.version}
+        WHERE id = #{entity.id} AND version = #{entity.version}
     </update>
 
     <delete id="deleteAnswers">DELETE FROM question_answer WHERE question_id = #{questionId}</delete>
@@ -102,20 +100,20 @@
         INSERT INTO question_tag (question_id, tag_id) VALUES (#{questionId}, #{tagId})
     </insert>
 
-    <select id="findTags" resultType="com.javainterviewlab.content.question.dto.QuestionDetailResponse$TagItem">
+    <select id="findTags" resultType="com.javainterviewlab.content.question.repository.model.QuestionTagRow">
         SELECT t.id, t.code, t.name
         FROM tag t JOIN question_tag qt ON qt.tag_id = t.id
         WHERE qt.question_id = #{questionId}
         ORDER BY t.name
     </select>
 
-    <select id="findAnswers" resultType="com.javainterviewlab.content.question.dto.QuestionDetailResponse$AnswerItem">
+    <select id="findAnswers" resultType="com.javainterviewlab.content.question.repository.model.QuestionAnswerRow">
         SELECT answer_type AS "answerType", content, sort_order AS "sortOrder"
         FROM question_answer WHERE question_id = #{questionId}
         ORDER BY sort_order, id
     </select>
 
-    <select id="findFollowUps" resultType="com.javainterviewlab.content.question.dto.QuestionDetailResponse$FollowUpItem">
+    <select id="findFollowUps" resultType="com.javainterviewlab.content.question.repository.model.QuestionFollowUpRow">
         SELECT id, title, reference_answer AS "referenceAnswer", sort_order AS "sortOrder"
         FROM question_follow_up WHERE question_id = #{questionId}
         ORDER BY sort_order, id

@@ -72,14 +72,27 @@ class JavaInterviewLabApplicationTest {
         String categoryBody = mockMvc.perform(post("/api/categories").contentType(MediaType.APPLICATION_JSON).content(categoryJson))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true)).andReturn().getResponse().getContentAsString();
         long categoryId = ((Number) com.jayway.jsonpath.JsonPath.read(categoryBody, "$.data.id")).longValue();
+        mockMvc.perform(get("/api/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.id == " + categoryId + ")].name").value("测试分类"));
         String topicJson = "{\"categoryId\":" + categoryId + ",\"code\":\"test-" + unique + "\",\"name\":\"测试专题\",\"starLevel\":3}";
         String topicBody = mockMvc.perform(post("/api/topics").contentType(MediaType.APPLICATION_JSON).content(topicJson))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         long topicId = ((Number) com.jayway.jsonpath.JsonPath.read(topicBody, "$.data.id")).longValue();
+        mockMvc.perform(get("/api/topics").param("categoryId", String.valueOf(categoryId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(topicId))
+                .andExpect(jsonPath("$.data[0].categoryName").value("测试分类"));
         String questionJson = "{\"topicId\":" + topicId + ",\"title\":\"测试题目\",\"starLevel\":3,\"difficulty\":\"MEDIUM\",\"frequencyLevel\":\"HIGH\",\"version\":0,\"tagIds\":[],\"answers\":[{\"answerType\":\"QUICK_30S\",\"content\":\"测试答案\"}],\"followUps\":[]}";
         String questionBody = mockMvc.perform(post("/api/questions").contentType(MediaType.APPLICATION_JSON).content(questionJson))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.answers[0].content").value("测试答案")).andReturn().getResponse().getContentAsString();
         long questionId = ((Number) com.jayway.jsonpath.JsonPath.read(questionBody, "$.data.id")).longValue();
+        mockMvc.perform(get("/api/questions").param("topicId", String.valueOf(topicId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[0].id").value(questionId));
+        mockMvc.perform(get("/api/questions/{id}", questionId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.answers[0].content").value("测试答案"));
         String updateJson = questionJson.replace("\"title\":\"测试题目\"", "\"title\":\"测试题目已更新\"");
         mockMvc.perform(put("/api/questions/{id}", questionId).contentType(MediaType.APPLICATION_JSON).content(updateJson))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.version").value(1));

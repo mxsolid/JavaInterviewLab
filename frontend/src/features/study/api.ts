@@ -42,10 +42,43 @@ export interface TodayStudy {
   day: StudyPlanDay;
 }
 
+export interface WrongQuestion {
+  questionId: number;
+  title: string;
+  starLevel: number;
+  masteryLevel: string;
+  attemptCount: number;
+  wrongCount: number;
+  lastStudiedAt: string;
+}
+
+export interface FavoriteQuestion {
+  favoriteId: number;
+  questionId: number;
+  title: string;
+  starLevel: number;
+  createdAt: string;
+}
+
+export interface ReviewTask {
+  id: number;
+  questionId: number;
+  title: string;
+  starLevel: number;
+  dueAt: string;
+  status: string;
+}
+
 export const studyApi = {
   plans: () => request<StudyPlanSummary[]>('/api/study/plans'),
   plan: (planId: number) => request<StudyPlanDetail>(`/api/study/plans/${planId}`),
   activatePlan: (planId: number) => request<CurrentPlan>(`/api/study/plans/${planId}/activate`, { method: 'POST' }),
   currentPlan: () => request<CurrentPlan | null>('/api/study/current-plan'),
   today: () => request<TodayStudy | null>('/api/study/today'),
+  wrongQuestions: () => request<WrongQuestion[]>('/api/study/wrong-questions'),
+  resolveWrongQuestion: (questionId: number) => request<void>(`/api/study/questions/${questionId}/wrong-book/resolve`, { method: 'PUT' }),
+  favorites: () => request<FavoriteQuestion[]>('/api/study/favorites'),
+  favoriteQuestion: (questionId: number) => request<void>(`/api/study/favorites/questions/${questionId}`, { method: 'POST' }),
+  unfavoriteQuestion: (questionId: number) => request<void>(`/api/study/favorites/questions/${questionId}`, { method: 'DELETE' }),
+  todayReviews: () => request<ReviewTask[]>('/api/study/reviews/today'),
 };

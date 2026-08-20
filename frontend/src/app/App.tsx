@@ -1,7 +1,7 @@
 import { BookOutlined, CompassOutlined, HomeOutlined, SettingOutlined } from '@ant-design/icons';
-import { Layout, Menu, Space, Typography } from 'antd';
+import { Layout, Menu } from 'antd';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { EmptyState } from '../components/states';
+import { DashboardPage } from '../features/dashboard/DashboardPage';
 import { ContentManagerPage } from '../features/content/ContentManagerPage';
 import { QuestionBankPage } from '../features/content/QuestionBankPage';
 import { QuestionDetailPage } from '../features/content/QuestionDetailPage';
@@ -15,18 +15,6 @@ const navigationItems = [
   { key: '/questions', icon: <BookOutlined />, label: '题库' },
   { key: '/settings', icon: <SettingOutlined />, label: '管理 / 设置' },
 ];
-
-function HomePage() {
-  return (
-    <Space direction="vertical" size={20} style={{ width: '100%' }}>
-      <Typography.Title level={2} style={{ margin: 0 }}>Java 面试学习</Typography.Title>
-      <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
-        从知识地图、题库与追问开始，形成可持续扩展的面试学习资料库。
-      </Typography.Paragraph>
-      <EmptyState description="可在管理页导入 V0.1 JSON 种子，或先手动创建分类、专题和题目。" />
-    </Space>
-  );
-}
 
 export function App() {
   const location = useLocation();
@@ -47,7 +35,7 @@ export function App() {
         <Header className="app-header">面向 Java 后端面试的学习系统</Header>
         <Content className="app-content">
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<DashboardPage />} />
             <Route path="/study" element={<StudyPlanPage />} />
             <Route path="/questions" element={<QuestionBankPage />} />
             <Route path="/questions/:id" element={<QuestionDetailPage />} />

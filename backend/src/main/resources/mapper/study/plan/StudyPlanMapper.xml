@@ -2,20 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.javainterviewlab.study.plan.repository.StudyPlanMapper">
 
-    <select id="findEnabledPlans" resultType="com.javainterviewlab.study.plan.dto.StudyPlanSummaryResponse">
+    <select id="findEnabledPlans" resultType="com.javainterviewlab.study.plan.repository.model.StudyPlanRow">
         SELECT id, code, name, duration_days AS "durationDays", description
         FROM study_plan
         WHERE status = 'ENABLED'
         ORDER BY sort_order, id
     </select>
 
-    <select id="findEnabledPlanById" resultType="com.javainterviewlab.study.plan.dto.StudyPlanSummaryResponse">
+    <select id="findEnabledPlanById" resultType="com.javainterviewlab.study.plan.repository.model.StudyPlanRow">
         SELECT id, code, name, duration_days AS "durationDays", description
         FROM study_plan
         WHERE id = #{planId} AND status = 'ENABLED'
     </select>
 
-    <select id="findDaysByPlanId" resultType="com.javainterviewlab.study.plan.repository.StudyPlanDayRow">
+    <select id="findDaysByPlanId" resultType="com.javainterviewlab.study.plan.repository.model.StudyPlanDayRow">
         SELECT id, day_number AS "dayNumber", title, description
         FROM study_plan_day
         WHERE study_plan_id = #{planId}
@@ -23,7 +23,7 @@
     </select>
 
     <!-- 按目标类型关联已有内容；SCENARIO 在 V0.3 前没有目标表，因此保留为空标题。 -->
-    <select id="findItemsByDayId" resultType="com.javainterviewlab.study.plan.dto.StudyPlanItemResponse">
+    <select id="findItemsByDayId" resultType="com.javainterviewlab.study.plan.repository.model.StudyPlanItemRow">
         SELECT i.id, i.target_type AS "targetType", i.target_id AS "targetId",
                CASE
                    WHEN i.target_type = 'TOPIC' THEN t.name
@@ -46,7 +46,7 @@
         SELECT id FROM profile WHERE is_default = TRUE FOR UPDATE
     </select>
 
-    <select id="findActivePlanByProfileId" resultType="com.javainterviewlab.study.plan.repository.StudyPlanMapper$CurrentPlanRow">
+    <select id="findActivePlanByProfileId" resultType="com.javainterviewlab.study.plan.repository.model.CurrentPlanRow">
         SELECT sp.id AS "planId", sp.code AS "planCode", sp.name AS "planName",
                sp.duration_days AS "durationDays", pp.started_at AS "startedAt"
         FROM profile_plan pp
@@ -71,7 +71,7 @@
             updated_at = CURRENT_TIMESTAMP
     </insert>
 
-    <select id="findDayByPlanIdAndDayNumber" resultType="com.javainterviewlab.study.plan.repository.StudyPlanDayRow">
+    <select id="findDayByPlanIdAndDayNumber" resultType="com.javainterviewlab.study.plan.repository.model.StudyPlanDayRow">
         SELECT id, day_number AS "dayNumber", title, description
         FROM study_plan_day
         WHERE study_plan_id = #{planId} AND day_number = #{dayNumber}
@@ -114,4 +114,9 @@
         ON CONFLICT (study_plan_day_id, target_type, target_id) DO UPDATE
         SET sort_order = EXCLUDED.sort_order
     </insert>
+
+    <!-- 路线 JSON 是系统计划项的唯一事实源；清理后再写入可避免已删除项长期残留。 -->
+    <delete id="deleteItemsByDayId">
+        DELETE FROM study_plan_item WHERE study_plan_day_id = #{dayId}
+    </delete>
 </mapper>

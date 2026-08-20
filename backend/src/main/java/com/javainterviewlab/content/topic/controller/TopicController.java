@@ -27,16 +27,19 @@ public class TopicController {
         this.topicService = topicService;
     }
 
+    /** 按可选分类查询专题。 */
     @GetMapping
     public ApiResponse<List<TopicResponse>> list(@RequestParam(required = false) Long categoryId) {
         return ApiResponse.success(topicService.list(categoryId));
     }
 
+    /** 创建专题。 */
     @PostMapping
     public ApiResponse<TopicResponse> create(@Valid @RequestBody TopicRequest request) {
         return ApiResponse.success(topicService.create(request));
     }
 
+    /** 更新指定专题。 */
     @PutMapping("/{id}")
     public ApiResponse<TopicResponse> update(@PathVariable Long id, @Valid @RequestBody TopicRequest request) {
         return ApiResponse.success(topicService.update(id, request));

@@ -1,6 +1,7 @@
 package com.javainterviewlab.study.plan.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.javainterviewlab.study.plan.domain.StudyPlanTargetType;
 import com.javainterviewlab.study.plan.repository.StudyPlanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +22,6 @@ public class StudyPlanBootstrapService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StudyPlanBootstrapService.class);
     private static final String CATALOG_RESOURCE = "study/study-plans.json";
-    private static final String TOPIC_TARGET = "TOPIC";
-    private static final String QUESTION_TARGET = "QUESTION";
 
     private final ObjectMapper objectMapper;
     private final StudyPlanMapper studyPlanMapper;
@@ -33,10 +32,12 @@ public class StudyPlanBootstrapService {
     }
 
     /**
-     * 路线定义与题库内容分开导入：题库尚未导入时保留路线和天数，待题库导入后再次执行即可补齐关联项。
+     * 同步系统内置路线到数据库。
+     *
+     * <p>该方法只由应用启动和种子导入调用。路线定义与题库内容分开时，未解析项会记录告警，种子导入完成后再次同步补齐。</p>
      */
     @Transactional
-    public void ensureSystemPlans() {
+    public void syncSystemPlans() {
         PlanCatalog catalog = readCatalog();
         int unresolvedItems = 0;
         for (PlanDefinition plan : catalog.plans()) {
@@ -45,11 +46,21 @@ public class StudyPlanBootstrapService {
             );
             for (DayDefinition day : plan.days()) {
                 Long dayId = studyPlanMapper.upsertDay(planId, day.dayNumber(), day.title(), day.description());
-                for (int index = 0; index < day.items().size(); index++) {
-                    ItemDefinition item = day.items().get(index);
+                List<CatalogItem> items = day.items().stream()
+                        .map(item -> new CatalogItem(StudyPlanTargetType.fromCatalogValue(item.targetType()), item.targetKey()))
+                        .toList();
+                // 目录是路线项的唯一事实源；先清空当日旧项，才能避免 JSON 删除某项后数据库继续展示它。
+                studyPlanMapper.deleteItemsByDayId(dayId);
+                for (int index = 0; index < items.size(); index++) {
+                    CatalogItem item = items.get(index);
                     Long targetId = resolveTargetId(item);
                     if (targetId == null) {
                         unresolvedItems++;
+                        LOGGER.warn(
+                                "学习路线目标尚未解析, targetType={}, targetKey={}",
+                                item.targetType(),
+                                item.targetKey()
+                        );
                         continue;
                     }
                     studyPlanMapper.upsertItem(dayId, item.targetType(), targetId, index);
@@ -57,14 +68,16 @@ public class StudyPlanBootstrapService {
             }
         }
         if (unresolvedItems > 0) {
-            LOGGER.info("学习路线已写入，等待题库导入后补齐关联项, unresolvedItems={}", unresolvedItems);
+            LOGGER.warn("学习路线同步完成，但仍有目标等待题库导入, unresolvedItems={}", unresolvedItems);
         }
     }
 
-    private Long resolveTargetId(ItemDefinition item) {
+    private Long resolveTargetId(CatalogItem item) {
         return switch (item.targetType()) {
-            case TOPIC_TARGET -> studyPlanMapper.findTopicIdByCode(item.targetKey());
-            case QUESTION_TARGET -> studyPlanMapper.findQuestionIdByExternalKey(item.targetKey());
+            case TOPIC -> studyPlanMapper.findTopicIdByCode(item.targetKey());
+            case QUESTION -> studyPlanMapper.findQuestionIdByExternalKey(item.targetKey());
+            // 场景表在 V0.3 才建立；保留合法目录类型，但当前不能伪造 targetId。
+            case SCENARIO -> null;
             default -> null;
         };
     }
@@ -99,5 +112,9 @@ public class StudyPlanBootstrapService {
     }
 
     private record ItemDefinition(String targetType, String targetKey) {
+    }
+
+    /** 已校验类型的目录项，避免后续解析继续传播原始字符串。 */
+    private record CatalogItem(StudyPlanTargetType targetType, String targetKey) {
     }
 }

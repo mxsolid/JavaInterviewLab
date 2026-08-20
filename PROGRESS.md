@@ -71,7 +71,7 @@
 | P00 | 锁定基线、复现问题、建立验收证据 | DONE |
 | P01 | 后端稳定性与 API 契约 | DONE |
 | P02 | Seed Import V2 与完整题库 | DONE |
-| P03 | Scenario / Source / Lab 后端 | TODO |
+| P03 | Scenario / Source / Lab 后端 | DONE |
 | P04 | 前端 Design System 与 AppShell | TODO |
 | P05 | Workbench / Knowledge / Question 核心页面 | TODO |
 | P06 | Scenario / Source / Lab / Interview 页面 | TODO |
@@ -110,3 +110,6 @@
 - P02 生产 seed 使用 `v03-core-complete/2026.08.21.2`，checksum 为 `a1f91d51d5fe1dbc687770bc3d88a0822eae4f1210327741599b5a56f301a5ec`。
 - 启动包原题库有 48 道题标签重复，规范化时去重并升级版本；未放松重复标签校验。
 - 启动包 1008 条追问只有标题。生产 seed 转为 V2 对象并将 `referenceAnswer` 保持 `null`，不编造内容；importer 对真实 referenceAnswer 的写入由集成测试覆盖。
+- P03 场景包的 12 种方案定义跨 12 个场景完全一致，数据库按全局方案词典保存 12 条，通过 Case 关系驱动矩阵，避免复制 144 条同义记录。
+- P03 保留旧基线已存在的空 Scenario 表并用 V12/V13 增量升级；`scenario_attempt` 继续采用 append-only 与 `(profile_id, client_attempt_id)` 幂等约束。
+- Source 只录入 3 段项目自写教学伪代码；Interview 本阶段只提供持久化结构与 evaluator 接口，不伪造外部模型能力。

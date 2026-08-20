@@ -1,5 +1,19 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P03 Scenario / Source / Lab 后端
+
+- 新增 Flyway V12/V13，增量升级旧 Scenario 草案表，并建立场景作答、种子历史、Source、Lab 和 Interview 持久化结构。
+- 导入 `v03-scenarios-complete/2026.08.21.1`：12 个场景、60 个 Case、12 个全局方案、140 个矩阵关系；同版本重复导入按 checksum 幂等返回。
+- 新增场景列表、详情、方案矩阵和 attempt 提交 API；矩阵完全由数据库关系生成，attempt 采用 UUID 唯一约束且只追加。
+- 新增 Source 列表/详情与 3 段项目自写教学伪代码；新增 3 个 Lab 定义元数据 API。
+- Interview 建立 session/turn 表与 evaluator 接口，不接外部 LLM，不提供伪造评分。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp test` 通过，40 个测试；`mvn -B -ntp package -DskipTests` 通过。
+- 本地 HTTP：12 个场景、详情 5 个 Case/12 个方案、矩阵 15 个关系单元、Source 3 条、Lab 3 条均可读取。
+- 同一 `clientAttemptId` 连续提交首次 `duplicated=false`、第二次 `duplicated=true`；OpenAPI 包含全部 P03 路径。
+
 ## 2026-08-21 — V0.3 P02 Seed Import V2 与 336 题核心题库
 
 - 新增 Flyway V11：题目记录 `seed_pack/source_version`，新增 checksum 导入历史和专题分页复合索引。

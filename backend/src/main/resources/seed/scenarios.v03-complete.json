@@ -1,0 +1,1826 @@
+{
+  "seedPack": "v03-scenarios-complete",
+  "version": "2026.08.21.1",
+  "scenarios": [
+    {
+      "externalKey": "scenario-payment-duplicate",
+      "title": "支付重复处理",
+      "starLevel": 5,
+      "summary": "同一支付业务在请求、回调、消息和多实例链路上被重复触发",
+      "cases": [
+        {
+          "code": "A",
+          "title": "用户连续点击支付",
+          "rootCause": "前端重试/用户误操作",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "支付平台重复回调",
+          "rootCause": "第三方至少一次通知",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "网关超时客户端重试",
+          "rootCause": "客户端不知道服务端是否成功",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "MQ 重复投递支付成功事件",
+          "rootCause": "ACK 丢失/消费重试",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "两个实例并发处理同一通知",
+          "rootCause": "分布式并发竞争",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-order-timeout",
+      "title": "订单超时与支付竞态",
+      "starLevel": 5,
+      "summary": "订单关闭、支付成功、库存释放并发发生",
+      "cases": [
+        {
+          "code": "A",
+          "title": "超时任务关闭订单同时支付回调到达",
+          "rootCause": "状态迁移竞态",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "订单关闭后迟到支付成功",
+          "rootCause": "跨系统状态滞后",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "库存已释放但支付成功",
+          "rootCause": "补偿顺序错误",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "超时任务重复执行",
+          "rootCause": "调度至少一次",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "多个实例扫描同一批超时订单",
+          "rootCause": "并发扫描竞争",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-inventory-oversell",
+      "title": "库存超卖与预占",
+      "starLevel": 5,
+      "summary": "高并发扣减、取消释放和支付确认需要保持库存不变量",
+      "cases": [
+        {
+          "code": "A",
+          "title": "1000 请求同时抢最后 10 件",
+          "rootCause": "并发扣减",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "订单取消重复释放库存",
+          "rootCause": "补偿幂等",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "预占库存长时间不释放",
+          "rootCause": "超时治理",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "缓存库存与数据库不一致",
+          "rootCause": "双事实源",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "分库后全局库存统计不准",
+          "rootCause": "分片一致性",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-cache-consistency",
+      "title": "缓存与数据库一致性",
+      "starLevel": 5,
+      "summary": "Cache Aside 下处理并发回填、删除失败与多级缓存失效",
+      "cases": [
+        {
+          "code": "A",
+          "title": "更新 DB 后删缓存失败",
+          "rootCause": "部分失败",
+          "candidateSolutions": [
+            "cache-version",
+            "retry-backoff",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "先删缓存后并发读回填旧值",
+          "rootCause": "时序窗口",
+          "candidateSolutions": [
+            "cache-version",
+            "retry-backoff",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "延迟双删延迟设置不当",
+          "rootCause": "经验参数失效",
+          "candidateSolutions": [
+            "cache-version",
+            "retry-backoff",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "CDC 事件重复/乱序更新缓存",
+          "rootCause": "事件语义",
+          "candidateSolutions": [
+            "cache-version",
+            "retry-backoff",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "本地缓存未同步失效",
+          "rootCause": "多级缓存",
+          "candidateSolutions": [
+            "cache-version",
+            "retry-backoff",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-mq-reliability",
+      "title": "消息可靠投递与消费",
+      "starLevel": 5,
+      "summary": "生产、Broker、消费确认、重试和 DLQ 全链路可靠性",
+      "cases": [
+        {
+          "code": "A",
+          "title": "DB 提交后应用崩溃未发消息",
+          "rootCause": "双写不一致",
+          "candidateSolutions": [
+            "outbox",
+            "db-unique",
+            "dlq"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "生产者超时重试造成重复消息",
+          "rootCause": "不确定成功",
+          "candidateSolutions": [
+            "outbox",
+            "db-unique",
+            "dlq"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "消费者处理成功但 ACK 丢失",
+          "rootCause": "重复投递",
+          "candidateSolutions": [
+            "outbox",
+            "db-unique",
+            "dlq"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "毒消息无限重试阻塞队列",
+          "rootCause": "失败隔离缺失",
+          "candidateSolutions": [
+            "outbox",
+            "db-unique",
+            "dlq"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "分区扩容后顺序被打乱",
+          "rootCause": "局部顺序边界",
+          "candidateSolutions": [
+            "outbox",
+            "db-unique",
+            "dlq"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-flash-sale",
+      "title": "秒杀与突发流量",
+      "starLevel": 5,
+      "summary": "热点活动下保护入口、库存和核心链路",
+      "cases": [
+        {
+          "code": "A",
+          "title": "活动开始 QPS 突增 100 倍",
+          "rootCause": "突发过载",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "验证码接口成为新瓶颈",
+          "rootCause": "前置校验热点",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "Redis 热 key 打满单节点",
+          "rootCause": "热点集中",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "队列积压数百万下单请求",
+          "rootCause": "持续超载",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "活动结束大量超时订单释放",
+          "rootCause": "补偿洪峰",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-coupon",
+      "title": "优惠券领取与核销",
+      "starLevel": 5,
+      "summary": "唯一权益在领取、发放、核销、退回链路保持不变量",
+      "cases": [
+        {
+          "code": "A",
+          "title": "用户并发领取同一券",
+          "rootCause": "唯一领取",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "核销接口网络重试",
+          "rootCause": "幂等核销",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "订单取消重复退券",
+          "rootCause": "补偿幂等",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "券库存缓存与数据库不一致",
+          "rootCause": "库存双写",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "批量发券任务重跑",
+          "rootCause": "任务幂等",
+          "candidateSolutions": [
+            "db-unique",
+            "conditional-update"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-id-generation",
+      "title": "分布式 ID 与时钟回拨",
+      "starLevel": 5,
+      "summary": "多实例生成唯一有序 ID 时处理机器号与时钟风险",
+      "cases": [
+        {
+          "code": "A",
+          "title": "机器号重复配置",
+          "rootCause": "节点身份冲突",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "NTP 导致时钟回拨",
+          "rootCause": "时间单调性破坏",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "同毫秒序列耗尽",
+          "rootCause": "峰值容量",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "跨机房 ID 排序异常",
+          "rootCause": "时钟差异",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "ID 泄露业务量",
+          "rootCause": "可预测性",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-rate-limit",
+      "title": "限流、重试与雪崩",
+      "starLevel": 5,
+      "summary": "入口与下游故障时避免重试风暴和级联失败",
+      "cases": [
+        {
+          "code": "A",
+          "title": "第三方接口 2 秒超时",
+          "rootCause": "线程占用",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "三层客户端各重试 3 次",
+          "rootCause": "重试放大",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "单租户打满全局配额",
+          "rootCause": "隔离不足",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "限流器节点间计数不一致",
+          "rootCause": "分布式计数",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "恢复瞬间所有请求同时重试",
+          "rootCause": "惊群",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-file-import",
+      "title": "大文件导入与批处理",
+      "starLevel": 5,
+      "summary": "题库/CSV/JSON 大文件的校验、事务、进度与失败恢复",
+      "cases": [
+        {
+          "code": "A",
+          "title": "100MB JSON 一次读入内存",
+          "rootCause": "资源耗尽",
+          "candidateSolutions": [
+            "batch",
+            "idempotency-key",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "第 90% 数据错误导致全回滚",
+          "rootCause": "大事务成本",
+          "candidateSolutions": [
+            "batch",
+            "idempotency-key",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "重复导入旧版本覆盖新内容",
+          "rootCause": "版本语义",
+          "candidateSolutions": [
+            "batch",
+            "idempotency-key",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "部分题目已存在但内容需要更新",
+          "rootCause": "幂等与更新",
+          "candidateSolutions": [
+            "batch",
+            "idempotency-key",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "导入过程中服务重启",
+          "rootCause": "可恢复性",
+          "candidateSolutions": [
+            "batch",
+            "idempotency-key",
+            "reconcile"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-db-deadlock",
+      "title": "数据库死锁与慢事务",
+      "starLevel": 5,
+      "summary": "并发更新顺序、索引和长事务导致锁等待",
+      "cases": [
+        {
+          "code": "A",
+          "title": "两个事务反向更新订单与账户",
+          "rootCause": "锁顺序不一致",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "缺索引导致更新扫描大量行",
+          "rootCause": "锁范围扩大",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "事务内远程调用 3 秒",
+          "rootCause": "持锁过久",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "死锁异常无限立即重试",
+          "rootCause": "故障放大",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "批处理一次更新十万行",
+          "rootCause": "大事务",
+          "candidateSolutions": [
+            "idempotency-key",
+            "retry-backoff"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    },
+    {
+      "externalKey": "scenario-observability",
+      "title": "线上偶发超时定位",
+      "starLevel": 5,
+      "summary": "尾延迟、GC、SQL、连接池和下游调用需要通过观测串联",
+      "cases": [
+        {
+          "code": "A",
+          "title": "平均 50ms 但 p99 3s",
+          "rootCause": "尾延迟",
+          "candidateSolutions": [
+            "trace",
+            "retry-backoff",
+            "rate-limit"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "B",
+          "title": "CPU 正常但接口超时",
+          "rootCause": "IO/锁/下游",
+          "candidateSolutions": [
+            "trace",
+            "retry-backoff",
+            "rate-limit"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "C",
+          "title": "数据库连接池偶发耗尽",
+          "rootCause": "资源饱和",
+          "candidateSolutions": [
+            "trace",
+            "retry-backoff",
+            "rate-limit"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "D",
+          "title": "日志很多但无法关联一次请求",
+          "rootCause": "trace 缺失",
+          "candidateSolutions": [
+            "trace",
+            "retry-backoff",
+            "rate-limit"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        },
+        {
+          "code": "E",
+          "title": "健康检查 UP 但核心接口失败",
+          "rootCause": "健康语义过浅",
+          "candidateSolutions": [
+            "trace",
+            "retry-backoff",
+            "rate-limit"
+          ],
+          "expectedAnalysis": [
+            "先定义业务不变量",
+            "画出并发/失败时序",
+            "数据库约束做最终防线",
+            "明确重试与补偿边界",
+            "给出可观测与验收方法"
+          ]
+        }
+      ],
+      "solutions": [
+        {
+          "code": "idempotency-key",
+          "name": "稳定业务幂等键",
+          "principle": "稳定业务幂等键 + 持久结果回读"
+        },
+        {
+          "code": "db-unique",
+          "name": "数据库唯一约束作为最终不变量",
+          "principle": "数据库唯一约束作为最终不变量"
+        },
+        {
+          "code": "conditional-update",
+          "name": "状态机/版本号/条件更新原子推进",
+          "principle": "状态机/版本号/条件更新原子推进"
+        },
+        {
+          "code": "outbox",
+          "name": "本地事务 Outbox",
+          "principle": "本地事务 Outbox + 异步可靠发布"
+        },
+        {
+          "code": "retry-backoff",
+          "name": "有限次数指数退避",
+          "principle": "有限次数指数退避 + jitter"
+        },
+        {
+          "code": "dlq",
+          "name": "失败隔离进入死信队列并可重放",
+          "principle": "失败隔离进入死信队列并可重放"
+        },
+        {
+          "code": "rate-limit",
+          "name": "有界限流/排队/拒绝并明确维度",
+          "principle": "有界限流/排队/拒绝并明确维度"
+        },
+        {
+          "code": "cache-version",
+          "name": "缓存值携带单调版本拒绝旧事件",
+          "principle": "缓存值携带单调版本拒绝旧事件"
+        },
+        {
+          "code": "advisory-lock",
+          "name": "按业务键的事务级数据库 advisory lock",
+          "principle": "按业务键的事务级数据库 advisory lock"
+        },
+        {
+          "code": "trace",
+          "name": "traceId",
+          "principle": "traceId + 结构化日志 + RED 指标 + span"
+        },
+        {
+          "code": "batch",
+          "name": "流式解析",
+          "principle": "流式解析 + 分批事务 + checkpoint"
+        },
+        {
+          "code": "reconcile",
+          "name": "定时/事件驱动对账与可重放补偿",
+          "principle": "定时/事件驱动对账与可重放补偿"
+        }
+      ]
+    }
+  ]
+}

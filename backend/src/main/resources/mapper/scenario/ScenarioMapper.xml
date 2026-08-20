@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.scenario.repository.ScenarioMapper">
+
+    <select id="findSummaries" resultType="com.javainterviewlab.scenario.repository.model.ScenarioSummaryRow">
+        SELECT s.id, s.external_key AS "externalKey", s.title, s.summary, s.star_level AS "starLevel",
+               COUNT(DISTINCT c.id) AS "caseCount",
+               COUNT(DISTINCT a.id) AS "attemptCount"
+        FROM scenario s
+        LEFT JOIN scenario_case c ON c.scenario_id = s.id
+        LEFT JOIN scenario_attempt a ON a.scenario_id = s.id AND a.profile_id = #{profileId}
+        WHERE s.status = 'ENABLED'
+        GROUP BY s.id
+        ORDER BY s.updated_at DESC, s.id DESC
+    </select>
+
+    <select id="findEnabledById" resultType="com.javainterviewlab.scenario.repository.model.ScenarioRow">
+        SELECT id, external_key AS "externalKey", title, summary, star_level AS "starLevel",
+               origin_type AS "originType", source_version AS "sourceVersion"
+        FROM scenario
+        WHERE id = #{id} AND status = 'ENABLED'
+    </select>
+
+    <select id="findByExternalKey" resultType="com.javainterviewlab.scenario.repository.model.ScenarioRow">
+        SELECT id, external_key AS "externalKey", title, summary, star_level AS "starLevel",
+               origin_type AS "originType", source_version AS "sourceVersion"
+        FROM scenario
+        WHERE external_key = #{externalKey}
+    </select>
+
+    <select id="findCases" resultType="com.javainterviewlab.scenario.repository.model.ScenarioCaseRow">
+        SELECT id, scenario_id AS "scenarioId", code, title, root_cause AS "rootCause", prompt,
+               expected_analysis::text AS "expectedAnalysisJson", sort_order AS "sortOrder"
+        FROM scenario_case
+        WHERE scenario_id = #{scenarioId}
+        ORDER BY sort_order, id
+    </select>
+
+    <select id="findSolutions" resultType="com.javainterviewlab.scenario.repository.model.ScenarioSolutionRow">
+        SELECT id, NULL::BIGINT AS "scenarioId", code, name, principle, pros, cons,
+               boundary_text AS "boundary", sort_order AS "sortOrder"
+        FROM scenario_solution
+        ORDER BY sort_order, id
+    </select>
+
+    <select id="findMatrixCells" resultType="com.javainterviewlab.scenario.repository.model.ScenarioMatrixCellRow">
+        SELECT cs.case_id AS "caseId", cs.solution_id AS "solutionId", cs.recommendation, cs.reason,
+               cs.sort_order AS "sortOrder"
+        FROM scenario_case_solution cs
+        JOIN scenario_case c ON c.id = cs.case_id
+        WHERE c.scenario_id = #{scenarioId}
+        ORDER BY cs.case_id, cs.sort_order, cs.solution_id
+    </select>
+
+    <select id="countEnabledScenario" resultType="int">
+        SELECT COUNT(*) FROM scenario WHERE id = #{scenarioId} AND status = 'ENABLED'
+    </select>
+
+    <select id="countCaseInScenario" resultType="int">
+        SELECT COUNT(*) FROM scenario_case WHERE id = #{caseId} AND scenario_id = #{scenarioId}
+    </select>
+
+    <!-- INSERT RETURNING 使用 select 映射时必须主动清缓存，否则写后回读会命中写前空结果。 -->
+    <select id="insertAttemptIgnore" resultType="long" flushCache="true" useCache="false">
+        INSERT INTO scenario_attempt (
+            profile_id, scenario_id, case_id, client_attempt_id, answer_text,
+            self_rating, result_type, duration_seconds
+        ) VALUES (
+            #{profileId}, #{request.scenarioId}, #{request.caseId}, #{request.clientAttemptId},
+            #{request.answerText}, #{request.selfRating}, #{request.resultType}, #{request.durationSeconds}
+        )
+        ON CONFLICT (profile_id, client_attempt_id) DO NOTHING
+        RETURNING id
+    </select>
+
+    <select id="findAttempt" resultType="com.javainterviewlab.scenario.repository.model.ScenarioAttemptRow">
+        SELECT id, profile_id AS "profileId", scenario_id AS "scenarioId", case_id AS "caseId",
+               client_attempt_id AS "clientAttemptId", self_rating AS "selfRating",
+               result_type AS "resultType", duration_seconds AS "durationSeconds", created_at AS "createdAt"
+        FROM scenario_attempt
+        WHERE profile_id = #{profileId} AND client_attempt_id = #{clientAttemptId}
+    </select>
+
+    <select id="lockSeedPack" resultType="int">
+        SELECT 1
+        FROM (SELECT pg_advisory_xact_lock(hashtextextended(CONCAT('scenario-seed:', #{seedPack}), 0))) AS lock_result
+    </select>
+
+    <select id="findSeedChecksum" resultType="string">
+        SELECT checksum_sha256
+        FROM scenario_seed_history
+        WHERE seed_pack = #{seedPack} AND version = #{version}
+    </select>
+
+    <select id="insertScenario" resultType="long">
+        INSERT INTO scenario (
+            external_key, title, summary, star_level, difficulty,
+            origin_type, status, seed_pack, source_version
+        ) VALUES (
+            #{item.externalKey}, #{item.title}, #{item.summary}, #{item.starLevel}, 'HARD',
+            'IMPORTED', 'ENABLED', #{pack}, #{version}
+        )
+        RETURNING id
+    </select>
+
+    <!-- 用户创建的场景不允许被内置包按同 externalKey 覆盖。 -->
+    <update id="updateScenario">
+        UPDATE scenario
+        SET title = #{item.title}, summary = #{item.summary}, star_level = #{item.starLevel},
+            seed_pack = #{pack}, source_version = #{version}, version = scenario.version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE external_key = #{item.externalKey}
+          AND origin_type IN ('BUILTIN', 'IMPORTED')
+          AND (origin_type = 'BUILTIN' OR seed_pack = #{pack})
+    </update>
+
+    <select id="upsertCase" resultType="long">
+        INSERT INTO scenario_case (
+            scenario_id, code, title, root_cause, prompt, expected_analysis, sort_order
+        ) VALUES (
+            #{scenarioId}, #{item.code}, #{item.title}, #{item.rootCause}, #{item.title},
+            CAST(#{expectedAnalysisJson} AS JSONB), #{sortOrder}
+        )
+        ON CONFLICT (scenario_id, code) DO UPDATE
+        SET title = EXCLUDED.title,
+            root_cause = EXCLUDED.root_cause,
+            prompt = EXCLUDED.prompt,
+            expected_analysis = EXCLUDED.expected_analysis,
+            sort_order = EXCLUDED.sort_order,
+            updated_at = CURRENT_TIMESTAMP
+        RETURNING id
+    </select>
+
+    <select id="upsertSolution" resultType="long">
+        INSERT INTO scenario_solution (code, name, principle, sort_order)
+        VALUES (#{item.code}, #{item.name}, #{item.principle}, #{sortOrder})
+        ON CONFLICT (code) DO UPDATE
+        SET name = EXCLUDED.name,
+            principle = EXCLUDED.principle,
+            sort_order = EXCLUDED.sort_order,
+            updated_at = CURRENT_TIMESTAMP
+        RETURNING id
+    </select>
+
+    <delete id="deleteMatrix">
+        DELETE FROM scenario_case_solution
+        WHERE case_id IN (SELECT id FROM scenario_case WHERE scenario_id = #{scenarioId})
+    </delete>
+
+    <insert id="insertMatrixCell">
+        INSERT INTO scenario_case_solution (
+            case_id, solution_id, recommendation, sort_order
+        ) VALUES (
+            #{caseId}, #{solutionId}, 'CANDIDATE', #{sortOrder}
+        )
+    </insert>
+
+    <insert id="insertSeedHistory">
+        INSERT INTO scenario_seed_history (
+            seed_pack, version, checksum_sha256, scenario_count, case_count, solution_count
+        ) VALUES (
+            #{seedPack}, #{version}, #{checksum}, #{scenarioCount}, #{caseCount}, #{solutionCount}
+        )
+    </insert>
+</mapper>

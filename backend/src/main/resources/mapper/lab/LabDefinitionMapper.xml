@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.lab.repository.LabDefinitionMapper">
+
+    <sql id="fields">
+        id, code, title, description, algorithm, version_label AS "versionLabel",
+        initial_dataset::text AS "initialDatasetJson", config_json::text AS "configJson"
+    </sql>
+
+    <select id="findEnabled" resultType="com.javainterviewlab.lab.repository.model.LabDefinitionRow">
+        SELECT <include refid="fields" />
+        FROM lab_definition
+        WHERE status = 'ENABLED'
+        ORDER BY sort_order, id
+    </select>
+
+    <select id="findEnabledByCode" resultType="com.javainterviewlab.lab.repository.model.LabDefinitionRow">
+        SELECT <include refid="fields" />
+        FROM lab_definition
+        WHERE code = #{code} AND status = 'ENABLED'
+    </select>
+</mapper>

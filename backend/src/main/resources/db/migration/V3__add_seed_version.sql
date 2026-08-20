@@ -1,0 +1,1 @@
+ALTER TABLE seed_import ADD COLUMN version VARCHAR(64) NOT NULL DEFAULT '1';

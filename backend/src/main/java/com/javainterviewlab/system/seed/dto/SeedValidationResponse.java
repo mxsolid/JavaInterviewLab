@@ -2,18 +2,17 @@ package com.javainterviewlab.system.seed.dto;
 
 import java.util.List;
 
-/** Seed V2 导入结果；dryRun=true 时数据库不会发生写入。 */
-public record SeedImportResponse(
+/** Seed V2 校验及 dry-run 结果；计数表示在当前数据库上的预期决策。 */
+public record SeedValidationResponse(
         String seedPack,
         String version,
         String checksumSha256,
         String importMode,
-        boolean dryRun,
+        boolean valid,
         int questionCount,
         int created,
         int updated,
         int skipped,
-        long durationMs,
         List<String> warnings
 ) {
 }

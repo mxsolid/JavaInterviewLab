@@ -1,5 +1,23 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P02 Seed Import V2 与 336 题核心题库
+
+- 新增 Flyway V11：题目记录 `seed_pack/source_version`，新增 checksum 导入历史和专题分页复合索引。
+- 新增 `/api/v1/system/seeds/validate` 与 `/import?dryRun=`；保留旧 `/api/system/seeds/import`。
+- Seed V2 支持 SHA-256、INSERT_ONLY/UPSERT、同版本幂等、旧版本拒绝、同版本 checksum 冲突、10MB/5000 题边界和严格重复字段检测。
+- UPSERT 只更新 BUILTIN 或同 seed namespace 的 IMPORTED 题；数据库条件再次阻止 USER/异 namespace 覆盖。答案、追问、标签按快照替换，学习历史不删除。
+- 完整导入 commonMistakes、scorePoints、sourceVersion、answers、tags 和 followUp referenceAnswer。
+- 将 336 题生产 seed 纳入 resources。validate 发现原包 48 道题标签重复后进行内容修正，版本升级为 `2026.08.21.2` 并重算 checksum。
+- 原包 1008 条追问没有参考答案；规范化后显式保存 `referenceAnswer=null`，不为了填字段编造内容。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp test` 通过，37 个测试；`mvn -B -ntp package -DskipTests` 通过。
+- 必测覆盖首次/重复、单题升级、INSERT_ONLY、坏专题引用回滚、重复 externalKey、重复 answerType、checksum 冲突、旧包和 USER 保护。
+- 正式导入：created=336、updated=0；相同版本重复导入 created=0、updated=0、skipped=336。
+- 数据库：336 题、180 道五星、90 道 VERY_HIGH、1008 条答案、1008 条追问、624 条标签关系，要求的题目内容字段缺失 0。
+- 稳定随机抽样 30 题全部 fullFields=true、3 层答案、至少 3 条追问且有标签；EXPLAIN 命中 `idx_question_topic_status_updated`。
+
 ## 2026-08-21 — V0.3 P01 后端稳定性与 API 契约
 
 - 新增 `CurrentProfileProvider`，统一当前学习档案解析，移除答题、进度、复习、笔记、收藏、Dashboard 和路线服务中的重复默认档案查询。

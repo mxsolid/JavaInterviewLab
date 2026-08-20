@@ -70,7 +70,7 @@
 |---|---|---|
 | P00 | 锁定基线、复现问题、建立验收证据 | DONE |
 | P01 | 后端稳定性与 API 契约 | DONE |
-| P02 | Seed Import V2 与完整题库 | TODO |
+| P02 | Seed Import V2 与完整题库 | DONE |
 | P03 | Scenario / Source / Lab 后端 | TODO |
 | P04 | 前端 Design System 与 AppShell | TODO |
 | P05 | Workbench / Knowledge / Question 核心页面 | TODO |
@@ -107,3 +107,6 @@
 - P01 使用 `CurrentProfileProvider` 隔离当前档案解析；V0.3 仍由默认档案实现，后续账户上下文不进入现有业务服务。
 - 进度并发锁调整为 PostgreSQL `profile_id + question_id` 事务级 advisory lock；同题串行，不同题可并行。
 - `/api/v1/workbench` 与 `/api/v1/knowledge-map` 作为 V0.3 新契约；V0.2 `/api/dashboard` 继续兼容。
+- P02 生产 seed 使用 `v03-core-complete/2026.08.21.2`，checksum 为 `a1f91d51d5fe1dbc687770bc3d88a0822eae4f1210327741599b5a56f301a5ec`。
+- 启动包原题库有 48 道题标签重复，规范化时去重并升级版本；未放松重复标签校验。
+- 启动包 1008 条追问只有标题。生产 seed 转为 V2 对象并将 `referenceAnswer` 保持 `null`，不编造内容；importer 对真实 referenceAnswer 的写入由集成测试覆盖。

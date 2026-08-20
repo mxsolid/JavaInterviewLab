@@ -1,0 +1,31 @@
+externalKey,title,fullFields,answers,followUps,tags
+q-v03-java-language-01,== 与 equals() 有什么区别？,true,3,3,2
+q-v03-distributed-01,CAP 定理如何正确理解？,true,3,3,1
+q-v03-high-concurrency-11,突发流量与持续高流量的治理有何不同？,true,3,3,2
+q-v03-observability-11,分布式追踪采样怎么选？,true,3,3,1
+q-v03-linux-04,select、poll、epoll 的主要区别是什么？,true,3,3,2
+q-v03-spring-tx-01,同类内部自调用为什么可能让 @Transactional 失效？,true,3,3,2
+q-v03-container-k8s-02,Docker 镜像分层有什么价值？,true,3,3,2
+q-v03-spring-tx-11,幂等和事务是什么关系？,true,3,3,2
+q-v03-payment-10,优惠券重复核销如何避免？,true,3,3,2
+q-v03-jvm-08,类加载过程有哪些阶段？,true,3,3,2
+q-v03-collections-11,fail-fast 是线程安全机制吗？,true,3,3,2
+q-v03-ai-llm-07,Prompt Injection 是什么？,true,3,3,2
+q-v03-sql-index-10,什么是 MVCC？,true,3,3,2
+q-v03-algorithms-08,LRU 缓存如何 O(1) 实现？,true,3,3,2
+q-v03-sql-index-02,联合索引的最左前缀如何理解？,true,3,3,2
+q-v03-network-01,TCP 三次握手为什么是三次？,true,3,3,1
+q-v03-container-k8s-06,Pod OOMKilled 如何排查？,true,3,3,2
+q-v03-testing-10,如何设计 smoke test？,true,3,3,2
+q-v03-mybatis-02,MyBatis 一级缓存是什么范围？,true,3,3,2
+q-v03-observability-04,哪些业务字段适合作为日志字段？,true,3,3,1
+q-v03-container-k8s-07,ConfigMap 和 Secret 有什么区别？,true,3,3,2
+q-v03-collections-04,HashMap resize 为什么元素新位置只有两种？,true,3,3,2
+q-v03-redis-01,Redis 为什么快？,true,3,3,2
+q-v03-generics-reflection-11,JDK 动态代理为什么通常要求接口？,true,3,3,2
+q-v03-collections-06,ConcurrentHashMap JDK 8 如何实现高并发？,true,3,3,2
+q-v03-system-design-05,如何设计限流算法？,true,3,3,2
+q-v03-concurrency-07,线程池参数该如何估算？,true,3,3,2
+q-v03-spring-web-06,Spring Boot 自动配置原理是什么？,true,3,3,2
+q-v03-ai-llm-01,RAG 解决什么问题？,true,3,3,2
+q-v03-ai-llm-09,Spring AI 适合解决什么？,true,3,3,2

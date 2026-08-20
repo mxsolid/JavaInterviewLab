@@ -2,45 +2,135 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.javainterviewlab.system.seed.repository.SeedMapper">
 
-    <select id="questionExists" resultType="int">
-        SELECT COUNT(1) FROM question WHERE external_key = #{externalKey}
+    <!-- 同一 seedPack 的版本判断和写入必须串行，避免并发请求同时越过历史检查。 -->
+    <select id="lockSeedPack" resultType="int">
+        SELECT 1
+        FROM (SELECT pg_advisory_xact_lock(hashtextextended(CONCAT('seed:', #{seedPack}), 0))) AS lock_result
     </select>
+
+    <select id="findHistory" resultType="com.javainterviewlab.system.seed.repository.model.SeedHistoryRow">
+        SELECT seed_pack AS "seedPack", version, checksum_sha256 AS "checksumSha256",
+               import_mode AS "importMode", imported_at AS "importedAt"
+        FROM seed_import_history
+        WHERE seed_pack = #{seedPack} AND version = #{version}
+    </select>
+
+    <select id="findLatestHistory" resultType="com.javainterviewlab.system.seed.repository.model.SeedHistoryRow">
+        SELECT seed_pack AS "seedPack", version, checksum_sha256 AS "checksumSha256",
+               import_mode AS "importMode", imported_at AS "importedAt"
+        FROM seed_import_history
+        WHERE seed_pack = #{seedPack}
+        ORDER BY imported_at DESC, id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findQuestionByExternalKey" resultType="com.javainterviewlab.system.seed.repository.model.SeedQuestionRow">
+        SELECT id, origin_type AS "originType", seed_pack AS "seedPack", version
+        FROM question
+        WHERE external_key = #{externalKey}
+    </select>
+
     <select id="findTopicId" resultType="long">SELECT id FROM topic WHERE code = #{code}</select>
     <select id="findCategoryId" resultType="long">SELECT id FROM category WHERE code = #{code}</select>
 
-    <!-- 唯一 code 使重试导入能够更新元信息而不新增重复分类。 -->
     <select id="upsertCategory" resultType="long">
         INSERT INTO category (code, name, sort_order, status)
         VALUES (#{code}, #{name}, 0, 'ENABLED')
-        ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name
-        RETURNING id
-    </select>
-    <select id="upsertTopic" resultType="long">
-        INSERT INTO topic (category_id, code, name, star_level, sort_order, status)
-        VALUES (#{categoryId}, #{code}, #{name}, #{starLevel}, 0, 'ENABLED')
         ON CONFLICT (code) DO UPDATE
-        SET category_id = EXCLUDED.category_id, name = EXCLUDED.name, star_level = EXCLUDED.star_level
+        SET name = EXCLUDED.name, updated_at = CURRENT_TIMESTAMP
         RETURNING id
     </select>
+
+    <select id="upsertTopic" resultType="long">
+        INSERT INTO topic (category_id, code, external_key, name, star_level, sort_order, status)
+        VALUES (#{categoryId}, #{code}, #{code}, #{name}, #{starLevel}, 0, 'ENABLED')
+        ON CONFLICT (code) DO UPDATE
+        SET category_id = EXCLUDED.category_id,
+            external_key = COALESCE(topic.external_key, EXCLUDED.external_key),
+            name = EXCLUDED.name,
+            star_level = EXCLUDED.star_level,
+            updated_at = CURRENT_TIMESTAMP
+        RETURNING id
+    </select>
+
     <select id="insertQuestion" resultType="long">
         INSERT INTO question (
             topic_id, external_key, title, question_type, star_level, difficulty,
             frequency_level, origin_type, status, one_liner, plain_explanation,
-            design_reason, common_mistakes, score_points
+            design_reason, common_mistakes, score_points, seed_pack, source_version
         ) VALUES (
-            #{topicId}, #{externalKey}, #{title}, 'KNOWLEDGE', #{starLevel}, #{difficulty},
-            #{frequencyLevel}, 'IMPORTED', 'ENABLED', #{oneLiner}, #{plainExplanation},
-            #{designReason}, NULL, NULL
-        ) RETURNING id
+            #{topicId}, #{question.externalKey}, #{question.title}, #{question.questionType},
+            #{question.starLevel}, #{question.difficulty}, #{question.frequencyLevel},
+            #{question.originType}, #{question.status}, #{question.oneLiner},
+            #{question.plainExplanation}, #{question.designReason}, #{question.commonMistakes},
+            #{question.scorePoints}, #{seedPack}, #{question.sourceVersion}
+        )
+        RETURNING id
     </select>
+
+    <!-- USER 与异 seed namespace 的 IMPORTED 题即使 Service 判断失误也不能被更新。 -->
+    <update id="updateQuestion">
+        UPDATE question
+        SET topic_id = #{topicId},
+            title = #{question.title},
+            question_type = #{question.questionType},
+            star_level = #{question.starLevel},
+            difficulty = #{question.difficulty},
+            frequency_level = #{question.frequencyLevel},
+            status = #{question.status},
+            one_liner = #{question.oneLiner},
+            plain_explanation = #{question.plainExplanation},
+            design_reason = #{question.designReason},
+            common_mistakes = #{question.commonMistakes},
+            score_points = #{question.scorePoints},
+            seed_pack = #{seedPack},
+            source_version = #{question.sourceVersion},
+            version = version + 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE external_key = #{question.externalKey}
+          AND (
+              origin_type = 'BUILTIN'
+              OR (origin_type = 'IMPORTED' AND seed_pack = #{seedPack})
+          )
+    </update>
+
+    <delete id="deleteAnswers">DELETE FROM question_answer WHERE question_id = #{questionId}</delete>
+    <delete id="deleteFollowUps">DELETE FROM question_follow_up WHERE question_id = #{questionId}</delete>
+    <delete id="deleteTags">DELETE FROM question_tag WHERE question_id = #{questionId}</delete>
+
+    <select id="upsertTag" resultType="long">
+        INSERT INTO tag (code, name)
+        VALUES (#{code}, #{code})
+        ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name
+        RETURNING id
+    </select>
+
+    <insert id="insertQuestionTag">
+        INSERT INTO question_tag (question_id, tag_id)
+        VALUES (#{questionId}, #{tagId})
+    </insert>
+
     <insert id="insertAnswer">
         INSERT INTO question_answer (question_id, answer_type, content, sort_order)
         VALUES (#{questionId}, #{answerType}, #{content}, #{sortOrder})
     </insert>
+
     <insert id="insertFollowUp">
-        INSERT INTO question_follow_up (question_id, title, sort_order)
-        VALUES (#{questionId}, #{title}, #{sortOrder})
+        INSERT INTO question_follow_up (question_id, title, reference_answer, sort_order)
+        VALUES (#{questionId}, #{title}, #{referenceAnswer}, #{sortOrder})
     </insert>
+
+    <insert id="insertHistory">
+        INSERT INTO seed_import_history (
+            seed_pack, version, checksum_sha256, import_mode, status,
+            created_count, updated_count, skipped_count, error_count, duration_ms
+        ) VALUES (
+            #{seedPack}, #{version}, #{checksum}, #{importMode}, 'SUCCESS',
+            #{created}, #{updated}, #{skipped}, 0, #{durationMs}
+        )
+    </insert>
+
+    <!-- 保留 V0.1 seed_import 最新版本表，旧诊断和兼容接口仍可读取。 -->
     <insert id="markImported">
         INSERT INTO seed_import (seed_pack, version, imported_at)
         VALUES (#{seedPack}, #{version}, CURRENT_TIMESTAMP)

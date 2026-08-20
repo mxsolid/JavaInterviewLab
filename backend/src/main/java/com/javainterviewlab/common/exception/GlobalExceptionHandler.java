@@ -12,6 +12,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -51,6 +52,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleMessageNotReadable(HttpMessageNotReadableException exception) {
         return response(ApiErrorCode.REQUEST_BODY_INVALID, ApiErrorCode.REQUEST_BODY_INVALID.getDefaultMessage(), null);
+    }
+
+    /** 上传层先于 Controller 解析 multipart，超限也必须返回稳定的内容校验错误。 */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceeded(
+            MaxUploadSizeExceededException exception
+    ) {
+        return response(ApiErrorCode.CONTENT_VALIDATION_FAILED, "种子文件不能超过 10MB", null);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

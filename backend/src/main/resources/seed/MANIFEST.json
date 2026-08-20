@@ -1,0 +1,11 @@
+{
+  "seedPack": "v03-core-complete",
+  "version": "2026.08.21.2",
+  "questionCount": 336,
+  "topicCount": 28,
+  "categoryCount": 16,
+  "star5Count": 180,
+  "veryHighCount": 90,
+  "sha256": "a1f91d51d5fe1dbc687770bc3d88a0822eae4f1210327741599b5a56f301a5ec",
+  "note": "V2 规范化：补齐 mode/questionType/originType/status，去除重复标签；旧字符串追问转为对象，缺失的 referenceAnswer 保持 null，不编造内容。"
+}

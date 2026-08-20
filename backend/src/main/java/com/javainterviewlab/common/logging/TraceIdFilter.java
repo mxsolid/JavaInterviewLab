@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 /**
@@ -22,7 +22,9 @@ public class TraceIdFilter extends OncePerRequestFilter {
 
     public static final String TRACE_ID_HEADER = "X-Trace-Id";
 
-    private static final Pattern TRACE_ID_PATTERN = Pattern.compile("[A-Za-z0-9._-]{1,128}");
+    private static final int TRACE_ID_LENGTH = 6;
+    private static final String TRACE_ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final Pattern TRACE_ID_PATTERN = Pattern.compile("[A-Za-z0-9]{" + TRACE_ID_LENGTH + "}");
 
     @Override
     protected void doFilterInternal(
@@ -45,6 +47,11 @@ public class TraceIdFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(requestedTraceId) && TRACE_ID_PATTERN.matcher(requestedTraceId).matches()) {
             return requestedTraceId;
         }
-        return UUID.randomUUID().toString();
+        StringBuilder traceId = new StringBuilder(TRACE_ID_LENGTH);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        for (int index = 0; index < TRACE_ID_LENGTH; index++) {
+            traceId.append(TRACE_ID_ALPHABET.charAt(random.nextInt(TRACE_ID_ALPHABET.length())));
+        }
+        return traceId.toString();
     }
 }

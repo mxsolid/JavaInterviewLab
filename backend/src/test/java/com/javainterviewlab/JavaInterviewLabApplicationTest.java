@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 验证骨架阶段必须可启动，并且健康检查、traceId 和统一异常响应已接通。
@@ -26,7 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(JavaInterviewLabApplicationTest.TestFailureController.class)
 class JavaInterviewLabApplicationTest {
 
-    private static final String TEST_TRACE_ID = "test-trace-001";
+    private static final String TEST_TRACE_ID = "Ab12Cd";
+    private static final String TRACE_ID_PATTERN = "[A-Za-z0-9]{6}";
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,6 +48,16 @@ class JavaInterviewLabApplicationTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("BUSINESS_RULE_VIOLATED"))
                 .andExpect(jsonPath("$.traceId").isNotEmpty());
+    }
+
+    @Test
+    void missingFaviconShouldReturnNormalNotFoundResponse() throws Exception {
+        mockMvc.perform(get("/favicon.ico").header("X-Trace-Id", "invalid-trace-id"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(result -> assertThat(result.getResponse().getHeader("X-Trace-Id"))
+                        .matches(TRACE_ID_PATTERN));
     }
 
     @TestConfiguration

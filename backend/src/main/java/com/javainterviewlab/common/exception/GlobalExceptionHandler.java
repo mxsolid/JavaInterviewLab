@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,6 +50,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleMessageNotReadable(HttpMessageNotReadableException exception) {
         return response(ApiErrorCode.REQUEST_BODY_INVALID, ApiErrorCode.REQUEST_BODY_INVALID.getDefaultMessage(), null);
+    }
+
+    /**
+     * 浏览器会自动请求 favicon.ico；未提供静态资源属于正常 404，不应进入未处理异常日志。
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException exception) {
+        return response(ApiErrorCode.RESOURCE_NOT_FOUND, ApiErrorCode.RESOURCE_NOT_FOUND.getDefaultMessage(), null);
     }
 
     @ExceptionHandler(Exception.class)

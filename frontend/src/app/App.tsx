@@ -2,6 +2,9 @@ import { BookOutlined, CompassOutlined, HomeOutlined, SettingOutlined } from '@a
 import { Layout, Menu, Space, Typography } from 'antd';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { EmptyState } from '../components/states';
+import { ContentManagerPage } from '../features/content/ContentManagerPage';
+import { QuestionBankPage } from '../features/content/QuestionBankPage';
+import { QuestionDetailPage } from '../features/content/QuestionDetailPage';
 
 const { Header, Content, Sider } = Layout;
 
@@ -17,9 +20,9 @@ function HomePage() {
     <Space direction="vertical" size={20} style={{ width: '100%' }}>
       <Typography.Title level={2} style={{ margin: 0 }}>Java 面试学习</Typography.Title>
       <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
-        题库与学习数据将在后续任务接入 PostgreSQL。
+        从知识地图、题库与追问开始，形成可持续扩展的面试学习资料库。
       </Typography.Paragraph>
-      <EmptyState description="题库内容尚未导入" />
+      <EmptyState description="可在管理页导入 V0.1 JSON 种子，或先手动创建分类、专题和题目。" />
     </Space>
   );
 }
@@ -49,8 +52,9 @@ export function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/study" element={<PlaceholderPage />} />
-            <Route path="/questions" element={<PlaceholderPage />} />
-            <Route path="/settings" element={<PlaceholderPage />} />
+            <Route path="/questions" element={<QuestionBankPage />} />
+            <Route path="/questions/:id" element={<QuestionDetailPage />} />
+            <Route path="/settings" element={<ContentManagerPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Content>

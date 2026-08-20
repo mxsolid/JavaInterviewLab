@@ -2,7 +2,7 @@
 
 Java 后端面试学习系统。本地运行，题库内容和后续学习数据以 PostgreSQL 为唯一事实源。
 
-当前版本：V0.2。已具备题库、学习路线、追加答题历史、掌握度、错题本、收藏、笔记、间隔复习和学习进度看板。
+当前版本：V0.2.1。已具备题库、学习路线、追加答题历史、掌握度、错题本、收藏、笔记、间隔复习和学习进度看板；重复提交可回读当前状态，逾期复习不会跨天消失。
 
 ## 技术栈
 
@@ -51,6 +51,17 @@ npm run dev
 
 在管理页选择 `seeds/v01-core.json` 上传导入。接口为 `POST /api/system/seeds/import`，表单字段名为 `file`。`seedPack`、`version` 和题目 `externalKey` 保证重复导入不产生重复题目。
 
-后端测试：`mvn -B -ntp test`。IDEA 可直接运行 `JavaInterviewLabApplication`，或运行 `backend/src/test` 下的测试类。
+后端测试：`mvn -B -ntp clean test`。IDEA 可直接运行 `JavaInterviewLabApplication`，或运行 `backend/src/test` 下的测试类。
 
 V0.2 重启后数据检查：`pwsh -File .\scripts\05_v02_reliability_check.ps1`。脚本只读取既有学习数据。
+
+V0.2.1 新增接口：`GET /api/study/reviews/due`、`GET /api/study/questions/{questionId}/progress`。`POST /api/study/attempts` 的响应含 `duplicated`，相同 `clientAttemptId` 不重复推进学习状态。
+
+## V0.2.1 前端学习闭环
+
+- 首页、学习路线、题库、题目详情、复习中心和管理页共用白色教育产品 Token、圆角卡片和轻阴影。
+- 题目默认进入练习模式：自己作答 → 查看答案 → 选择四档结果 → 自评 → 提交。成功后显示掌握度、练习次数和下次复习；网络重试复用同一 UUID。
+- `/review` 提供待复习、错题本、收藏三个真实数据 Tab。待复习按“逾期加今日”展示。
+- 笔记采用串行防抖保存，只有服务端 `VERSION_CONFLICT` 才提示跨页面版本冲突。
+
+前端与端到端验收记录见 `docs/25_V0.2.1前端与端到端验收报告.md`。

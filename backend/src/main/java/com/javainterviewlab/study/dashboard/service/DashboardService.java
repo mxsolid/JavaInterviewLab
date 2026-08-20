@@ -65,6 +65,7 @@ public class DashboardService {
                 currentPlan == null ? null : currentPlan.durationDays(),
                 todayStudy == null ? 0 : todayStudy.day().items().size(),
                 dashboardMapper.countTodayReviews(profileId, start, end),
+                dashboardMapper.countDueReviews(profileId, end),
                 stats.totalQuestionCount(),
                 stats.touchedQuestionCount(),
                 stats.solidQuestionCount(),

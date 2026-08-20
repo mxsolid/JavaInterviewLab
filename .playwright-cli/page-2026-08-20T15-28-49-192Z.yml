@@ -1,0 +1,37 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - text: Java Interview Lab
+        - generic [ref=e7]: Java 后端面试学习系统
+      - menu [ref=e8]:
+        - menuitem "home 首页" [ref=e9] [cursor=pointer]:
+          - img "home" [ref=e10]
+          - generic [ref=e13]: 首页
+        - menuitem "compass 开始学习" [ref=e14] [cursor=pointer]:
+          - img "compass" [ref=e15]
+          - generic [ref=e18]: 开始学习
+        - menuitem "book 题库" [ref=e19] [cursor=pointer]:
+          - img "book" [ref=e20]
+          - generic [ref=e23]: 题库
+        - menuitem "undo 复习中心" [active] [ref=e24] [cursor=pointer]:
+          - img "undo" [ref=e25]
+          - generic [ref=e28]: 复习中心
+        - menuitem "setting 管理 / 设置" [ref=e29] [cursor=pointer]:
+          - img "setting" [ref=e30]
+          - generic [ref=e33]: 管理 / 设置
+  - generic [ref=e34]:
+    - banner [ref=e35]: 面向 Java 后端面试的学习系统
+    - main [ref=e36]:
+      - generic [ref=e125]:
+        - generic [ref=e128]:
+          - heading "复习中心" [level=2] [ref=e129]
+          - generic [ref=e130]: 待复习按逾期加今日口径展示；错题与收藏均来自当前学习档案。
+        - generic [ref=e134]:
+          - tablist [ref=e135]:
+            - generic [ref=e137]:
+              - tab "待复习 0" [selected] [ref=e139] [cursor=pointer]
+              - tab "错题本 1" [ref=e141] [cursor=pointer]
+              - tab "收藏 1" [ref=e143] [cursor=pointer]
+          - tabpanel "待复习 0" [ref=e146]:
+            - generic [ref=e147]: 暂无待复习内容

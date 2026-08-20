@@ -93,3 +93,11 @@ Tab:
 - 关键状态不能只靠颜色区分；
 - 喇叭按钮有 tooltip；
 - 所有按钮有明确文字或 aria-label。
+
+## 8. V0.2.1 已落地规范
+
+- 全局视觉 Token 集中在 `frontend/src/styles.css`：近白底色、蓝/紫/青绿辅助色、10/16/20px 圆角、弱阴影和统一间距。
+- 页面使用 `PageHeader`、`SectionCard`、`StatCard`、`StarRating`、难度/频率/掌握度 Tag；不在页面重复定义枚举中文文案。
+- Sidebar 固定首页、开始学习、题库、复习中心、管理/设置；题目详情等子路由保持所属菜单高亮。
+- 题目详情默认是练习模式，参考答案只在用户点击后显示；学习模式提供分层解释与回答 Tab。
+- Dashboard 的“已练习”与“较熟练及以上”独立展示，不能把 `touchedQuestionCount` 称为完成。

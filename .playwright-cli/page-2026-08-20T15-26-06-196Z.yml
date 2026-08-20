@@ -1,0 +1,72 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - text: Java Interview Lab
+        - generic [ref=e7]: Java 后端面试学习系统
+      - menu [ref=e8]:
+        - menuitem "home 首页" [ref=e9] [cursor=pointer]:
+          - img "home" [ref=e10]
+          - generic [ref=e13]: 首页
+        - menuitem "compass 开始学习" [ref=e14] [cursor=pointer]:
+          - img "compass" [ref=e15]
+          - generic [ref=e18]: 开始学习
+        - menuitem "book 题库" [ref=e19] [cursor=pointer]:
+          - img "book" [ref=e20]
+          - generic [ref=e23]: 题库
+        - menuitem "undo 复习中心" [ref=e24] [cursor=pointer]:
+          - img "undo" [ref=e25]
+          - generic [ref=e28]: 复习中心
+        - menuitem "setting 管理 / 设置" [ref=e29] [cursor=pointer]:
+          - img "setting" [ref=e30]
+          - generic [ref=e33]: 管理 / 设置
+  - generic [ref=e34]:
+    - banner [ref=e35]: 面向 Java 后端面试的学习系统
+    - main [ref=e36]:
+      - generic [ref=e258]:
+        - button "arrow-left 返回题库" [ref=e260] [cursor=pointer]:
+          - img "arrow-left" [ref=e262]
+          - generic [ref=e265]: 返回题库
+        - generic [ref=e268]:
+          - heading "题目学习" [level=2] [ref=e269]
+          - generic [ref=e270]: 先理解，再输出；掌握度只在提交练习后更新。
+        - generic [ref=e274]:
+          - generic [ref=e276]:
+            - heading "B08重启验收题目-202608202138" [level=2] [ref=e278]
+            - button "star 已收藏" [ref=e280] [cursor=pointer]:
+              - img "star" [ref=e282]
+              - generic [ref=e285]: 已收藏
+          - generic [ref=e287]:
+            - generic "3 星" [ref=e289]: ★★★☆☆
+            - generic [ref=e290]: 中等
+            - generic [ref=e292]: 高频
+          - table [ref=e297]:
+            - rowgroup [ref=e298]:
+              - row [ref=e299]:
+                - 'cell "专题 : B08重启验收专题" [ref=e300]':
+                  - generic [ref=e301]:
+                    - generic [ref=e302]: "专题 :"
+                    - generic [ref=e303]: B08重启验收专题
+                - 'cell "分类 : B08重启验收分类" [ref=e304]':
+                  - generic [ref=e305]:
+                    - generic [ref=e306]: "分类 :"
+                    - generic [ref=e307]: B08重启验收分类
+        - radiogroup "segmented control" [ref=e309]:
+          - generic [ref=e310]:
+            - generic [ref=e311] [cursor=pointer]:
+              - radio "学习模式"
+              - generic "学习模式" [ref=e312]
+            - generic [ref=e313] [cursor=pointer]:
+              - radio "练习模式" [checked]
+              - generic "练习模式" [ref=e314]
+        - generic [ref=e316]:
+          - generic [ref=e317]: 练习区
+          - generic [ref=e339]:
+            - textbox "写下你的回答。内容会随本次练习保存，便于后续回看。" [ref=e341]
+            - button "查看参考答案" [ref=e343] [cursor=pointer]
+        - generic [ref=e328]:
+          - generic [ref=e329]: 我的笔记
+          - generic [ref=e333]:
+            - generic [ref=e334]: 学习笔记
+            - textbox "记录自己的理解、易错点或追问…" [ref=e336]: B08重启验收笔记
+            - generic [ref=e337]: 最近保存：2026/8/20 21:40:44

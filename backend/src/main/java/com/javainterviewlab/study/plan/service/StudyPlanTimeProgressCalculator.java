@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit;
 /**
  * 学习路线自然时间进度算法。
  *
- * <p>时间进度只反映路线开始后的自然日，不把停学或完成度混入计算；后者由 B03 的学习快照负责。</p>
+ * <p>时间进度只反映路线开始后的自然日，不把停学或完成度混入计算；学习完成情况由题目掌握度快照单独表示。</p>
  */
 public final class StudyPlanTimeProgressCalculator {
 

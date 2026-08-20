@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 /**
  * 追加答题历史的业务服务。
  *
- * <p>一次练习只能写入一条历史事实；本任务不更新 progress 或 review，避免提前引入后续任务的状态变化。</p>
+ * <p>一次练习只能写入一条历史事实；学习快照和复习计划由提交编排服务统一推进，避免历史写入职责混入可变状态。</p>
  */
 @Service
 public class QuestionAttemptService {
@@ -78,9 +80,17 @@ public class QuestionAttemptService {
         return entity;
     }
 
-    public com.javainterviewlab.study.attempt.dto.QuestionAttemptResponse toResponse(QuestionAttemptEntity entity) {
+    /**
+     * 组装提交响应。
+     *
+     * <p>调用方传入已通过唯一键校验的请求 UUID；首次写入和幂等命中均以该业务键定位同一条历史。</p>
+     */
+    public com.javainterviewlab.study.attempt.dto.QuestionAttemptResponse toResponse(
+            QuestionAttemptEntity entity,
+            UUID clientAttemptId
+    ) {
         return new com.javainterviewlab.study.attempt.dto.QuestionAttemptResponse(
-                entity.getId(), entity.getQuestionId(), entity.getClientAttemptId(), entity.isViewedAnswer(),
+                entity.getId(), entity.getQuestionId(), clientAttemptId, entity.isViewedAnswer(),
                 entity.getSelfRating(), entity.getResultType().name(), entity.getElapsedMs(), entity.getCreatedAt()
         );
     }

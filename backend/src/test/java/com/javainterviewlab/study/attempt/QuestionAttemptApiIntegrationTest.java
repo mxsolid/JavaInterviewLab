@@ -45,7 +45,7 @@ class QuestionAttemptApiIntegrationTest {
     @Test
     @Transactional
     void shouldAppendAttemptIdempotently() throws Exception {
-        long questionId = firstEnabledQuestionId();
+        long questionId = createEnabledQuestion();
         UUID firstAttemptId = UUID.randomUUID();
         String firstPayload = payload(questionId, firstAttemptId, 4, 1200L, "CORRECT");
 
@@ -53,8 +53,11 @@ class QuestionAttemptApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).content(firstPayload))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.attempt.questionId").value(questionId))
+                .andExpect(jsonPath("$.data.attempt.clientAttemptId").value(firstAttemptId.toString()))
                 .andExpect(jsonPath("$.data.attempt.resultType").value("CORRECT"))
                 .andExpect(jsonPath("$.data.progress.attemptCount").value(1))
+                .andExpect(jsonPath("$.data.review.questionId").value(questionId))
+                .andExpect(jsonPath("$.data.duplicated").value(false))
                 .andReturn().getResponse().getContentAsString();
         Number firstId = JsonPath.read(firstBody, "$.data.attempt.id");
 
@@ -62,10 +65,25 @@ class QuestionAttemptApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).content(payload(questionId, firstAttemptId, 1, 1L, "WRONG")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.attempt.resultType").value("CORRECT"))
-                .andExpect(jsonPath("$.data.progress").doesNotExist())
+                .andExpect(jsonPath("$.data.attempt.clientAttemptId").value(firstAttemptId.toString()))
+                .andExpect(jsonPath("$.data.progress.attemptCount").value(1))
+                .andExpect(jsonPath("$.data.review.questionId").value(questionId))
+                .andExpect(jsonPath("$.data.duplicated").value(true))
                 .andReturn().getResponse().getContentAsString();
         Number duplicateId = JsonPath.read(duplicateBody, "$.data.attempt.id");
         assertThat(duplicateId.longValue()).isEqualTo(firstId.longValue());
+        Integer attemptCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM question_attempt WHERE question_id = ?", Integer.class, questionId
+        );
+        Integer progressAttemptCount = jdbcTemplate.queryForObject(
+                "SELECT attempt_count FROM study_progress WHERE question_id = ?", Integer.class, questionId
+        );
+        Integer pendingReviewCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM review_task WHERE question_id = ? AND status = 'PENDING'", Integer.class, questionId
+        );
+        assertThat(attemptCount).isEqualTo(1);
+        assertThat(progressAttemptCount).isEqualTo(1);
+        assertThat(pendingReviewCount).isEqualTo(1);
 
         String secondBody = mockMvc.perform(post("/api/study/attempts")
                         .contentType(MediaType.APPLICATION_JSON).content(payload(questionId, UUID.randomUUID(), 3, 300L, "PARTIAL")))
@@ -151,6 +169,17 @@ class QuestionAttemptApiIntegrationTest {
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         Number id = JsonPath.read(body, "$.data.items[0].id");
         return id.longValue();
+    }
+
+    private long createEnabledQuestion() {
+        Long topicId = jdbcTemplate.queryForObject("SELECT id FROM topic WHERE status = 'ENABLED' ORDER BY id LIMIT 1", Long.class);
+        return jdbcTemplate.queryForObject(
+                "INSERT INTO question (topic_id, title, question_type, star_level, difficulty, frequency_level, origin_type, status) "
+                        + "VALUES (?, ?, 'CONCEPT', 5, 'MEDIUM', 'HIGH', 'USER', 'ENABLED') RETURNING id",
+                Long.class,
+                topicId,
+                "答题幂等测试题 " + System.nanoTime()
+        );
     }
 
     private String payload(long questionId, UUID attemptId, int selfRating, long elapsedMs, String resultType) {

@@ -1,5 +1,34 @@
 # 开发变更记录
 
+## 2026-08-20 — V0.2.1 前端学习闭环、原型还原与端到端验收
+
+- FE01：API Client 安全处理网络错误、JSON 业务错误和非 JSON HTTP 错误；`ApiRequestError` 增加 `code`、`status`、`traceId`，学习 queryKey 集中管理。
+- FE02：建立白色教育产品 Token、AppShell、公共 PageHeader/SectionCard/StatCard/学习 Tag；增加 `/review`，修复题目详情等子路由菜单选中。
+- FE03/FE04：新增真实 PracticePanel。题目默认进入练习模式，按“自己回答 → 查看答案 → 四档结果 → 自评 → 提交”调用后端，成功显示 progress 与下次复习；技术术语按题目文本动态匹配。
+- FE05/FE06：新增复习中心三 Tab；Dashboard 重做为学习入口、真实统计、待复习、错题和最近学习，明确区分“已练习”和“较熟练及以上”。
+- FE07/FE08：NoteEditor 改为单请求串行保存，按 `VERSION_CONFLICT` 处理真实冲突；收藏/错题单行 loading 和统一缓存失效；StudyPlan 对 SCENARIO 明确禁用，题库显示中文枚举与统一卡片样式。
+
+### 验证
+
+- Node 22.13.0：`npm ci`、`npm run typecheck`、`npm run build` 通过；Vite 仅保留主包超过 500 KB 警告。
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp clean test` 通过，25 个测试全部通过；`mvn -B -ntp package -DskipTests` 通过。
+- 本地服务：后端 `http://127.0.0.1:8080/actuator/health` 返回 `UP`，Vite `http://127.0.0.1:5173` 返回 200。
+- 浏览器：真实提交 questionId 26 后 progress 从 1 次变为 2 次；重复同 UUID 请求确认只增加一次，第二次 `duplicated=true`；笔记自动保存后刷新可回读；`/review` 菜单与三 Tab 可访问。
+
+## 2026-08-20 — V0.2.1 后端稳定性与可用性优化
+
+- BE01：新增 `GET /api/study/reviews/due`，待处理复习统一为“逾期加今日”；列表返回 `overdue`，Dashboard 新增 `dueReviewCount`，保留旧 `todayReviewCount` 和 `/today` 兼容既有调用。
+- BE02：同一 `clientAttemptId` 重试不再返回空快照，改为回读原 attempt、当前 progress、当前 pending review，并标记 `duplicated=true`；新增单题进度接口，无历史时返回 PREVIEW / UNKNOWN 默认状态与描述字段。
+- BE03：笔记首次保存改用 `INSERT ... ON CONFLICT DO NOTHING RETURNING id`。唯一键竞争失败时回读已有记录，不覆盖先保存内容，不吞没其他数据库异常。
+- BE04：提交 Service 内部改用 Entity 传递 progress 和 review；调度结果与复习列表响应拆分。清理任务编号型生产注释，保留 profile 行锁覆盖首次 progress 创建竞争。
+- BE05：新增 due、单题默认进度、笔记重复首次创建集成测试；既有学习闭环测试改为按测试题断言，避免本地持久化验收数据干扰。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp clean test` 通过，25 个测试全部通过。
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp package -DskipTests` 通过，生成 Spring Boot 可执行 jar。
+- 本地 HTTP（8080）：`/actuator/health` 返回 `UP`；Swagger UI 返回 HTTP 200；OpenAPI 包含 `/api/study/reviews/due` 与 `/api/study/questions/{questionId}/progress`；due、Dashboard 与单题进度只读 Smoke 通过。
+
 ## 2026-08-20 — B03-B08 V0.2 学习闭环与可靠性验收
 
 - B03：新增 V7 `study_progress`、纯 Java 掌握度计算、profile 行锁和 attempt/progress 同事务提交；同 UUID 重试不重复推进快照。

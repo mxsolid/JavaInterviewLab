@@ -9,7 +9,7 @@ public enum ReviewTaskStatus {
     /** 已通过一次新的答题提交完成。 */
     COMPLETED("已完成"),
 
-    /** 因未来业务规则调整而取消，V0.2 暂不产生该状态。 */
+    /** 因业务规则调整而取消；当前应用不主动产生该状态。 */
     CANCELLED("已取消");
 
     private final String description;

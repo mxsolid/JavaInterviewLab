@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.javainterviewlab.study.progress.repository.StudyProgressMapper">
+    <select id="countEnabledQuestionById" resultType="int">
+        SELECT COUNT(1) FROM question WHERE id = #{questionId} AND status = 'ENABLED'
+    </select>
+
     <!--
         首次答题时 study_progress 尚不存在，FOR UPDATE 无法锁住空结果。
         先锁定 profile 行，将同一学习档案的提交串行化；提交或回滚时由 PostgreSQL 自动释放该行锁。
@@ -12,13 +16,13 @@
         FOR UPDATE
     </select>
 
-    <!-- 已有快照行通过行锁串行化同题提交，保证 MasteryCalculator 总以最新前态计算。 -->
-    <select id="findByProfileIdAndQuestionIdForUpdate" resultType="com.javainterviewlab.study.progress.repository.model.StudyProgressEntity">
+    <!-- profile 行锁已串行化同一档案的提交，读取最新快照即可作为掌握度计算前态。 -->
+    <select id="findByProfileIdAndQuestionId" resultType="com.javainterviewlab.study.progress.repository.model.StudyProgressEntity">
         SELECT id, profile_id AS "profileId", question_id AS "questionId", stage,
                mastery_level AS "masteryLevel", attempt_count AS "attemptCount", wrong_count AS "wrongCount",
                wrong_book_active AS "wrongBookActive", last_studied_at AS "lastStudiedAt", version,
                created_at AS "createdAt", updated_at AS "updatedAt"
-        FROM study_progress WHERE profile_id = #{profileId} AND question_id = #{questionId} FOR UPDATE
+        FROM study_progress WHERE profile_id = #{profileId} AND question_id = #{questionId}
     </select>
     <!-- ON CONFLICT 以数据库行原子累加，避免两个标签页各自读取旧快照后覆盖计数。 -->
     <select id="upsertAfterAttempt" resultType="com.javainterviewlab.study.progress.repository.model.StudyProgressEntity">

@@ -18,6 +18,9 @@ public interface DashboardMapper {
     /** 今日到期的启用题目复习数量。 */
     long countTodayReviews(@Param("profileId") Long profileId, @Param("start") Instant start, @Param("end") Instant end);
 
+    /** 统计截止指定时刻仍待处理的启用题目复习数量，包含逾期任务。 */
+    long countDueReviews(@Param("profileId") Long profileId, @Param("endExclusive") Instant endExclusive);
+
     /** 按最后学习时间返回有限条最近学习项目。 */
     List<RecentStudyRow> findRecentStudyItems(@Param("profileId") Long profileId, @Param("limit") int limit);
 }

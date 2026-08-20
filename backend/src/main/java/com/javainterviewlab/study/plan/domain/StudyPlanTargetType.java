@@ -13,7 +13,7 @@ public enum StudyPlanTargetType {
     /** 路线项指向一道题目。 */
     QUESTION("题目"),
 
-    /** 为 V0.3 场景训练预留，当前目录不会解析到具体内容。 */
+    /** 为尚未开放的场景内容预留，当前目录不会解析到具体内容。 */
     SCENARIO("场景");
 
     private final String description;

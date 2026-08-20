@@ -4,6 +4,8 @@ import { Alert, Button, Card, Col, Empty, List, Row, Space, Tag, Typography, mes
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorState, LoadingState } from '../../components/states';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { SectionCard } from '../../components/ui/SectionCard';
 import { studyApi, type StudyPlanDay } from './api';
 import { studyQueryKeys } from './queryKeys';
 
@@ -13,19 +15,21 @@ function DayItems({ day }: { day: StudyPlanDay }) {
     return <Typography.Text type="secondary">今天用于复盘、输出或查漏补缺。</Typography.Text>;
   }
   return <Space direction="vertical" size={4}>
-    {day.items.map((item) => (
-      <Button
-        key={item.id}
-        type="link"
-        style={{ paddingInline: 0 }}
-        onClick={() => navigate(
-          item.targetType === 'QUESTION' ? `/questions/${item.targetId}` : `/questions?topicId=${item.targetId}`,
-        )}
-      >
-        {item.targetType === 'TOPIC' ? '专题：' : '题目：'}{item.targetTitle ?? '关联内容'}
-      </Button>
-    ))}
+    {day.items.map((item) => {
+      const route = targetRoute(item);
+      return <Button key={item.id} type="link" disabled={!route} style={{ paddingInline: 0 }} onClick={() => route && navigate(route)}>
+        {item.targetType === 'TOPIC' ? '专题：' : item.targetType === 'QUESTION' ? '题目：' : '场景：'}{item.targetTitle ?? '关联内容'}{item.targetType === 'SCENARIO' ? '（场景训练将在后续版本开放）' : ''}
+      </Button>;
+    })}
   </Space>;
+}
+
+function targetRoute(item: StudyPlanDay['items'][number]) {
+  switch (item.targetType) {
+    case 'QUESTION': return `/questions/${item.targetId}`;
+    case 'TOPIC': return `/questions?topicId=${item.targetId}`;
+    case 'SCENARIO': return undefined;
+  }
 }
 
 export function StudyPlanPage() {
@@ -58,27 +62,24 @@ export function StudyPlanPage() {
   if (plans.isError || currentPlan.isError || today.isError || !plans.data) return <ErrorState description="学习路线加载失败" />;
 
   return <Space direction="vertical" size={20} style={{ width: '100%' }}>
-    <div>
-      <Typography.Title level={2} style={{ margin: 0 }}>开始学习</Typography.Title>
-      <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>先选择适合自己的路线，再按每日主题进入题库学习。</Typography.Paragraph>
-    </div>
+    <PageHeader title="开始学习" description="先选择适合自己的路线，再按每日主题进入题库学习。" />
 
     {today.data ? (
-      <Card title={<Space><ClockCircleOutlined /><span>今日任务</span></Space>} extra={<Tag color="blue">Day {today.data.currentPlan.timeProgressDay} / {today.data.currentPlan.durationDays}</Tag>}>
+      <SectionCard title={<Space><ClockCircleOutlined /><span>今日任务</span></Space>} extra={<Tag className="study-tag study-tag-blue">Day {today.data.currentPlan.timeProgressDay} / {today.data.currentPlan.durationDays}</Tag>}>
         <Typography.Title level={4}>{today.data.day.title}</Typography.Title>
         {today.data.day.description && <Typography.Paragraph type="secondary">{today.data.day.description}</Typography.Paragraph>}
         <DayItems day={today.data.day} />
-      </Card>
+      </SectionCard>
     ) : (
       <Alert type="info" showIcon message="尚未选择学习路线" description="选择后才开始计算 Day N；中断学习不会把知识内容自动记为完成。" />
     )}
 
-    <Card title={<Space><ReadOutlined /><span>系统预设路线</span></Space>}>
+    <SectionCard title={<Space><ReadOutlined /><span>系统预设路线</span></Space>}>
       <Row gutter={[16, 16]}>
         {plans.data.map((plan) => {
           const active = currentPlan.data?.planId === plan.id;
           return <Col xs={24} md={8} key={plan.id}>
-            <Card size="small" hoverable={selectedPlanId === plan.id || (!selectedPlanId && plan.id === displayPlanId)} onClick={() => setSelectedPlanId(plan.id)}>
+            <Card className="section-card" size="small" hoverable={selectedPlanId === plan.id || (!selectedPlanId && plan.id === displayPlanId)} onClick={() => setSelectedPlanId(plan.id)}>
               <Space direction="vertical" size={8} style={{ width: '100%' }}>
                 <Typography.Title level={4} style={{ margin: 0 }}>{plan.name}</Typography.Title>
                 <Tag>{plan.durationDays} 天</Tag>
@@ -91,15 +92,15 @@ export function StudyPlanPage() {
           </Col>;
         })}
       </Row>
-    </Card>
+    </SectionCard>
 
-    <Card title={detail.data ? `${detail.data.name} · 每日计划` : '每日计划'} loading={detail.isLoading}>
+    <SectionCard title={detail.data ? `${detail.data.name} · 每日计划` : '每日计划'}>
       {detail.isError && <Typography.Text type="danger">路线详情加载失败</Typography.Text>}
       {detail.data && <List
         dataSource={detail.data.days}
-        renderItem={(day) => <List.Item><List.Item.Meta title={`Day ${day.dayNumber} · ${day.title}`} description={day.description} /><DayItems day={day} /></List.Item>}
+        renderItem={(day) => <List.Item className={today.data?.day.id === day.id ? 'plan-day-current' : undefined}><List.Item.Meta title={`Day ${day.dayNumber} · ${day.title}`} description={day.description} /><DayItems day={day} /></List.Item>}
       />}
       {!detail.isLoading && !detail.data && !detail.isError && <Empty description="暂无学习计划" />}
-    </Card>
+    </SectionCard>
   </Space>;
 }

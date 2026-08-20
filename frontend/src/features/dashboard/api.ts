@@ -15,6 +15,7 @@ export interface DashboardData {
   planDurationDays: number | null;
   todayPlanItemCount: number;
   todayReviewCount: number;
+  dueReviewCount: number;
   totalQuestionCount: number;
   touchedQuestionCount: number;
   solidQuestionCount: number;

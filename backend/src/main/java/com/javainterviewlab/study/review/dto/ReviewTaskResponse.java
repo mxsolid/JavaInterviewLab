@@ -9,6 +9,7 @@ public record ReviewTaskResponse(
         String title,
         Integer starLevel,
         Instant dueAt,
-        String status
+        String status,
+        boolean overdue
 ) {
 }

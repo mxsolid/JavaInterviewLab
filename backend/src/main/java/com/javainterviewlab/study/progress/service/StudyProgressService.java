@@ -1,8 +1,11 @@
 package com.javainterviewlab.study.progress.service;
 
+import com.javainterviewlab.common.api.ApiErrorCode;
+import com.javainterviewlab.common.exception.BusinessException;
 import com.javainterviewlab.study.attempt.repository.model.QuestionAttemptEntity;
 import com.javainterviewlab.study.progress.domain.MasteryCalculator;
 import com.javainterviewlab.study.progress.domain.MasteryLevel;
+import com.javainterviewlab.study.progress.domain.StudyStage;
 import com.javainterviewlab.study.progress.dto.StudyProgressResponse;
 import com.javainterviewlab.study.progress.dto.WrongQuestionResponse;
 import com.javainterviewlab.study.progress.repository.StudyProgressMapper;
@@ -40,9 +43,9 @@ public class StudyProgressService {
      * <p>先锁定学习档案行，弥补首次创建时没有进度行可加锁的问题。
      * 因此掌握度计算总是基于上一条已提交快照，UPSERT 只负责原子落库和计数累加。</p>
      */
-    public StudyProgressResponse applyAttempt(QuestionAttemptEntity attempt) {
+    public StudyProgressEntity applyAttempt(QuestionAttemptEntity attempt) {
         mapper.lockProfileForProgress(attempt.getProfileId());
-        StudyProgressEntity current = mapper.findByProfileIdAndQuestionIdForUpdate(
+        StudyProgressEntity current = mapper.findByProfileIdAndQuestionId(
                 attempt.getProfileId(), attempt.getQuestionId()
         );
         MasteryLevel currentLevel = current == null ? MasteryLevel.UNKNOWN : current.getMasteryLevel();
@@ -54,10 +57,46 @@ public class StudyProgressService {
                 attempt.getResultType().name().equals("WRONG"),
                 clock.instant()
         );
+        return entity;
+    }
+
+    /**
+     * 查询单题当前学习进度。
+     *
+     * <p>从未练习的题目返回默认快照，让题目详情页无需为“还没有数据库行”维护另一套状态。</p>
+     */
+    public StudyProgressResponse getQuestionProgress(Long questionId) {
+        verifyEnabledQuestion(questionId);
+        return toResponse(questionId, findCurrentEntity(requireDefaultProfileId(), questionId));
+    }
+
+    /** 读取指定档案和题目的当前快照，供提交幂等回填使用。 */
+    public StudyProgressEntity findCurrentEntity(Long profileId, Long questionId) {
+        return mapper.findByProfileIdAndQuestionId(profileId, questionId);
+    }
+
+    /** 在 HTTP 边界组装当前快照；旧答题历史缺少快照时同样按未学习处理。 */
+    public StudyProgressResponse toResponse(Long questionId, StudyProgressEntity entity) {
+        if (entity == null) {
+            return new StudyProgressResponse(
+                    questionId,
+                    StudyStage.PREVIEW.name(),
+                    StudyStage.PREVIEW.getDescription(),
+                    MasteryLevel.UNKNOWN.name(),
+                    MasteryLevel.UNKNOWN.getDescription(),
+                    0,
+                    0,
+                    false,
+                    null,
+                    0L
+            );
+        }
         return new StudyProgressResponse(
                 entity.getQuestionId(),
                 entity.getStage().name(),
+                entity.getStage().getDescription(),
                 entity.getMasteryLevel().name(),
+                entity.getMasteryLevel().getDescription(),
                 entity.getAttemptCount(),
                 entity.getWrongCount(),
                 entity.isWrongBookActive(),
@@ -85,12 +124,15 @@ public class StudyProgressService {
     private Long requireDefaultProfileId() {
         Long profileId = studyProfileMapper.findDefaultProfileId();
         if (profileId == null) {
-            throw new com.javainterviewlab.common.exception.BusinessException(
-                    com.javainterviewlab.common.api.ApiErrorCode.RESOURCE_NOT_FOUND,
-                    "默认学习档案不存在"
-            );
+            throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "默认学习档案不存在");
         }
         return profileId;
+    }
+
+    private void verifyEnabledQuestion(Long questionId) {
+        if (mapper.countEnabledQuestionById(questionId) == 0) {
+            throw new BusinessException(ApiErrorCode.RESOURCE_NOT_FOUND, "题目不存在或已停用");
+        }
     }
 
     private WrongQuestionResponse toWrongQuestionResponse(WrongQuestionRow row) {

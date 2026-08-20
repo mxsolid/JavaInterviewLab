@@ -1,57 +1,64 @@
+import { BookOutlined, ClockCircleOutlined, EditOutlined, ReadOutlined, UndoOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Col, List, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, List, Progress, Row, Space, Typography, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { ErrorState, LoadingState } from '../../components/states';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { SectionCard } from '../../components/ui/SectionCard';
+import { StatCard } from '../../components/ui/StatCard';
+import { MasteryBadge, StarRating } from '../../components/ui/StudyTags';
 import { studyApi } from '../study/api';
 import { studyQueryKeys } from '../study/queryKeys';
 import { dashboardApi } from './api';
 
-const dashboardKey = ['dashboard'] as const;
+const shortcuts = [
+  { title: '今日学习', description: '按当前路线进入任务', route: '/study', icon: <ReadOutlined /> },
+  { title: '开始练习', description: '从题库选择一道题', route: '/questions', icon: <EditOutlined /> },
+  { title: '复习中心', description: '处理逾期与今日复习', route: '/review', icon: <UndoOutlined /> },
+  { title: '错题本', description: '查看待解决的错误', route: '/review', icon: <ClockCircleOutlined /> },
+  { title: '题库', description: '搜索全部知识点', route: '/questions', icon: <BookOutlined /> },
+];
 
-/** 首页只展示后端计算的统计，避免日期进度和学习完成度被前端混算。 */
 export function DashboardPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const dashboard = useQuery({ queryKey: dashboardKey, queryFn: dashboardApi.get });
+  const dashboard = useQuery({ queryKey: studyQueryKeys.dashboard, queryFn: dashboardApi.get });
   const wrongQuestions = useQuery({ queryKey: studyQueryKeys.wrongQuestions, queryFn: studyApi.wrongQuestions });
-  const reviews = useQuery({ queryKey: studyQueryKeys.todayReviews, queryFn: studyApi.todayReviews });
+  const dueReviews = useQuery({ queryKey: studyQueryKeys.dueReviews, queryFn: studyApi.dueReviews });
   const resolveWrong = useMutation({
     mutationFn: studyApi.resolveWrongQuestion,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: studyQueryKeys.wrongQuestions });
-      void queryClient.invalidateQueries({ queryKey: dashboardKey });
+    onSuccess: async () => {
+      await Promise.all([queryClient.invalidateQueries({ queryKey: studyQueryKeys.wrongQuestions }), queryClient.invalidateQueries({ queryKey: studyQueryKeys.dashboard })]);
+      message.success('错题已标记解决');
     },
+    onError: () => message.error('错题状态更新失败'),
   });
   if (dashboard.isLoading) return <LoadingState />;
   if (dashboard.isError || !dashboard.data) return <ErrorState description="学习看板加载失败" />;
   const data = dashboard.data;
+  const practicedPercent = data.totalQuestionCount === 0 ? 0 : Math.round(data.touchedQuestionCount / data.totalQuestionCount * 100);
+  const solidCount = data.solidQuestionCount + data.masteredQuestionCount;
+
   return <Space direction="vertical" size={20} style={{ width: '100%' }}>
-    <div>
-      <Typography.Title level={2} style={{ margin: 0 }}>学习进度</Typography.Title>
-      <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>时间推进不等于已经掌握，完成情况以答题快照为准。</Typography.Paragraph>
-    </div>
-    {data.currentPlan ? <Card title={data.currentPlan.planName}>
-      <Space direction="vertical" style={{ width: '100%' }}>
-        <div>时间：Day {data.timeProgressDay} / {data.planDurationDays}　学习完成：{data.touchedQuestionCount} / {data.totalQuestionCount}</div>
-        <Progress percent={data.totalQuestionCount === 0 ? 0 : Math.round(data.touchedQuestionCount / data.totalQuestionCount * 100)} />
-      </Space>
-    </Card> : <Alert type="info" message="尚未选择学习路线" action={<Button size="small" onClick={() => navigate('/study')}>选择路线</Button>} />}
+    <PageHeader title="首页 / 工作台" description="今天该学什么、该复习什么，以及真实的掌握状态。" />
+    {data.currentPlan ? <Card className="hero-card">
+      <Row gutter={[24, 20]} align="middle"><Col xs={24} lg={16}><Space direction="vertical" size={10}><Typography.Title level={2} style={{ margin: 0 }}>今天继续 Java 面试冲刺</Typography.Title><Typography.Text type="secondary">当前：{data.currentPlan.planName} · Day {data.timeProgressDay} / {data.planDurationDays}</Typography.Text><Typography.Text>已练习 {data.touchedQuestionCount} / {data.totalQuestionCount} 题；较熟练及以上 {solidCount} 题。</Typography.Text><Button type="primary" onClick={() => navigate('/study')}>查看今日任务</Button></Space></Col><Col xs={24} lg={8}><Space direction="vertical" align="center" style={{ width: '100%' }}><Progress type="circle" percent={practicedPercent} format={() => `${practicedPercent}%`} /><Typography.Text type="secondary">已练习占比，不等于已完成</Typography.Text></Space></Col></Row>
+    </Card> : <Alert type="info" showIcon message="尚未选择学习路线" description="选择路线后，系统才会生成当天学习任务。" action={<Button size="small" onClick={() => navigate('/study')}>选择路线</Button>} />}
+    <Row gutter={[16, 16]}>{shortcuts.map((item) => <Col xs={12} sm={8} lg={4} key={item.title}><SectionCard className="shortcut-card"><Space direction="vertical"><Typography.Text className="shortcut-icon">{item.icon}</Typography.Text><Typography.Text strong>{item.title}</Typography.Text><Typography.Text type="secondary">{item.description}</Typography.Text><Button type="link" onClick={() => navigate(item.route)} style={{ paddingInline: 0 }}>进入</Button></Space></SectionCard></Col>)}</Row>
     <Row gutter={[16, 16]}>
-      <Col xs={12} md={6}><Card><Statistic title="今日计划" value={data.todayPlanItemCount} suffix="项" /></Card></Col>
-      <Col xs={12} md={6}><Card><Statistic title="今日复习" value={data.todayReviewCount} suffix="项" /></Card></Col>
-      <Col xs={12} md={6}><Card><Statistic title="激活错题" value={data.activeWrongQuestionCount} suffix="题" /></Card></Col>
-      <Col xs={12} md={6}><Card><Statistic title="五星掌握率" value={Math.round(data.fiveStarMasteryRate * 100)} suffix="%" /></Card></Col>
+      <Col xs={12} md={6}><StatCard title="今日计划" value={data.todayPlanItemCount} suffix="项" /></Col>
+      <Col xs={12} md={6}><StatCard title="待复习" value={data.dueReviewCount} suffix="项" tone="orange" /></Col>
+      <Col xs={12} md={6}><StatCard title="激活错题" value={data.activeWrongQuestionCount} suffix="题" tone="violet" /></Col>
+      <Col xs={12} md={6}><StatCard title="五星掌握率" value={Math.round(data.fiveStarMasteryRate * 100)} suffix="%" tone="teal" /></Col>
     </Row>
     <Row gutter={[16, 16]}>
-      <Col xs={24} lg={12}><Card title="今日复习" extra={<Button type="link" onClick={() => navigate('/study')}>学习路线</Button>}>
-        <List dataSource={reviews.data ?? []} locale={{ emptyText: '今天没有到期复习' }} renderItem={(item) => <List.Item actions={[<Button key="open" type="link" onClick={() => navigate(`/questions/${item.questionId}`)}>学习</Button>]}>{item.title}</List.Item>} />
-      </Card></Col>
-      <Col xs={24} lg={12}><Card title="错题本">
-        <List dataSource={wrongQuestions.data ?? []} locale={{ emptyText: '暂无激活错题' }} renderItem={(item) => <List.Item actions={[<Button key="open" type="link" onClick={() => navigate(`/questions/${item.questionId}`)}>查看</Button>, <Button key="resolve" loading={resolveWrong.isPending} onClick={() => resolveWrong.mutate(item.questionId)}>标记解决</Button>]}><Space><span>{item.title}</span><Tag>{item.masteryLevel}</Tag><span>错误 {item.wrongCount} 次</span></Space></List.Item>} />
-      </Card></Col>
+      <Col xs={24} lg={12}><SectionCard title="待复习" extra={<Button type="link" onClick={() => navigate('/review')}>查看全部</Button>}>
+        {dueReviews.isError ? <ErrorState description="待复习加载失败" /> : <List dataSource={dueReviews.data ?? []} locale={{ emptyText: '暂无待复习内容' }} renderItem={(item) => <List.Item actions={[<Button key="open" type="link" onClick={() => navigate(`/questions/${item.questionId}`)}>开始复习</Button>]}><Space wrap><Typography.Text>{item.title}</Typography.Text><StarRating value={item.starLevel} /></Space></List.Item>} />}
+      </SectionCard></Col>
+      <Col xs={24} lg={12}><SectionCard title="错题本" extra={<Button type="link" onClick={() => navigate('/review')}>查看全部</Button>}>
+        {wrongQuestions.isError ? <ErrorState description="错题本加载失败" /> : <List dataSource={wrongQuestions.data ?? []} locale={{ emptyText: '暂无激活错题' }} renderItem={(item) => <List.Item actions={[<Button key="open" type="link" onClick={() => navigate(`/questions/${item.questionId}`)}>查看</Button>, <Button key="resolve" loading={resolveWrong.isPending && resolveWrong.variables === item.questionId} onClick={() => resolveWrong.mutate(item.questionId)}>标记解决</Button>]}><Space wrap><Typography.Text>{item.title}</Typography.Text><MasteryBadge value={item.masteryLevel} /><Typography.Text type="secondary">错误 {item.wrongCount} 次</Typography.Text></Space></List.Item>} />}
+      </SectionCard></Col>
     </Row>
-    <Card title="最近学习">
-      <List dataSource={data.recentStudyItems} locale={{ emptyText: '提交一次练习后会显示在这里' }} renderItem={(item) => <List.Item actions={[<Button key="open" type="link" onClick={() => navigate(`/questions/${item.questionId}`)}>查看</Button>]}><Space><span>{item.title}</span><Tag>{item.masteryLevel}</Tag></Space></List.Item>} />
-    </Card>
+    <SectionCard title="最近学习"><List dataSource={data.recentStudyItems} locale={{ emptyText: '提交一次练习后会显示在这里' }} renderItem={(item) => <List.Item actions={[<Button key="open" type="link" onClick={() => navigate(`/questions/${item.questionId}`)}>查看</Button>]}><Space wrap><Typography.Text>{item.title}</Typography.Text><MasteryBadge value={item.masteryLevel} /></Space></List.Item>} /></SectionCard>
   </Space>;
 }

@@ -6,7 +6,9 @@ import java.time.Instant;
 public record StudyProgressResponse(
         Long questionId,
         String stage,
+        String stageDescription,
         String masteryLevel,
+        String masteryDescription,
         Integer attemptCount,
         Integer wrongCount,
         boolean wrongBookActive,

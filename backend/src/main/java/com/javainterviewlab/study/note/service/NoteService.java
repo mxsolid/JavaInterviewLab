@@ -41,19 +41,29 @@ public class NoteService {
         return entity == null ? null : toResponse(entity);
     }
 
-    /** 创建首次笔记；同一目标已有记录时拒绝，防止绕过 version 语义。 */
+    /**
+     * 创建首次笔记。
+     *
+     * <p>首次自动保存允许多个标签页竞争；只有一个请求插入，其他请求回读同一记录，
+     * 后续内容变更仍必须携带 version 调用更新接口。</p>
+     */
     public NoteResponse create(CreateNoteRequest request) {
         requireSupportedExistingTarget(request.targetType(), request.targetId());
         Long profileId = requireDefaultProfileId();
-        if (noteMapper.findByProfileAndTarget(profileId, request.targetType(), request.targetId()) != null) {
-            throw new BusinessException(ApiErrorCode.BUSINESS_RULE_VIOLATED, "该内容已有笔记，请使用最新版本保存");
-        }
         NoteEntity entity = new NoteEntity();
         entity.setProfileId(profileId);
         entity.setTargetType(request.targetType());
         entity.setTargetId(request.targetId());
         entity.setContent(request.content());
-        return toResponse(noteMapper.insert(entity));
+        Long noteId = noteMapper.insertIgnore(entity);
+        if (noteId != null) {
+            return toResponse(noteMapper.findById(noteId));
+        }
+        NoteEntity existing = noteMapper.findByProfileAndTarget(profileId, request.targetType(), request.targetId());
+        if (existing == null) {
+            throw new IllegalStateException("笔记唯一键冲突后未找到已有记录");
+        }
+        return toResponse(existing);
     }
 
     /** 更新笔记；版本不一致时返回 409，绝不覆盖其他页面已保存的文本。 */

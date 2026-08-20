@@ -31,4 +31,16 @@ public interface ReviewTaskMapper {
             @Param("start") Instant start,
             @Param("end") Instant end
     );
+
+    /** 查询截止指定时刻仍待处理的任务，包含此前未完成的逾期任务。 */
+    List<ReviewTaskRow> findPendingDueBefore(
+            @Param("profileId") Long profileId,
+            @Param("endExclusive") Instant endExclusive
+    );
+
+    /** 读取当前题目的 pending 任务，用于幂等重复提交回填。 */
+    ReviewTaskEntity findPendingByProfileIdAndQuestionId(
+            @Param("profileId") Long profileId,
+            @Param("questionId") Long questionId
+    );
 }

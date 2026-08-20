@@ -62,7 +62,7 @@ public class StudyPlanService {
     /**
      * 切换当前路线并开始新的时间进度。
      *
-     * <p>锁住 profile 行而不是引入 Redis 锁：V0.2 的状态唯一事实源就是 PostgreSQL，且锁范围仅限同一个本地用户。</p>
+     * <p>锁住 profile 行而不是引入 Redis 锁：学习状态的唯一事实源是 PostgreSQL，且锁范围仅限同一个本地用户。</p>
      */
     @Transactional
     public CurrentPlanResponse activatePlan(Long planId) {
@@ -79,7 +79,7 @@ public class StudyPlanService {
         return currentPlan;
     }
 
-    /** 返回当前自然日对应的学习项；停学不会被误判为完成，学习完成进度留给 B03。 */
+    /** 返回当前自然日对应的学习项；停学不会被误判为完成，学习完成进度由题目掌握度快照单独表示。 */
     public TodayStudyResponse getTodayStudy() {
         CurrentPlanResponse currentPlan = getCurrentPlan();
         if (currentPlan == null) {

@@ -3,11 +3,12 @@ package com.javainterviewlab.study.review.service;
 import com.javainterviewlab.common.api.ApiErrorCode;
 import com.javainterviewlab.common.exception.BusinessException;
 import com.javainterviewlab.study.attempt.repository.model.QuestionAttemptEntity;
-import com.javainterviewlab.study.progress.dto.StudyProgressResponse;
 import com.javainterviewlab.study.progress.domain.MasteryLevel;
+import com.javainterviewlab.study.progress.repository.model.StudyProgressEntity;
 import com.javainterviewlab.study.review.domain.ReviewPolicy;
 import com.javainterviewlab.study.review.domain.ReviewTaskStatus;
 import com.javainterviewlab.study.review.dto.ReviewTaskResponse;
+import com.javainterviewlab.study.review.dto.ScheduledReviewResponse;
 import com.javainterviewlab.study.review.repository.ReviewTaskMapper;
 import com.javainterviewlab.study.review.repository.model.ReviewTaskEntity;
 import com.javainterviewlab.study.review.repository.model.ReviewTaskRow;
@@ -49,26 +50,18 @@ public class ReviewService {
      *
      * <p>该方法由提交事务调用：先完成同题旧 pending，再写新的 pending，部分唯一索引确保任何时刻最多一个待复习任务。</p>
      */
-    public ReviewTaskResponse scheduleAfterAttempt(QuestionAttemptEntity attempt, StudyProgressResponse progress) {
+    public ReviewTaskEntity scheduleAfterAttempt(QuestionAttemptEntity attempt, StudyProgressEntity progress) {
         Instant now = clock.instant();
         reviewTaskMapper.completePendingByProfileAndQuestion(attempt.getProfileId(), attempt.getQuestionId(), now);
         ReviewTaskEntity entity = new ReviewTaskEntity();
         entity.setProfileId(attempt.getProfileId());
         entity.setQuestionId(attempt.getQuestionId());
         entity.setDueAt(reviewPolicy.calculateNextReviewTime(
-                MasteryLevel.valueOf(progress.masteryLevel()),
+                progress.getMasteryLevel(),
                 attempt.getResultType(),
                 now
         ));
-        ReviewTaskEntity created = reviewTaskMapper.insertPending(entity);
-        return new ReviewTaskResponse(
-                created.getId(),
-                created.getQuestionId(),
-                null,
-                null,
-                created.getDueAt(),
-                created.getStatus().name()
-        );
+        return reviewTaskMapper.insertPending(entity);
     }
 
     /** 返回今天到期的待复习任务，按应用 Clock 的时区切分自然日。 */
@@ -81,11 +74,44 @@ public class ReviewService {
                 .toList();
     }
 
+    /**
+     * 返回截止今天结束前仍待处理的复习任务。
+     *
+     * <p>未在原定日期完成的任务仍是学习者需要处理的事项，因此查询不能以当天零点作为下界。</p>
+     */
+    public List<ReviewTaskResponse> listDue() {
+        LocalDate today = LocalDate.now(clock);
+        Instant todayStart = today.atStartOfDay(clock.getZone()).toInstant();
+        Instant tomorrowStart = today.plusDays(1).atStartOfDay(clock.getZone()).toInstant();
+        return reviewTaskMapper.findPendingDueBefore(requireDefaultProfileId(), tomorrowStart).stream()
+                .map(row -> toResponse(row, row.dueAt().isBefore(todayStart)))
+                .toList();
+    }
+
     /** 返回指定状态的任务，默认 API 只用于 PENDING/COMPLETED/CANCELLED 的显式查询。 */
     public List<ReviewTaskResponse> listByStatus(ReviewTaskStatus status) {
         return reviewTaskMapper.findByProfileAndStatus(requireDefaultProfileId(), status.name()).stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    /** 读取当前 pending 任务，供重复提交返回可靠的现状而不重新调度。 */
+    public ReviewTaskEntity findPendingEntity(Long profileId, Long questionId) {
+        return reviewTaskMapper.findPendingByProfileIdAndQuestionId(profileId, questionId);
+    }
+
+    /** 将提交调度结果转换为接口模型。 */
+    public ScheduledReviewResponse toScheduledResponse(ReviewTaskEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return new ScheduledReviewResponse(
+                entity.getId(),
+                entity.getQuestionId(),
+                entity.getDueAt(),
+                entity.getStatus().name(),
+                entity.getStatus().getDescription()
+        );
     }
 
     private Long requireDefaultProfileId() {
@@ -97,6 +123,12 @@ public class ReviewService {
     }
 
     private ReviewTaskResponse toResponse(ReviewTaskRow row) {
-        return new ReviewTaskResponse(row.id(), row.questionId(), row.title(), row.starLevel(), row.dueAt(), row.status());
+        return toResponse(row, false);
+    }
+
+    private ReviewTaskResponse toResponse(ReviewTaskRow row, boolean overdue) {
+        return new ReviewTaskResponse(
+                row.id(), row.questionId(), row.title(), row.starLevel(), row.dueAt(), row.status(), overdue
+        );
     }
 }

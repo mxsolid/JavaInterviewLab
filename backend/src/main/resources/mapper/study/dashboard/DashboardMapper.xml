@@ -27,6 +27,14 @@
           AND r.due_at >= #{start} AND r.due_at &lt; #{end}
     </select>
 
+    <!-- 首页待处理复习与 /reviews/due 使用同一到期语义，逾期任务不能因跨天从统计中消失。 -->
+    <select id="countDueReviews" resultType="long">
+        SELECT COUNT(r.id)
+        FROM review_task r JOIN question q ON q.id = r.question_id
+        WHERE r.profile_id = #{profileId} AND r.status = 'PENDING' AND q.status = 'ENABLED'
+          AND r.due_at &lt; #{endExclusive}
+    </select>
+
     <select id="findRecentStudyItems" resultType="com.javainterviewlab.study.dashboard.repository.model.RecentStudyRow">
         SELECT q.id AS "questionId", q.title, q.star_level AS "starLevel", p.mastery_level AS "masteryLevel",
                p.last_studied_at AS "lastStudiedAt"

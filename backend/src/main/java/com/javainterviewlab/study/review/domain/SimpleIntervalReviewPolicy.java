@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 
 /**
- * V0.2 的固定间隔复习策略。
+ * 固定间隔复习策略。
  *
  * <p>规则简单且可解释，先按一次错误短间隔复习；此策略是独立变化点，未来升级算法无需侵入事务服务。</p>
  */

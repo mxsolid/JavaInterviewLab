@@ -11,6 +11,7 @@ public record DashboardResponse(
         Integer planDurationDays,
         Integer todayPlanItemCount,
         Long todayReviewCount,
+        Long dueReviewCount,
         Long totalQuestionCount,
         Long touchedQuestionCount,
         Long solidQuestionCount,

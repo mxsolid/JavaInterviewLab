@@ -3,9 +3,9 @@ package com.javainterviewlab.study.attempt.service;
 import com.javainterviewlab.study.attempt.dto.QuestionAttemptResponse;
 import com.javainterviewlab.study.attempt.dto.SubmitAttemptRequest;
 import com.javainterviewlab.study.attempt.dto.SubmitAttemptResponse;
-import com.javainterviewlab.study.progress.dto.StudyProgressResponse;
+import com.javainterviewlab.study.progress.repository.model.StudyProgressEntity;
 import com.javainterviewlab.study.progress.service.StudyProgressService;
-import com.javainterviewlab.study.review.dto.ReviewTaskResponse;
+import com.javainterviewlab.study.review.repository.model.ReviewTaskEntity;
 import com.javainterviewlab.study.review.service.ReviewService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +40,18 @@ public class StudySubmissionService {
     @Transactional
     public SubmitAttemptResponse submit(SubmitAttemptRequest request) {
         QuestionAttemptService.AppendAttemptResult append = attemptService.appendIdempotently(request);
-        StudyProgressResponse progress = append.duplicated() ? null : progressService.applyAttempt(append.attempt());
-        ReviewTaskResponse review = append.duplicated() ? null : reviewService.scheduleAfterAttempt(append.attempt(), progress);
-        QuestionAttemptResponse attempt = attemptService.toResponse(append.attempt());
-        return new SubmitAttemptResponse(attempt, progress, review);
+        StudyProgressEntity progress = append.duplicated()
+                ? progressService.findCurrentEntity(append.attempt().getProfileId(), append.attempt().getQuestionId())
+                : progressService.applyAttempt(append.attempt());
+        ReviewTaskEntity review = append.duplicated()
+                ? reviewService.findPendingEntity(append.attempt().getProfileId(), append.attempt().getQuestionId())
+                : reviewService.scheduleAfterAttempt(append.attempt(), progress);
+        QuestionAttemptResponse attempt = attemptService.toResponse(append.attempt(), request.clientAttemptId());
+        return new SubmitAttemptResponse(
+                attempt,
+                progressService.toResponse(append.attempt().getQuestionId(), progress),
+                reviewService.toScheduledResponse(review),
+                append.duplicated()
+        );
     }
 }

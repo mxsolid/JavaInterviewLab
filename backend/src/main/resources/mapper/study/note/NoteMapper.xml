@@ -12,10 +12,15 @@
         WHERE profile_id = #{profileId} AND target_type = #{targetType} AND target_id = #{targetId}
     </select>
 
-    <select id="insert" resultType="com.javainterviewlab.study.note.repository.model.NoteEntity">
+    <!--
+        首次自动保存可能被多个标签页同时触发。唯一键是最终并发防线；输掉竞争的请求回读现有记录，
+        既不返回 500，也不覆盖先保存的内容。
+    -->
+    <select id="insertIgnore" resultType="long">
         INSERT INTO note (profile_id, target_type, target_id, content)
         VALUES (#{entity.profileId}, #{entity.targetType}, #{entity.targetId}, #{entity.content})
-        RETURNING <include refid="noteColumns" />
+        ON CONFLICT (profile_id, target_type, target_id) DO NOTHING
+        RETURNING id
     </select>
 
     <!-- 低冲突笔记不占用长事务；version 不匹配时拒绝写入，避免旧页面覆盖新内容。 -->

@@ -45,6 +45,25 @@
 | B07 | 首页学习进度仪表盘 | DONE | ★★★★ | 中 | 20k–50k |
 | B08 | V0.2 数据可靠性测试 | DONE | ★★★★ | 中 | 20k–50k |
 
+## V0.2.1 稳定性与可用性优化
+
+| ID | 子任务 | 状态 |
+|---|---|---|
+| BE01 | 复习逾期语义与 Dashboard 统计 | DONE |
+| BE02 | 幂等响应与单题进度接口 | DONE |
+| BE03 | 笔记首次并发创建 | DONE |
+| BE04 | Service/DTO/注释边界整理 | DONE |
+| BE05 | 测试、文档、Smoke 验收 | DONE |
+| FE01 | API Client / 类型 / queryKey | DONE |
+| FE02 | AppShell / Design System / 导航 | DONE |
+| FE03 | PracticePanel 答题闭环 | DONE |
+| FE04 | 题目详情学习体验 | DONE |
+| FE05 | 复习中心 | DONE |
+| FE06 | Dashboard | DONE |
+| FE07 | NoteEditor / 收藏 / 错题交互 | DONE |
+| FE08 | StudyPlan / QuestionBank 原型统一 | DONE |
+| FE09 | 本地构建与端到端验收 | DONE |
+
 ## V0.3 场景训练版
 
 | ID | 子任务 | 状态 | 难度 | 相对工作量 | 建议 Agent Token 预算 |

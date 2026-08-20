@@ -32,6 +32,13 @@ public class ReviewController {
         return ApiResponse.success(reviewService.listToday());
     }
 
+    /** 获取逾期和今天到期的待复习任务。 */
+    @Operation(summary = "待处理复习", description = "返回逾期及今天到期、尚未完成的复习任务")
+    @GetMapping("/due")
+    public ApiResponse<List<ReviewTaskResponse>> due() {
+        return ApiResponse.success(reviewService.listDue());
+    }
+
     /** 获取一个明确状态的复习任务列表。 */
     @Operation(summary = "复习任务列表")
     @GetMapping

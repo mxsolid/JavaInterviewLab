@@ -16,8 +16,8 @@ public interface NoteMapper {
             @Param("targetId") Long targetId
     );
 
-    /** 新建笔记并回填数据库生成字段。 */
-    NoteEntity insert(@Param("entity") NoteEntity entity);
+    /** 原子尝试新建笔记；唯一键冲突时不写入并返回 null。 */
+    Long insertIgnore(@Param("entity") NoteEntity entity);
 
     /** 仅当版本匹配时更新；返回 0 时由 Service 区分不存在和版本冲突。 */
     int updateIfVersionMatches(@Param("entity") NoteEntity entity);

@@ -1,4 +1,5 @@
 import { request } from '../../api/client';
+import type { NoteData, StudyProgress, SubmitAttemptRequest, SubmitAttemptResponse } from './types';
 
 export interface StudyPlanSummary {
   id: number;
@@ -67,6 +68,7 @@ export interface ReviewTask {
   starLevel: number;
   dueAt: string;
   status: string;
+  overdue: boolean;
 }
 
 export const studyApi = {
@@ -81,4 +83,18 @@ export const studyApi = {
   favoriteQuestion: (questionId: number) => request<void>(`/api/study/favorites/questions/${questionId}`, { method: 'POST' }),
   unfavoriteQuestion: (questionId: number) => request<void>(`/api/study/favorites/questions/${questionId}`, { method: 'DELETE' }),
   todayReviews: () => request<ReviewTask[]>('/api/study/reviews/today'),
+  dueReviews: () => request<ReviewTask[]>('/api/study/reviews/due'),
+  getQuestionProgress: (questionId: number) => request<StudyProgress>(`/api/study/questions/${questionId}/progress`),
+  submitAttempt: (body: SubmitAttemptRequest) => request<SubmitAttemptResponse>('/api/study/attempts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }),
+  note: (targetType: 'QUESTION' | 'TOPIC', targetId: number) => request<NoteData | null>(`/api/study/notes?targetType=${targetType}&targetId=${targetId}`),
+  createNote: (targetType: 'QUESTION' | 'TOPIC', targetId: number, content: string) => request<NoteData>('/api/study/notes', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetType, targetId, content }),
+  }),
+  updateNote: (id: number, content: string, version: number) => request<NoteData>(`/api/study/notes/${id}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content, version }),
+  }),
 };

@@ -17,16 +17,19 @@ import java.util.List;
 @Mapper
 public interface StudyProgressMapper {
 
+    /** 仅允许查询存在且启用的题目进度。 */
+    int countEnabledQuestionById(@Param("questionId") Long questionId);
+
     /**
      * 锁定学习档案行。
      *
-     * <p>当前 V0.2 每个本地档案只有一个活跃学习者，按档案串行化提交足以覆盖首次创建窗口；
+     * <p>当前每个本地档案只有一个活跃学习者，按档案串行化提交足以覆盖首次创建窗口；
      * 锁随提交或回滚自动释放，不需要 Redis，也不会遗留应用层锁。</p>
      */
     void lockProfileForProgress(@Param("profileId") Long profileId);
 
-    /** 读取当前快照；在咨询锁之后保留行锁，避免绕过本提交链路的更新覆盖当前行。 */
-    StudyProgressEntity findByProfileIdAndQuestionIdForUpdate(@Param("profileId") Long profileId, @Param("questionId") Long questionId);
+    /** 读取当前快照；profile 行锁已串行化本提交链路，查询无需再叠加 progress 行锁。 */
+    StudyProgressEntity findByProfileIdAndQuestionId(@Param("profileId") Long profileId, @Param("questionId") Long questionId);
 
     /** 用 UPSERT 创建或推进快照，并原子累加次数。 */
     StudyProgressEntity upsertAfterAttempt(@Param("profileId") Long profileId, @Param("questionId") Long questionId,

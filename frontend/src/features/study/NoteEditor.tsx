@@ -1,28 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Input, Space, Typography } from 'antd';
-import { ApiRequestError, request } from '../../api/client';
+import { ApiRequestError } from '../../api/client';
+import { studyApi } from './api';
+import type { NoteData } from './types';
 
 type EditorStatus = 'IDLE' | 'DIRTY' | 'SAVING' | 'SAVED' | 'ERROR';
-
-interface NoteData {
-  id: number;
-  content: string;
-  version: number;
-}
 
 interface NoteEditorProps {
   targetType: 'QUESTION' | 'TOPIC';
   targetId: number;
 }
 
-async function loadNote(targetType: string, targetId: number) {
-  return request<NoteData | null>(`/api/study/notes?targetType=${targetType}&targetId=${targetId}`);
-}
-
 /**
- * 可复用笔记编辑器。
- *
- * 保存使用 1000ms 防抖；失败时不以旧服务端值覆盖本地输入，版本冲突只允许用户明确重新加载。
+ * 同一笔记只允许一个保存请求在途，避免连续输入时第二次请求携带旧 version。
+ * 真正跨标签页竞争时后端返回 VERSION_CONFLICT，前端保留当前输入而不覆盖他页内容。
  */
 export function NoteEditor({ targetType, targetId }: NoteEditorProps) {
   const [note, setNote] = useState<NoteData | null>(null);
@@ -30,47 +21,85 @@ export function NoteEditor({ targetType, targetId }: NoteEditorProps) {
   const [status, setStatus] = useState<EditorStatus>('IDLE');
   const [conflict, setConflict] = useState(false);
   const timerRef = useRef<number | null>(null);
+  const serverNoteRef = useRef<NoteData | null>(null);
+  const pendingContentRef = useRef<string | null>(null);
+  const savingRef = useRef(false);
+
+  const clearTimer = () => {
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   const reload = async () => {
-    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-    const current = await loadNote(targetType, targetId);
+    clearTimer();
+    pendingContentRef.current = null;
+    const current = await studyApi.note(targetType, targetId);
+    serverNoteRef.current = current;
     setNote(current);
     setContent(current?.content ?? '');
     setStatus('IDLE');
     setConflict(false);
   };
 
-  useEffect(() => { void reload(); return () => { if (timerRef.current !== null) window.clearTimeout(timerRef.current); }; }, [targetType, targetId]);
-
-  const save = async (nextContent: string, currentNote: NoteData | null) => {
+  const flush = async (): Promise<void> => {
+    if (savingRef.current || pendingContentRef.current === null) return;
+    const contentToSave = pendingContentRef.current;
+    if (!serverNoteRef.current && !contentToSave.trim()) {
+      pendingContentRef.current = null;
+      setStatus('IDLE');
+      return;
+    }
+    pendingContentRef.current = null;
+    savingRef.current = true;
     setStatus('SAVING');
+    let saved = false;
     try {
-      const saved = currentNote
-        ? await request<NoteData>(`/api/study/notes/${currentNote.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: nextContent, version: currentNote.version }) })
-        : await request<NoteData>('/api/study/notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetType, targetId, content: nextContent }) });
-      setNote(saved);
+      const current = serverNoteRef.current;
+      const next = current
+        ? await studyApi.updateNote(current.id, contentToSave, current.version)
+        : await studyApi.createNote(targetType, targetId, contentToSave);
+      serverNoteRef.current = next;
+      setNote(next);
       setStatus('SAVED');
       setConflict(false);
+      saved = true;
     } catch (error) {
+      pendingContentRef.current = contentToSave;
       setStatus('ERROR');
-      setConflict(error instanceof ApiRequestError && error.message.includes('其他页面'));
+      setConflict(error instanceof ApiRequestError && error.code === 'VERSION_CONFLICT');
+    } finally {
+      savingRef.current = false;
+      // 保存完成后立即处理保存期间的新输入，第二次请求始终使用最新 version。
+      if (saved && pendingContentRef.current !== null) void flush();
     }
   };
 
+  const scheduleFlush = () => {
+    clearTimer();
+    timerRef.current = window.setTimeout(() => { void flush(); }, 1000);
+  };
+
+  useEffect(() => {
+    void reload();
+    return clearTimer;
+  }, [targetType, targetId]);
+
   const onChange = (nextContent: string) => {
     setContent(nextContent);
+    pendingContentRef.current = nextContent;
     setStatus('DIRTY');
     setConflict(false);
-    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-    const noteSnapshot = note;
-    timerRef.current = window.setTimeout(() => { void save(nextContent, noteSnapshot); }, 1000);
+    scheduleFlush();
   };
 
   const statusText: Record<EditorStatus, string> = { IDLE: '', DIRTY: '待保存', SAVING: '保存中…', SAVED: '已保存', ERROR: '保存失败，输入内容仍在本地' };
   return <Space direction="vertical" size={8} style={{ width: '100%' }}>
     <Typography.Text type="secondary">学习笔记　{statusText[status]}</Typography.Text>
-    {conflict && <Alert type="warning" message="其他页面已修改笔记" action={<Button size="small" onClick={() => void reload()}>重新加载</Button>} />}
-    {status === 'ERROR' && !conflict && <Alert type="error" message="笔记保存失败，请稍后继续编辑" />}
+    {conflict && <Alert type="warning" message="其他页面已修改笔记" description="当前输入没有被覆盖。重新加载会读取对方已保存的版本。" action={<Button size="small" onClick={() => void reload()}>重新加载</Button>} />}
+    {status === 'ERROR' && !conflict && <Alert type="error" message="笔记保存失败，输入内容仍在本地" action={<Button size="small" onClick={() => void flush()}>重新保存</Button>} />}
     <Input.TextArea value={content} onChange={(event) => onChange(event.target.value)} rows={5} maxLength={20000} placeholder="记录自己的理解、易错点或追问…" />
+    {note && <Typography.Text type="secondary">最近保存：{new Date(note.updatedAt).toLocaleString('zh-CN')}</Typography.Text>}
   </Space>;
 }

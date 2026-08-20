@@ -1,0 +1,137 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - complementary [ref=f5e3]:
+      - generic [ref=f5e4]:
+        - generic [ref=f5e5]: J
+        - generic [ref=f5e6]:
+          - text: Java Interview Lab
+          - generic [ref=f5e7]: V0.3 社招通关版
+      - navigation [ref=f5e8]:
+        - button "⌂ 首页 / 工作台" [ref=f5e9] [cursor=pointer]:
+          - generic [ref=f5e10]: ⌂
+          - generic [ref=f5e11]: 首页 / 工作台
+        - button "◉ 知识地图" [ref=f5e12] [cursor=pointer]:
+          - generic [ref=f5e13]: ◉
+          - generic [ref=f5e14]: 知识地图
+        - button "▣ 题目学习" [ref=f5e15] [cursor=pointer]:
+          - generic [ref=f5e16]: ▣
+          - generic [ref=f5e17]: 题目学习
+        - button "◇ 场景训练" [ref=f5e18] [cursor=pointer]:
+          - generic [ref=f5e19]: ◇
+          - generic [ref=f5e20]: 场景训练
+        - button "↻ 复习中心" [ref=f5e21] [cursor=pointer]:
+          - generic [ref=f5e22]: ↻
+          - generic [ref=f5e23]: 复习中心
+        - button "</> 源码阅读" [ref=f5e24] [cursor=pointer]:
+          - generic [ref=f5e25]: </>
+          - generic [ref=f5e26]: 源码阅读
+        - button "△ 动画实验室" [ref=f5e27] [cursor=pointer]:
+          - generic [ref=f5e28]: △
+          - generic [ref=f5e29]: 动画实验室
+        - button "◍ 模拟面试" [ref=f5e30] [cursor=pointer]:
+          - generic [ref=f5e31]: ◍
+          - generic [ref=f5e32]: 模拟面试
+        - button "✦ AI 专题" [ref=f5e33] [cursor=pointer]:
+          - generic [ref=f5e34]: ✦
+          - generic [ref=f5e35]: AI 专题
+        - button "⚙ 管理 / 系统" [ref=f5e36] [cursor=pointer]:
+          - generic [ref=f5e37]: ⚙
+          - generic [ref=f5e38]: 管理 / 系统
+      - generic [ref=f5e39]: 原型规则生产 React 页面禁止硬编码本原型数字；它们只表达布局与状态。
+    - main [ref=f5e40]:
+      - generic [ref=f5e41]:
+        - generic [ref=f5e42]:
+          - text: ⌕
+          - textbox "搜索考点、源码、场景（HashMap / 幂等 / B+ 树）" [ref=f5e43]
+        - generic [ref=f5e44]:
+          - button "30 天冲刺" [ref=f5e45] [cursor=pointer]
+          - button "15 天进阶" [ref=f5e46] [cursor=pointer]
+          - button "10 天突击" [ref=f5e47] [cursor=pointer]
+        - generic [ref=f5e48]:
+          - button "▤" [ref=f5e49] [cursor=pointer]
+          - button "♡" [ref=f5e50] [cursor=pointer]
+          - generic [ref=f5e51]: P7+
+      - generic [ref=f5e53]:
+        - generic [ref=f5e54]:
+          - generic [ref=f5e55]:
+            - heading "首页 / 工作台" [level=1] [ref=f5e56]
+            - paragraph [ref=f5e57]: 今天该学什么、该复习什么，以及真实的掌握状态。
+          - generic [ref=f5e58]: 本地服务已同步
+        - generic [ref=f5e59]:
+          - generic [ref=f5e60]:
+            - heading "早上好，码上进步！ 🚀" [level=2] [ref=f5e61]
+            - paragraph [ref=f5e62]: 当前：30 天 Java 后端冲刺 · Day 4 / 30 · 今天比昨天更进一步。
+            - generic [ref=f5e63]:
+              - generic [ref=f5e64]: HashMap 源码与扩容
+              - generic [ref=f5e65]: 支付重复处理
+              - generic [ref=f5e66]: AQS 原理
+            - button "继续今日学习" [ref=f5e67] [cursor=pointer]
+          - generic [ref=f5e68]:
+            - generic [ref=f5e70]:
+              - strong [ref=f5e71]: 72%
+              - generic [ref=f5e72]: 236 / 326 节点
+            - generic [ref=f5e73]: 总体学习进度 · 不是简单完成率
+        - generic [ref=f5e74]:
+          - generic [ref=f5e75]:
+            - generic [ref=f5e76]: ▤
+            - text: 预习
+            - paragraph [ref=f5e77]: 按路线理解新知识
+          - generic [ref=f5e78]:
+            - generic [ref=f5e79]: ✓
+            - text: 练习
+            - paragraph [ref=f5e80]: 闭卷输出面试回答
+          - generic [ref=f5e81]:
+            - generic [ref=f5e82]: ↻
+            - text: 复习
+            - paragraph [ref=f5e83]: 处理逾期与今日任务
+          - generic [ref=f5e84]:
+            - generic [ref=f5e85]: "!"
+            - text: 错题本
+            - paragraph [ref=f5e86]: 优先修复高频薄弱点
+          - generic [ref=f5e87]:
+            - generic [ref=f5e88]: ✎
+            - text: 笔记
+            - paragraph [ref=f5e89]: 沉淀自己的理解
+        - generic [ref=f5e90]:
+          - generic [ref=f5e91]:
+            - text: 今日计划
+            - generic [ref=f5e92]: 6 项
+          - generic [ref=f5e93]:
+            - text: 待复习
+            - generic [ref=f5e94]: 14 项
+          - generic [ref=f5e95]:
+            - text: 激活错题
+            - generic [ref=f5e96]: 7 题
+          - generic [ref=f5e97]:
+            - text: 五星掌握率
+            - generic [ref=f5e98]: 78%
+        - generic [ref=f5e99]:
+          - generic [ref=f5e100]:
+            - generic [ref=f5e101]:
+              - heading "今日推荐攻坚" [level=3] [ref=f5e102]
+              - button "知识地图" [ref=f5e103] [cursor=pointer]
+            - list [ref=f5e104]:
+              - listitem [ref=f5e105]:
+                - generic [ref=f5e107]: HashMap resize 高低位迁移
+                - generic [ref=f5e108]: 学习中
+              - listitem [ref=f5e109]:
+                - generic [ref=f5e111]: 支付重复回调 Case B
+                - generic [ref=f5e112]: 练习
+              - listitem [ref=f5e113]:
+                - generic [ref=f5e115]: AQS acquire / release
+                - generic [ref=f5e116]: 复习
+          - generic [ref=f5e117]:
+            - generic [ref=f5e118]:
+              - heading "待复习 / 错题" [level=3] [ref=f5e119]
+              - button "查看全部" [ref=f5e120] [cursor=pointer]
+            - list [ref=f5e121]:
+              - listitem [ref=f5e122]:
+                - generic [ref=f5e123]: 缓存一致性为什么常用更新 DB 后删缓存？
+                - generic [ref=f5e124]: 逾期
+              - listitem [ref=f5e125]:
+                - generic [ref=f5e126]: ThreadPoolExecutor.execute 流程
+                - generic [ref=f5e127]: ★★★★★
+              - listitem [ref=f5e128]:
+                - generic [ref=f5e129]: 事务自调用失效
+                - generic [ref=f5e130]: 错误 2 次
+  - generic [ref=f5e131]: Canonical Prototype · 生产页面必须绑定真实 API / DB，原型数字只用于视觉。

@@ -1,0 +1,26 @@
+- generic [ref=f4e3]:
+  - complementary [ref=f4e4]:
+    - generic [ref=f4e5]:
+      - generic [ref=f4e6]:
+        - text: Java Interview Lab
+        - generic [ref=f4e7]: Java 后端面试学习系统
+      - menu [ref=f4e8]:
+        - menuitem "home 首页" [ref=f4e9] [cursor=pointer]:
+          - img "home" [ref=f4e10]
+          - generic [ref=f4e13]: 首页
+        - menuitem "compass 开始学习" [ref=f4e14] [cursor=pointer]:
+          - img "compass" [ref=f4e15]
+          - generic [ref=f4e18]: 开始学习
+        - menuitem "book 题库" [ref=f4e19] [cursor=pointer]:
+          - img "book" [ref=f4e20]
+          - generic [ref=f4e23]: 题库
+        - menuitem "undo 复习中心" [ref=f4e24] [cursor=pointer]:
+          - img "undo" [ref=f4e25]
+          - generic [ref=f4e28]: 复习中心
+        - menuitem "setting 管理 / 设置" [ref=f4e29] [cursor=pointer]:
+          - img "setting" [ref=f4e30]
+          - generic [ref=f4e33]: 管理 / 设置
+  - generic [ref=f4e34]:
+    - banner [ref=f4e35]: 面向 Java 后端面试的学习系统
+    - main [ref=f4e36]:
+      - generic "内容加载中" [ref=f4e37]

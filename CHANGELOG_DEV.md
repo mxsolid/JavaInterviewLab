@@ -1,5 +1,20 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P00 基线锁定与复现证据
+
+- 锁定 V0.3 基线 `b99e7fb55995162d301d3690c14c3791beaef6c3`，创建 `feat/v03` 分支；未修改业务代码。
+- 保存后端测试/打包、前端安装/类型检查/构建、数据库版本与题目数量基线。
+- 用真实浏览器打开 `/`、`/study`、`/questions`、`/questions/1`、`/review`，保存 5 张当前页面截图和 2 张 canonical 对照截图。
+- 记录当前 5 个导航入口与 canonical 10 个模块的差距；确认业务请求无 4xx/5xx，存在 3 类 Ant Design 弃用 console error。
+- 记录生产单 JS chunk 1,240.10 kB、gzip 393.52 kB，保留 Vite 超过 500 kB 告警作为后续性能基线。
+
+### 验证
+
+- JDK 21.0.12.1 + Maven 3.8.4：`mvn -B -ntp clean test` 通过，25 个测试；`mvn -B -ntp package -DskipTests` 通过。
+- Node 22.13.0 + npm 10.9.2：`npm ci`、`npm run typecheck`、`npm run build` 通过。
+- PostgreSQL 16.15：Flyway V10，题目 7 条，其中 ENABLED 6 条。
+- 浏览器：5 个当前路由均成功打开；观察到的 18 次业务请求全部返回 200。
+
 ## 2026-08-20 — V0.2.1 前端学习闭环、原型还原与端到端验收
 
 - FE01：API Client 安全处理网络错误、JSON 业务错误和非 JSON HTTP 错误；`ApiRequestError` 增加 `code`、`status`、`traceId`，学习 queryKey 集中管理。

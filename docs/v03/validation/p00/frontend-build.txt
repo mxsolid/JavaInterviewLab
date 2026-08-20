@@ -1,0 +1,30 @@
+v22.13.0
+10.9.2
+
+added 94 packages in 40s
+
+12 packages are looking for funding
+  run `npm fund` for details
+
+> java-interview-lab-frontend@0.1.0 typecheck
+> tsc -b --pretty false
+
+
+> java-interview-lab-frontend@0.1.0 build
+> tsc -b && vite build
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 3155 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                     0.47 kB │ gzip:   0.30 kB
+dist/assets/index-D_7IAPJ_.css      3.33 kB │ gzip:   1.28 kB
+dist/assets/index-CRz37Fl8.js   1,240.10 kB │ gzip: 393.52 kB
+
+✓ built in 17.32s
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

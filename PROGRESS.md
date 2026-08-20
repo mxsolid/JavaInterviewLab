@@ -64,6 +64,21 @@
 | FE08 | StudyPlan / QuestionBank 原型统一 | DONE |
 | FE09 | 本地构建与端到端验收 | DONE |
 
+## V0.3 产品化阶段
+
+| Phase | 任务 | 状态 |
+|---|---|---|
+| P00 | 锁定基线、复现问题、建立验收证据 | DONE |
+| P01 | 后端稳定性与 API 契约 | TODO |
+| P02 | Seed Import V2 与完整题库 | TODO |
+| P03 | Scenario / Source / Lab 后端 | TODO |
+| P04 | 前端 Design System 与 AppShell | TODO |
+| P05 | Workbench / Knowledge / Question 核心页面 | TODO |
+| P06 | Scenario / Source / Lab / Interview 页面 | TODO |
+| P07 | 真实端到端联调 | TODO |
+| P08 | E2E / Visual / Performance | TODO |
+| P09 | Windows 部署与最终验收 | TODO |
+
 ## V0.3 场景训练版
 
 | ID | 子任务 | 状态 | 难度 | 相对工作量 | 建议 Agent Token 预算 |
@@ -83,3 +98,9 @@
 ## 当前阻塞
 
 - 无。V0.2 已完成本地 PostgreSQL 自动测试、前端构建和停启后的学习数据回读验收。
+
+## 当前决策
+
+- P00 基线锁定为 `b99e7fb55995162d301d3690c14c3791beaef6c3`，后续 phase 基于 `feat/v03` 继续。
+- 根目录 `AGENTS.md` 的日期格式 `yyyy-MM-dd HH:mm:ss` 高于旧启动包中的错误格式写法。
+- 日志继续遵守根目录 `AGENTS.md`，不记录密码、Token 或完整敏感数据；dev 环境不降低该约束。

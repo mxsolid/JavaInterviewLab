@@ -1,0 +1,146 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - complementary [ref=f6e3]:
+      - generic [ref=f6e4]:
+        - generic [ref=f6e5]: J
+        - generic [ref=f6e6]:
+          - text: Java Interview Lab
+          - generic [ref=f6e7]: V0.3 社招通关版
+      - navigation [ref=f6e8]:
+        - button "⌂ 首页 / 工作台" [ref=f6e9] [cursor=pointer]:
+          - generic [ref=f6e10]: ⌂
+          - generic [ref=f6e11]: 首页 / 工作台
+        - button "◉ 知识地图" [ref=f6e12] [cursor=pointer]:
+          - generic [ref=f6e13]: ◉
+          - generic [ref=f6e14]: 知识地图
+        - button "▣ 题目学习" [ref=f6e15] [cursor=pointer]:
+          - generic [ref=f6e16]: ▣
+          - generic [ref=f6e17]: 题目学习
+        - button "◇ 场景训练" [ref=f6e18] [cursor=pointer]:
+          - generic [ref=f6e19]: ◇
+          - generic [ref=f6e20]: 场景训练
+        - button "↻ 复习中心" [ref=f6e21] [cursor=pointer]:
+          - generic [ref=f6e22]: ↻
+          - generic [ref=f6e23]: 复习中心
+        - button "</> 源码阅读" [ref=f6e24] [cursor=pointer]:
+          - generic [ref=f6e25]: </>
+          - generic [ref=f6e26]: 源码阅读
+        - button "△ 动画实验室" [ref=f6e27] [cursor=pointer]:
+          - generic [ref=f6e28]: △
+          - generic [ref=f6e29]: 动画实验室
+        - button "◍ 模拟面试" [ref=f6e30] [cursor=pointer]:
+          - generic [ref=f6e31]: ◍
+          - generic [ref=f6e32]: 模拟面试
+        - button "✦ AI 专题" [ref=f6e33] [cursor=pointer]:
+          - generic [ref=f6e34]: ✦
+          - generic [ref=f6e35]: AI 专题
+        - button "⚙ 管理 / 系统" [ref=f6e36] [cursor=pointer]:
+          - generic [ref=f6e37]: ⚙
+          - generic [ref=f6e38]: 管理 / 系统
+      - generic [ref=f6e39]: 原型规则生产 React 页面禁止硬编码本原型数字；它们只表达布局与状态。
+    - main [ref=f6e40]:
+      - generic [ref=f6e41]:
+        - generic [ref=f6e42]:
+          - text: ⌕
+          - textbox "搜索考点、源码、场景（HashMap / 幂等 / B+ 树）" [ref=f6e43]
+        - generic [ref=f6e44]:
+          - button "30 天冲刺" [ref=f6e45] [cursor=pointer]
+          - button "15 天进阶" [ref=f6e46] [cursor=pointer]
+          - button "10 天突击" [ref=f6e47] [cursor=pointer]
+        - generic [ref=f6e48]:
+          - button "▤" [ref=f6e49] [cursor=pointer]
+          - button "♡" [ref=f6e50] [cursor=pointer]
+          - generic [ref=f6e51]: P7+
+      - generic [ref=f6e53]:
+        - generic [ref=f6e54]:
+          - generic [ref=f6e55]:
+            - heading "题目学习 · HashMap 底层实现原理" [level=1] [ref=f6e56]
+            - paragraph [ref=f6e57]: 先输出，再看答案；把“一句话会背”升级到“能讲清设计、源码、边界”。
+          - generic [ref=f6e58]:
+            - text: ★★★★★
+            - generic [ref=f6e59]: 超高频
+        - generic [ref=f6e60]:
+          - generic [ref=f6e61]:
+            - generic [ref=f6e62]:
+              - generic [ref=f6e63]:
+                - generic [ref=f6e64]:
+                  - generic [ref=f6e65]: 集合框架
+                  - heading "HashMap 为什么数组长度通常设计为 2 的幂？" [level=2] [ref=f6e66]
+                  - text: JDK 8 / 11 / 17 / 21 · Source + Practice
+                - button "☆ 收藏" [ref=f6e67] [cursor=pointer]
+              - generic [ref=f6e68]:
+                - button "30 秒极速背诵" [ref=f6e69] [cursor=pointer]
+                - button "标准回答" [ref=f6e70] [cursor=pointer]
+                - button "深度追问剖析" [ref=f6e71] [cursor=pointer]
+                - button "常见丢分点" [ref=f6e72] [cursor=pointer]
+              - generic [ref=f6e73]:
+                - text: 核心结论：容量为 2 的幂时可以通过
+                - code [ref=f6e74]: (n - 1) & hash
+                - text: 高效定位桶；扩容翻倍后，节点只需要判断 oldCap 对应的那一位，就能确定留在原索引还是移动到
+                - code [ref=f6e75]: oldIndex + oldCap
+                - text: 。
+            - generic [ref=f6e76]:
+              - generic [ref=f6e77]:
+                - heading "闭卷练习" [level=3] [ref=f6e78]
+                - generic [ref=f6e79]: clientAttemptId 已生成
+              - paragraph [ref=f6e80]: 这里的交互必须在 production 中真实调用 answer-view / submit attempt API。
+              - textbox "用自己的话回答。建议 30 秒到 2 分钟完整口述……" [ref=f6e81]
+              - generic [ref=f6e82]:
+                - generic [ref=f6e83]:
+                  - button "不会" [ref=f6e84] [cursor=pointer]
+                  - button "模糊" [ref=f6e85] [cursor=pointer]
+                  - button "基本" [ref=f6e86] [cursor=pointer]
+                  - button "熟练" [ref=f6e87] [cursor=pointer]
+                  - button "掌握" [ref=f6e88] [cursor=pointer]
+                - generic [ref=f6e89]:
+                  - button "查看参考答案" [ref=f6e90] [cursor=pointer]
+                  - button "提交练习" [ref=f6e91] [cursor=pointer]
+            - generic [ref=f6e92]:
+              - generic [ref=f6e93]:
+                - heading "源码 / 结构联动" [level=3] [ref=f6e94]
+                - button "打开源码阅读页" [ref=f6e95] [cursor=pointer]
+              - generic [ref=f6e96]:
+                - generic [ref=f6e97]: treeify：链表长度达到阈值只是触发条件之一；数组容量不足时优先扩容。resize：JDK 8 通过新增容量位拆成 low/high 两条链，避免重新做完整桶定位。
+                - generic [ref=f6e98]: Node<K,V>[] table[0] → Node(k1,v1)[1] → TreeNode(root)[2] → Node(k2) → Node(k3)[3] → null
+          - complementary [ref=f6e99]:
+            - generic [ref=f6e100]:
+              - generic [ref=f6e101]:
+                - heading "当前掌握" [level=3] [ref=f6e102]
+                - generic [ref=f6e103]: 学习中
+              - generic [ref=f6e104]:
+                - generic [ref=f6e105]: 练习次数
+                - generic [ref=f6e106]: "6"
+              - generic [ref=f6e107]:
+                - generic [ref=f6e108]: 错误次数
+                - generic [ref=f6e109]: "2"
+              - generic [ref=f6e110]:
+                - generic [ref=f6e111]: 掌握度
+                - generic [ref=f6e112]: ★★★☆☆
+              - generic [ref=f6e113]:
+                - generic [ref=f6e114]: 下次复习
+                - generic [ref=f6e115]: 08-22 09:00
+            - generic [ref=f6e116]:
+              - generic [ref=f6e117]:
+                - heading "关键术语" [level=3] [ref=f6e118]
+                - generic [ref=f6e119]: 点击发音
+              - generic [ref=f6e120]:
+                - generic [ref=f6e121]: load factor负载因子
+                - button "🔊" [ref=f6e122] [cursor=pointer]
+              - generic [ref=f6e123]:
+                - generic [ref=f6e124]: treeify树化
+                - button "🔊" [ref=f6e125] [cursor=pointer]
+              - generic [ref=f6e126]:
+                - generic [ref=f6e127]: fail-fast快速失败
+                - button "🔊" [ref=f6e128] [cursor=pointer]
+            - generic [ref=f6e129]:
+              - heading "高频追问" [level=3] [ref=f6e131]
+              - list [ref=f6e132]:
+                - listitem [ref=f6e133]: 为什么不是任意偶数？
+                - listitem [ref=f6e134]: JDK 8 resize 如何避免重新定位？
+                - listitem [ref=f6e135]: hashCode 很差会怎样？
+            - generic [ref=f6e136]:
+              - generic [ref=f6e137]:
+                - heading "我的笔记" [level=3] [ref=f6e138]
+                - generic [ref=f6e139]: 已保存
+              - textbox "Markdown 自动保存……" [ref=f6e140]: 树化除了链表长度阈值，还要注意数组容量门槛。
+  - generic [ref=f6e141]: Canonical Prototype · 生产页面必须绑定真实 API / DB，原型数字只用于视觉。

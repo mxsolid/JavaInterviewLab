@@ -1,0 +1,118 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - text: Java Interview Lab
+        - generic [ref=e7]: Java 后端面试学习系统
+      - menu [ref=e8]:
+        - menuitem "home 首页" [ref=e9] [cursor=pointer]:
+          - img "home" [ref=e10]
+          - generic [ref=e13]: 首页
+        - menuitem "compass 开始学习" [ref=e14] [cursor=pointer]:
+          - img "compass" [ref=e15]
+          - generic [ref=e18]: 开始学习
+        - menuitem "book 题库" [ref=e19] [cursor=pointer]:
+          - img "book" [ref=e20]
+          - generic [ref=e23]: 题库
+        - menuitem "undo 复习中心" [ref=e24] [cursor=pointer]:
+          - img "undo" [ref=e25]
+          - generic [ref=e28]: 复习中心
+        - menuitem "setting 管理 / 设置" [ref=e29] [cursor=pointer]:
+          - img "setting" [ref=e30]
+          - generic [ref=e33]: 管理 / 设置
+  - generic [ref=e34]:
+    - banner [ref=e35]: 面向 Java 后端面试的学习系统
+    - main [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e40]:
+          - heading "首页 / 工作台" [level=2] [ref=e41]
+          - generic [ref=e42]: 今天该学什么、该复习什么，以及真实的掌握状态。
+        - generic [ref=e46]:
+          - generic [ref=e48]:
+            - heading "今天继续 Java 面试冲刺" [level=2] [ref=e50]
+            - generic [ref=e51]: 当前：10 天突击 · Day 2 / 10
+            - generic [ref=e53]: 已练习 1 / 6 题；较熟练及以上 0 题。
+            - button "查看今日任务" [ref=e56] [cursor=pointer]
+          - generic [ref=e59]:
+            - progressbar [ref=e61]:
+              - generic "17%" [ref=e66]
+            - generic [ref=e67]: 已练习占比，不等于已完成
+        - generic [ref=e69]:
+          - generic [ref=e73] [cursor=pointer]:
+            - img "read" [ref=e76]
+            - strong [ref=e81]: 今日学习
+            - generic [ref=e82]: 按当前路线进入任务
+            - button "进入" [ref=e84]
+          - generic [ref=e89] [cursor=pointer]:
+            - img "edit" [ref=e92]
+            - strong [ref=e97]: 开始练习
+            - generic [ref=e98]: 从题库选择一道题
+            - button "进入" [ref=e100]
+          - generic [ref=e105] [cursor=pointer]:
+            - img "undo" [ref=e108]
+            - strong [ref=e113]: 复习中心
+            - generic [ref=e114]: 处理逾期与今日复习
+            - button "进入" [ref=e116]
+          - generic [ref=e121] [cursor=pointer]:
+            - img "clock-circle" [ref=e124]
+            - strong [ref=e130]: 错题本
+            - generic [ref=e131]: 查看待解决的错误
+            - button "进入" [ref=e133]
+          - generic [ref=e138] [cursor=pointer]:
+            - img "book" [ref=e141]
+            - strong [ref=e146]: 题库
+            - generic [ref=e147]: 搜索全部知识点
+            - button "进入" [ref=e149]
+        - generic [ref=e152]:
+          - generic [ref=e156]:
+            - generic [ref=e157]: 今日计划
+            - generic [ref=e159]:
+              - generic [ref=e160]: "1"
+              - generic [ref=e161]: 项
+          - generic [ref=e165]:
+            - generic [ref=e166]: 待复习
+            - generic [ref=e168]:
+              - generic [ref=e169]: "0"
+              - generic [ref=e170]: 项
+          - generic [ref=e174]:
+            - generic [ref=e175]: 激活错题
+            - generic [ref=e177]:
+              - generic [ref=e178]: "1"
+              - generic [ref=e179]: 题
+          - generic [ref=e183]:
+            - generic [ref=e184]: 五星掌握率
+            - generic [ref=e186]:
+              - generic [ref=e187]: "0"
+              - generic [ref=e188]: "%"
+        - generic [ref=e190]:
+          - generic [ref=e192]:
+            - generic [ref=e194]:
+              - generic [ref=e195]: 待复习
+              - button "查看全部" [ref=e197] [cursor=pointer]
+            - generic [ref=e199]: 暂无待复习内容
+          - generic [ref=e205]:
+            - generic [ref=e207]:
+              - generic [ref=e208]: 错题本
+              - button "查看全部" [ref=e210] [cursor=pointer]
+            - list [ref=e216]:
+              - listitem [ref=e217]:
+                - generic [ref=e218]:
+                  - generic [ref=e219]: B08重启验收题目-202608202138
+                  - generic [ref=e220]: 有印象
+                  - generic [ref=e222]: 错误 2 次
+                - list [ref=e224]:
+                  - listitem [ref=e225]:
+                    - button "查看" [ref=e226] [cursor=pointer]
+                    - emphasis [ref=e228]
+                  - listitem [ref=e229]:
+                    - button "标记解决" [ref=e230] [cursor=pointer]
+        - generic [ref=e233]:
+          - generic [ref=e234]: 最近学习
+          - list [ref=e241]:
+            - listitem [ref=e242]:
+              - generic [ref=e243]:
+                - generic [ref=e244]: B08重启验收题目-202608202138
+                - generic [ref=e245]: 有印象
+              - list [ref=e247]:
+                - listitem [ref=e248]:
+                  - button "查看" [ref=e249] [cursor=pointer]

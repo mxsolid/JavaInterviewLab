@@ -49,6 +49,7 @@ class FreshDatabaseAcceptanceTest {
                             "logging.level.root=WARN"
                     )
                     .run(
+                            "--jil.test.seed.enabled=false",
                             "--spring.datasource.url=" + DATABASE_URL_PREFIX + databaseName,
                             "--spring.datasource.username=" + USERNAME,
                             "--spring.datasource.password=" + PASSWORD

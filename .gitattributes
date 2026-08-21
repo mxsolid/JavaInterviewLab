@@ -1,0 +1,2 @@
+/backend/src/main/resources/seed/*.json text eol=lf
+/seeds/*.json text eol=lf

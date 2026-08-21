@@ -1,12 +1,7 @@
-import { mkdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { captureViewport } from './helpers/screenshot';
 
-const evidenceDirectory = resolve('..', 'docs', 'v03', 'validation', 'p04', 'screenshots');
-
 test('canonical shell 在桌面和移动端保持可用', async ({ page }) => {
-  await mkdir(evidenceDirectory, { recursive: true });
   const errors: string[] = [];
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text());
@@ -22,7 +17,7 @@ test('canonical shell 在桌面和移动端保持可用', async ({ page }) => {
     { name: 'shell-1920', width: 1920, height: 1080 },
     { name: 'shell-mobile-390', width: 390, height: 844 },
   ]) {
-    await captureViewport(page, viewport, resolve(evidenceDirectory, `${viewport.name}.png`));
+    await captureViewport(page, viewport);
   }
 
   await expect(page.getByRole('navigation', { name: '主导航' })).toBeVisible();

@@ -1,5 +1,22 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P08 E2E、视觉回归与性能门禁
+
+- 新增确定性 E2E profile 和固定隔离库重建脚本；每次导入正式 336 题、创建独立 Profile 并激活 10 天冲刺路线。
+- 新增 11 个规定视口的 Playwright 像素基线，覆盖 Workbench、Knowledge、Question、Scenario、Source、Lab、Review 和移动端。
+- 增加键盘焦点、可访问名称、非纯颜色状态和 reduced motion 冒烟；首页断言不请求 Lab/Source 路由模块。
+- 调整 Vite 共享包拆分，新增 manifest 分析与 bundle gate；最大 chunk 从 581.87 KiB 降至 174.26 KiB。
+- 保存 keyword search 的 `EXPLAIN (ANALYZE, BUFFERS)`；336 题下返回 7 行，执行时间 0.700 ms。
+- 修复全新库中 V16 先执行、Topic 后导入造成的 Source 空关联；种子事务补齐 3 条固定映射，新库验收覆盖 3/3 关联。
+
+### 验证
+
+- JDK 21 + Maven 3.8.4：`mvn -B -ntp test` 通过，49/49；`mvn -B -ntp package -DskipTests` 通过。
+- Node 22.13.0：`npm run typecheck`、`npm run test`、`npm run performance` 通过；Vitest 5/5。
+- Playwright Chromium：17/17 通过；11 个 visual baseline 在无更新模式下无差异。
+- Bundle gate：初始静态 JS 834.51 KiB / 850 KiB，最大 chunk 174.26 KiB / 500 KiB，首页未加载 Lab/Source。
+- 完整证据见 `docs/v03/validation/p08/validation.md`、`bundle-report.md` 与 `keyword-search-explain.md`。
+
 ## 2026-08-21 — V0.3 P07 真实端到端联调
 
 - 新增 `/api/v1/system/status`，一次 PostgreSQL 快照返回服务状态、数据库/Flyway 版本及题目、场景、Source、Lab 计数；管理页接入真实状态卡片。

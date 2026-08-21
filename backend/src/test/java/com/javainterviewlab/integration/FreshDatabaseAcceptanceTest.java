@@ -73,6 +73,10 @@ class FreshDatabaseAcceptanceTest {
             assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM scenario_case", Integer.class)).isEqualTo(60);
             assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM study_plan_item", Integer.class)).isEqualTo(34);
             assertThat(jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM source_snippet WHERE status = 'ENABLED' AND topic_id IS NOT NULL",
+                    Integer.class
+            )).isEqualTo(3);
+            assertThat(jdbcTemplate.queryForObject(
                     "SELECT version::integer FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1",
                     Integer.class
             )).isEqualTo(16);

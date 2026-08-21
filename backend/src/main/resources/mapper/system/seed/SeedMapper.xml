@@ -53,6 +53,25 @@
         RETURNING id
     </select>
 
+    <!-- Flyway 先创建 Source，生产种子后创建 Topic，因此关联必须在 Topic 写入后补齐。 -->
+    <update id="linkSourceSnippetsToTopics">
+        UPDATE source_snippet AS source
+        SET topic_id = topic.id,
+            updated_at = CURRENT_TIMESTAMP
+        FROM topic
+        WHERE topic.code = CASE source.external_key
+            WHEN 'source-hashmap-bucket' THEN 'topic-collections'
+            WHEN 'source-aqs-acquire' THEN 'topic-concurrency'
+            WHEN 'source-transaction-boundary' THEN 'topic-db-transaction'
+        END
+          AND source.external_key IN (
+              'source-hashmap-bucket',
+              'source-aqs-acquire',
+              'source-transaction-boundary'
+          )
+          AND source.topic_id IS DISTINCT FROM topic.id
+    </update>
+
     <select id="insertQuestion" resultType="long">
         INSERT INTO question (
             topic_id, external_key, title, question_type, star_level, difficulty,

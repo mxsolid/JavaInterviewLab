@@ -31,6 +31,8 @@ public interface SeedMapper {
             @Param("starLevel") Integer starLevel
     );
 
+    int linkSourceSnippetsToTopics();
+
     Long insertQuestion(
             @Param("topicId") Long topicId,
             @Param("seedPack") String seedPack,

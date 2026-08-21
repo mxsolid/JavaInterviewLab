@@ -1,8 +1,4 @@
-import { mkdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-
-const evidenceDirectory = resolve('..', 'docs', 'v03', 'validation', 'p06', 'screenshots');
 
 function collectErrors(page: Page): string[] {
   const errors: string[] = [];
@@ -16,23 +12,22 @@ function collectErrors(page: Page): string[] {
   return errors;
 }
 
-async function capture(page: Page, route: string, heading: string, name: string, width: number, height: number) {
+async function verifyViewport(page: Page, route: string, heading: string, width: number, height: number) {
   await page.setViewportSize({ width, height });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(route);
-  await expect(page.getByRole('heading', { name, exact: false }).or(page.getByRole('heading', { name: heading, exact: false }))).toBeVisible();
-  await page.screenshot({ path: resolve(evidenceDirectory, `${name}.png`), fullPage: false, animations: 'disabled' });
+  await expect(page.getByRole('heading', { name: heading, exact: false })).toBeVisible();
+  await page.screenshot({ fullPage: false, animations: 'disabled' });
 }
 
 test('四个工作区生成桌面与移动端基线', async ({ page }) => {
-  await mkdir(evidenceDirectory, { recursive: true });
   const errors = collectErrors(page);
-  await capture(page, '/scenarios', '场景训练', 'scenario-1720', 1720, 1000);
-  await capture(page, '/source', '源码 + 注释阅读', 'source-1720', 1720, 1000);
-  await capture(page, '/lab', '动画实验室', 'lab-1720', 1720, 1000);
-  await capture(page, '/interview', '模拟面试', 'interview-1720', 1720, 1000);
-  await capture(page, '/scenarios', '场景训练', 'scenario-mobile-390', 390, 844);
-  await capture(page, '/interview', '模拟面试', 'interview-mobile-390', 390, 844);
+  await verifyViewport(page, '/scenarios', '场景训练', 1720, 1000);
+  await verifyViewport(page, '/source', '源码 + 注释阅读', 1720, 1000);
+  await verifyViewport(page, '/lab', '动画实验室', 1720, 1000);
+  await verifyViewport(page, '/interview', '模拟面试', 1720, 1000);
+  await verifyViewport(page, '/scenarios', '场景训练', 390, 844);
+  await verifyViewport(page, '/interview', '模拟面试', 390, 844);
   expect(errors).toEqual([]);
 });
 

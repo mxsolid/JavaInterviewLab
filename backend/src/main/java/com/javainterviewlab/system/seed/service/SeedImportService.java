@@ -86,12 +86,18 @@ public class SeedImportService {
             seedMapper.lockSeedPack(pack.seedPack());
         }
         ImportAnalysis analysis = analyze(pack);
-        if (dryRun || analysis.alreadyImported()) {
+        if (dryRun) {
             return response(pack, dryRun, analysis, elapsedMillis(startedAt));
+        }
+        if (analysis.alreadyImported()) {
+            // 兼容曾在全新库中先执行 Flyway、后导入 Topic 而留下的 Source 空关联。
+            seedMapper.linkSourceSnippetsToTopics();
+            return response(pack, false, analysis, elapsedMillis(startedAt));
         }
 
         Map<String, Long> categoryIds = upsertCategories(pack);
         Map<String, Long> topicIds = upsertTopics(pack, categoryIds);
+        seedMapper.linkSourceSnippetsToTopics();
         for (int index = 0; index < pack.questions().size(); index++) {
             SeedQuestion question = pack.questions().get(index);
             SeedQuestionDecision decision = analysis.decisions().get(index);

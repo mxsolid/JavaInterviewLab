@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javainterviewlab.system.e2e.E2eProfileMapper">
+    <select id="insertProfile" resultType="long">
+        INSERT INTO profile (display_name, is_default)
+        VALUES (#{displayName}, FALSE)
+        RETURNING id
+    </select>
+
+    <insert id="activatePlan">
+        INSERT INTO profile_plan (profile_id, study_plan_id, started_at, selected_at, active)
+        SELECT #{profileId}, id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE
+        FROM study_plan
+        WHERE code = #{planCode} AND status = 'ENABLED'
+    </insert>
+</mapper>

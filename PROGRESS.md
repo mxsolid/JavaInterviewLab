@@ -76,7 +76,7 @@
 | P05 | Workbench / Knowledge / Question 核心页面 | DONE |
 | P06 | Scenario / Source / Lab / Interview 页面 | DONE |
 | P07 | 真实端到端联调 | DONE |
-| P08 | E2E / Visual / Performance | TODO |
+| P08 | E2E / Visual / Performance | DONE |
 | P09 | Windows 部署与最终验收 | TODO |
 
 ## V0.3 场景训练版
@@ -128,3 +128,8 @@
 - fresh DB 验收只创建并删除正则校验后的 `jil_p07_*` 随机数据库；不清理或改写 `devdb`。
 - 三条学习路线的 34 个目标全部改为正式 V0.3 Seed externalKey；导入 336 题后必须全部解析写入 `study_plan_item`。
 - P07 happy path 禁止 Mock；404、笔记 409、Seed 422、同 UUID 重试均调用真实后端。backend-down 通过真实停止 8080 后端验证错误页。
+- P08 Playwright 每次重建固定隔离库 `jil_e2e`，使用 `local,e2e` profile 导入 336 题并创建独立档案；不复用 `devdb` 的历史状态。
+- 视觉回归固定 11 个规定视口，像素差异比例门限为 0.001；旧阶段 screenshot smoke 不覆盖 P04～P06 历史证据。
+- 生产构建以 850 KiB 首页初始静态 JS 和 500 KiB 单 chunk 为门限；首页必须保持不加载 Lab/Source 路由模块。
+- keyword search 在 336 题上的执行时间为 0.700 ms；当前规模保留顺序扫描，不为 P08 增加 trigram 索引。
+- Source 固定 Topic 映射在 Seed 导入事务中补齐，解决 Flyway V16 早于 Topic 导入时的新库空关联。

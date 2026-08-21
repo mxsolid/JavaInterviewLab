@@ -1,8 +1,4 @@
-import { mkdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-
-const evidenceDirectory = resolve('..', 'docs', 'v03', 'validation', 'p05', 'screenshots');
 
 async function enabledQuestionId(page: Page): Promise<number> {
   const response = await page.request.get('/api/questions?page=1&pageSize=1&status=ENABLED');
@@ -25,23 +21,22 @@ function collectErrors(page: Page): string[] {
   return errors;
 }
 
-async function screenshot(page: Page, route: string, heading: string, name: string, width: number, height: number) {
+async function verifyViewport(page: Page, route: string, heading: string, width: number, height: number) {
   await page.setViewportSize({ width, height });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(route);
   await expect(page.getByRole('heading', { name: heading })).toBeVisible();
-  await page.screenshot({ path: resolve(evidenceDirectory, `${name}.png`), fullPage: false, animations: 'disabled' });
+  await page.screenshot({ fullPage: false, animations: 'disabled' });
 }
 
 test('Workbench、Knowledge、Question 生成桌面与移动端基线', async ({ page }) => {
-  await mkdir(evidenceDirectory, { recursive: true });
   const errors = collectErrors(page);
   const questionId = await enabledQuestionId(page);
-  await screenshot(page, '/', '首页 / 工作台', 'workbench-1720', 1720, 1000);
-  await screenshot(page, '/knowledge', '知识地图', 'knowledge-1720', 1720, 1000);
-  await screenshot(page, `/questions/${questionId}`, '题目学习', 'question-1720', 1720, 1000);
-  await screenshot(page, '/', '首页 / 工作台', 'workbench-mobile-390', 390, 844);
-  await screenshot(page, `/questions/${questionId}`, '题目学习', 'question-mobile-390', 390, 844);
+  await verifyViewport(page, '/', '首页 / 工作台', 1720, 1000);
+  await verifyViewport(page, '/knowledge', '知识地图', 1720, 1000);
+  await verifyViewport(page, `/questions/${questionId}`, '题目学习', 1720, 1000);
+  await verifyViewport(page, '/', '首页 / 工作台', 390, 844);
+  await verifyViewport(page, `/questions/${questionId}`, '题目学习', 390, 844);
   expect(errors).toEqual([]);
 });
 

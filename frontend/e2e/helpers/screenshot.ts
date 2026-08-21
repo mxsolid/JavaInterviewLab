@@ -10,11 +10,10 @@ export interface ScreenshotViewport {
 export async function captureViewport(
   page: Page,
   viewport: ScreenshotViewport,
-  outputPath: string,
 ) {
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await page.getByRole('heading', { name: '首页' }).waitFor();
-  await page.screenshot({ path: outputPath, fullPage: false, animations: 'disabled' });
+  await page.screenshot({ fullPage: false, animations: 'disabled' });
 }

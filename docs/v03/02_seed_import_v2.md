@@ -56,7 +56,7 @@ UPDATE 会增加 `question.version`，并替换 answer、follow-up、tag 快照�
 后端启动后：
 
 ```powershell
-& .\scripts\06_import_v03_bank.ps1
+& .\scripts\import-v03-bank.ps1
 ```
 
 脚本依次执行 validate、dry-run、真实导入和重复导入，并校验四次 checksum 一致及重复导入零 mutation。

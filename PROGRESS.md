@@ -77,7 +77,7 @@
 | P06 | Scenario / Source / Lab / Interview 页面 | DONE |
 | P07 | 真实端到端联调 | DONE |
 | P08 | E2E / Visual / Performance | DONE |
-| P09 | Windows 部署与最终验收 | TODO |
+| P09 | Windows 部署与最终验收 | IN_PROGRESS |
 
 ## V0.3 场景训练版
 

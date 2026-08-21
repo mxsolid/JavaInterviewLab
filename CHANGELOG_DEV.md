@@ -1,5 +1,20 @@
 # 开发变更记录
 
+## 2026-08-21 — V0.3 P09 Windows 运行部署与最终验收
+
+- 新增 Windows 11 精确生命周期脚本：后端 JAR 与 Vite 使用 PID、可执行文件和项目命令行标记管理，不按进程名结束 Java/Node。
+- 新增正式题库导入、V0.3 冒烟和 PostgreSQL custom-format 备份脚本；README 补齐干净克隆、数据库、PowerShell 7 和 IDEA 配置。
+- 固定正式 Seed 为 LF，避免 Windows `core.autocrlf` 改变校验和；测试环境按需幂等导入 336 题，使空 PostgreSQL 数据库可独立执行全量测试。
+- 在独立克隆和独立数据库完成后端、前端、导入、冒烟、启停、备份恢复及 Playwright 全流程。
+
+### 验证
+
+- 验收基线 `296c99b`；JDK 21.0.12.1 + Maven 3.8.4：后端 49/49，package 通过。
+- Node 22.13.0 + npm 10.9.2：类型检查、Vitest 5/5、生产构建和 bundle gate 通过。
+- Playwright Chromium 17/17；11 张 Windows Chromium visual baseline 无差异。
+- 正式题库 336，场景 12，Source 3，Lab 5，Flyway 16；重复导入跳过 336，warning 0。
+- 备份 212991 字节，已恢复至专用临时库并确认原库与恢复库计数一致；完整证据见 `docs/v03/V03_FINAL_ACCEPTANCE.md`。
+
 ## 2026-08-21 — V0.3 P08 E2E、视觉回归与性能门禁
 
 - 新增确定性 E2E profile 和固定隔离库重建脚本；每次导入正式 336 题、创建独立 Profile 并激活 10 天冲刺路线。
